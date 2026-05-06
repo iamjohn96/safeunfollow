@@ -21,6 +21,7 @@ interface Snapshot {
 interface DashboardProps {
   data: ParsedData;
   lang: Lang;
+  onReset?: () => void;
 }
 
 function AccountCard({ account }: { account: InstagramAccount }) {
@@ -74,12 +75,13 @@ function LockedOverlay({ lang, onUnlock }: { lang: Lang; onUnlock: () => void })
   );
 }
 
-export function Dashboard({ data, lang }: DashboardProps) {
+export function Dashboard({ data, lang, onReset }: DashboardProps) {
   const [tab, setTab] = useState<'nonfollowers' | 'changes'>('nonfollowers');
   const [isPremium, setIsPremium] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [snapshotMsg, setSnapshotMsg] = useState('');
+  const [snapshotSaved, setSnapshotSaved] = useState(false);
   const [search, setSearch] = useState('');
 
   const nonFollowers = computeNonFollowers(data);
@@ -99,6 +101,12 @@ export function Dashboard({ data, lang }: DashboardProps) {
   }, [loadSnapshots]);
 
   function saveSnapshot() {
+    // Gate: free users can only have 1 snapshot
+    if (!isPremium && snapshots.length >= 1) {
+      setShowModal(true);
+      return;
+    }
+
     const newSnap: Snapshot = {
       id: Date.now().toString(),
       timestamp: Date.now(),
@@ -106,10 +114,11 @@ export function Dashboard({ data, lang }: DashboardProps) {
       data,
     };
 
-    const updated = isPremium ? [...snapshots, newSnap] : [newSnap];
+    const updated = [...snapshots, newSnap];
     localStorage.setItem('snapshots', JSON.stringify(updated));
     setSnapshots(updated);
     setSnapshotMsg(t('snapshots.saved', lang));
+    setSnapshotSaved(true);
     setTimeout(() => setSnapshotMsg(''), 3000);
   }
 
@@ -158,7 +167,7 @@ export function Dashboard({ data, lang }: DashboardProps) {
             onClick={saveSnapshot}
             className="text-sm font-medium bg-zinc-900 hover:bg-zinc-700 text-white px-4 py-2 rounded-full transition-colors"
           >
-            {snapshots.length > 0 && !isPremium ? t('dashboard.snapshot.update', lang) : t('dashboard.snapshot.save', lang)}
+            {t('dashboard.snapshot.save', lang)}
           </button>
 
           {isPremium && (
@@ -184,6 +193,22 @@ export function Dashboard({ data, lang }: DashboardProps) {
           )}
         </div>
 
+        {/* Snapshot saved prompt */}
+        {snapshotSaved && onReset && (
+          <div className="mb-4 p-4 bg-green-50 border border-green-100 rounded-xl flex items-center gap-3">
+            <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-sm text-green-700 flex-1">{t('upload.snapshot_prompt', lang)}</p>
+            <button
+              onClick={onReset}
+              className="text-xs font-semibold text-green-700 hover:text-green-800 underline underline-offset-2 transition-colors flex-shrink-0"
+            >
+              {t('upload.new_file', lang)} →
+            </button>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="flex border-b border-zinc-200 mb-4">
           {(['nonfollowers', 'changes'] as const).map(tabKey => (
@@ -196,6 +221,11 @@ export function Dashboard({ data, lang }: DashboardProps) {
               {tabKey === 'nonfollowers' && nonFollowers.length > 0 && (
                 <span className="ml-1.5 bg-pink-100 text-pink-600 text-xs font-semibold px-1.5 py-0.5 rounded-full">
                   {nonFollowers.length}
+                </span>
+              )}
+              {tabKey === 'changes' && changes && (changes.newUnfollowers.length + changes.newFollowers.length) > 0 && (
+                <span className="ml-1.5 bg-zinc-100 text-zinc-600 text-xs font-semibold px-1.5 py-0.5 rounded-full">
+                  {changes.newUnfollowers.length + changes.newFollowers.length}
                 </span>
               )}
             </button>
@@ -245,48 +275,70 @@ export function Dashboard({ data, lang }: DashboardProps) {
                 <div className="text-4xl mb-3">📸</div>
                 <p className="text-sm">Save a snapshot first, then upload a new file to see changes.</p>
               </div>
-            ) : !isPremium ? (
-              <div className="relative min-h-[300px]">
-                <LockedOverlay lang={lang} onUnlock={() => setShowModal(true)} />
-              </div>
             ) : changes ? (
-              <div className="space-y-6">
-                {/* New unfollowers */}
-                <section>
-                  <h3 className="text-sm font-semibold text-zinc-700 mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-red-400 inline-block" />
-                    {t('dashboard.changes.new_unfollowers', lang)}
-                    <span className="ml-auto text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">
-                      {changes.newUnfollowers.length}
-                    </span>
-                  </h3>
-                  {changes.newUnfollowers.length === 0 ? (
-                    <p className="text-sm text-zinc-400 py-4 text-center">No new unfollowers</p>
-                  ) : (
-                    <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
-                      {changes.newUnfollowers.map(a => <AccountCard key={a.username} account={a} />)}
+              !isPremium ? (
+                <div className="space-y-4">
+                  {/* Section count summaries — always visible for free users */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
+                      <span className="w-2 h-2 rounded-full bg-red-400 inline-block" />
+                      {t('dashboard.changes.new_unfollowers', lang)}
+                      <span className="ml-auto text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">
+                        {changes.newUnfollowers.length}
+                      </span>
                     </div>
-                  )}
-                </section>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-zinc-700">
+                      <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
+                      {t('dashboard.changes.new_followers', lang)}
+                      <span className="ml-auto text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full font-semibold">
+                        {changes.newFollowers.length}
+                      </span>
+                    </div>
+                  </div>
+                  {/* Account lists locked */}
+                  <div className="relative min-h-[250px]">
+                    <LockedOverlay lang={lang} onUnlock={() => setShowModal(true)} />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* New unfollowers */}
+                  <section>
+                    <h3 className="text-sm font-semibold text-zinc-700 mb-2 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-red-400 inline-block" />
+                      {t('dashboard.changes.new_unfollowers', lang)}
+                      <span className="ml-auto text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">
+                        {changes.newUnfollowers.length}
+                      </span>
+                    </h3>
+                    {changes.newUnfollowers.length === 0 ? (
+                      <p className="text-sm text-zinc-400 py-4 text-center">No new unfollowers</p>
+                    ) : (
+                      <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
+                        {changes.newUnfollowers.map(a => <AccountCard key={a.username} account={a} />)}
+                      </div>
+                    )}
+                  </section>
 
-                {/* New followers */}
-                <section>
-                  <h3 className="text-sm font-semibold text-zinc-700 mb-2 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
-                    {t('dashboard.changes.new_followers', lang)}
-                    <span className="ml-auto text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full font-semibold">
-                      {changes.newFollowers.length}
-                    </span>
-                  </h3>
-                  {changes.newFollowers.length === 0 ? (
-                    <p className="text-sm text-zinc-400 py-4 text-center">No new followers</p>
-                  ) : (
-                    <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
-                      {changes.newFollowers.map(a => <AccountCard key={a.username} account={a} />)}
-                    </div>
-                  )}
-                </section>
-              </div>
+                  {/* New followers */}
+                  <section>
+                    <h3 className="text-sm font-semibold text-zinc-700 mb-2 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-400 inline-block" />
+                      {t('dashboard.changes.new_followers', lang)}
+                      <span className="ml-auto text-xs bg-green-100 text-green-600 px-1.5 py-0.5 rounded-full font-semibold">
+                        {changes.newFollowers.length}
+                      </span>
+                    </h3>
+                    {changes.newFollowers.length === 0 ? (
+                      <p className="text-sm text-zinc-400 py-4 text-center">No new followers</p>
+                    ) : (
+                      <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
+                        {changes.newFollowers.map(a => <AccountCard key={a.username} account={a} />)}
+                      </div>
+                    )}
+                  </section>
+                </div>
+              )
             ) : null}
           </div>
         )}

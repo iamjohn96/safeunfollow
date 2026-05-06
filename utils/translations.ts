@@ -106,7 +106,9 @@ export type TranslationKey =
   | 'common.error'
   | 'common.back'
   | 'common.close'
-  | 'common.or';
+  | 'common.or'
+  | 'upload.snapshot_prompt'
+  | 'upload.new_file';
 
 type Translations = Record<TranslationKey, string>;
 
@@ -217,6 +219,8 @@ const en: Translations = {
   'common.back': 'Back',
   'common.close': 'Close',
   'common.or': 'or',
+  'upload.snapshot_prompt': 'Upload another file to compare changes',
+  'upload.new_file': 'Upload New File',
 };
 
 const ko: Translations = {
@@ -326,6 +330,8 @@ const ko: Translations = {
   'common.back': '뒤로',
   'common.close': '닫기',
   'common.or': '또는',
+  'upload.snapshot_prompt': '다른 파일을 업로드하여 변경 사항을 비교하세요',
+  'upload.new_file': '새 파일 업로드',
 };
 
 const ja: Translations = {
@@ -435,6 +441,8 @@ const ja: Translations = {
   'common.back': '戻る',
   'common.close': '閉じる',
   'common.or': 'または',
+  'upload.snapshot_prompt': '別のファイルをアップロードして変更を比較しましょう',
+  'upload.new_file': '新しいファイルをアップロード',
 };
 
 const es: Translations = {
@@ -544,6 +552,8 @@ const es: Translations = {
   'common.back': 'Atrás',
   'common.close': 'Cerrar',
   'common.or': 'o',
+  'upload.snapshot_prompt': 'Sube otro archivo para comparar los cambios',
+  'upload.new_file': 'Subir nuevo archivo',
 };
 
 export const translations: Record<Lang, Translations> = { en, ko, ja, es };

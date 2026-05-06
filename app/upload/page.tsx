@@ -85,7 +85,7 @@ function UploadContent() {
             {t('common.back', lang)} / Upload new file
           </button>
         </div>
-        <Dashboard data={parsedData} lang={lang} />
+        <Dashboard data={parsedData} lang={lang} onReset={() => setParsedData(null)} />
       </div>
     );
   }
