@@ -32,7 +32,7 @@ export interface PremiumUser {
 
 export async function getAllPremiumUsers(): Promise<PremiumUser[]> {
   const users: PremiumUser[] = [];
-  let cursor = 0;
+  let cursor: string = '0';
 
   do {
     const [nextCursor, keys] = await redis.scan(cursor, { match: 'premium:*', count: 100 });
@@ -52,7 +52,7 @@ export async function getAllPremiumUsers(): Promise<PremiumUser[]> {
         }
       });
     }
-  } while (cursor !== 0);
+  } while (cursor !== '0');
 
   return users;
 }
