@@ -1,64 +1,106 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomInt } from 'crypto';
 import { isPremiumEmail, setCancelToken } from '@/lib/redis';
-import crypto from 'crypto';
 
+const EMAIL_FROM = process.env.EMAIL_FROM ?? 'noreply@safeunfollow.com';
+
+async function sendCancelTokenEmail(email: string, token: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn('[cancel/verify] RESEND_API_KEY not set; cannot send token email');
+    return false;
+  }
+
+  const html = `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#18181b">
+      <h2 style="color:#db2777">구독 취소 확인 코드</h2>
+      <p><strong>SafeUnfollow Premium</strong> 구독 취소 요청이 접수되었습니다.</p>
+      <p>아래 코드를 입력하여 취소를 확인해 주세요:</p>
+      <div style="text-align:center;margin:24px 0">
+        <span style="font-size:36px;font-weight:700;letter-spacing:8px;color:#18181b">
+          ${token}
+        </span>
+      </div>
+      <p style="font-size:13px;color:#71717a">
+        이 코드는 15분간 유효합니다. 본인이 요청하지 않은 경우 이 이메일을 무시하세요 — 구독이 취소되지 않습니다.
+      </p>
+      <p style="font-size:12px;color:#71717a;margin-top:32px">
+        SafeUnfollow &mdash; 100% 비공개, 인스타그램 로그인 불필요.
+      </p>
+    </div>
+  `;
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: EMAIL_FROM,
+      to: email,
+      subject: 'SafeUnfollow 구독 취소 인증 코드',
+      html,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text().catch(() => '');
+    console.error(
+      `[cancel/verify] Resend error for ${email}: ${response.status} ${err}`,
+    );
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * POST /api/premium/cancel/verify
+ *
+ * Step 1 of the 2-step cancellation flow.
+ * Accepts { email }, checks premium status, generates a 6-digit OTP,
+ * stores it in Redis with a 15-minute TTL, and emails it to the user.
+ */
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  let body: unknown;
+  let body: { email?: unknown };
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  const email = (body as Record<string, unknown>)?.email;
-
-  if (typeof email !== 'string' || !email.includes('@') || !email.includes('.')) {
+  const { email } = body;
+  if (typeof email !== 'string' || !email.includes('@')) {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
   }
 
-  const normalizedEmail = email.toLowerCase().trim();
+  const normalised = email.toLowerCase().trim();
 
-  try {
-    const isPremium = await isPremiumEmail(normalizedEmail);
-    if (!isPremium) {
-      return NextResponse.json({ error: 'No active subscription found' }, { status: 404 });
-    }
-
-    const otp = String(crypto.randomInt(100000, 1000000));
-
-    await setCancelToken(normalizedEmail, otp);
-
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: process.env.EMAIL_FROM || 'SafeUnfollow <noreply@safeunfollow.com>',
-        to: normalizedEmail,
-        subject: 'SafeUnfollow 구독 취소 인증 코드',
-        html: `
-          <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 32px;">
-            <h2 style="margin-bottom: 8px;">구독 취소 인증 코드</h2>
-            <p style="color: #555; margin-bottom: 24px;">아래 코드를 입력하여 구독 취소를 확인하세요. 코드는 15분간 유효합니다.</p>
-            <div style="background: #f4f4f4; border-radius: 8px; padding: 24px; text-align: center; letter-spacing: 8px; font-size: 32px; font-weight: bold;">
-              ${otp}
-            </div>
-            <p style="color: #888; font-size: 13px; margin-top: 24px;">본인이 요청하지 않은 경우 이 이메일을 무시하세요.</p>
-          </div>
-        `,
-      }),
-    });
-
-    if (!res.ok) {
-      console.error('[cancel/verify] Resend send failed:', await res.text());
-      return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
-    }
-
-    return NextResponse.json({ message: 'Check your email for a confirmation code.' });
-  } catch (err) {
-    console.error('[cancel/verify] Error:', err);
-    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+  const hasPremium = await isPremiumEmail(normalised);
+  if (!hasPremium) {
+    return NextResponse.json(
+      { error: 'No active subscription found for this email' },
+      { status: 404 },
+    );
   }
+
+  // Cryptographically secure 6-digit token (100000–999999)
+  const token = String(randomInt(100000, 1000000));
+
+  await setCancelToken(normalised, token);
+
+  const sent = await sendCancelTokenEmail(normalised, token);
+  if (!sent) {
+    return NextResponse.json(
+      { error: 'Failed to send confirmation email. Please try again later.' },
+      { status: 503 },
+    );
+  }
+
+  console.log(`[cancel/verify] Confirmation code sent to ${normalised}`);
+
+  return NextResponse.json({
+    message: 'Check your email for a confirmation code.',
+  });
 }
