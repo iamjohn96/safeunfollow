@@ -20,8 +20,9 @@ export async function setPremiumEmail(email: string, renewalTimestamp?: number):
 
 export async function isPremiumEmail(email: string): Promise<boolean> {
   const val = await redis.get<string | { status: string; renewal?: number }>(`premium:${email.toLowerCase().trim()}`);
+  console.log('[isPremiumEmail]', email, 'val:', JSON.stringify(val));
   if (val === null) return false;
-  if (typeof val === 'string') return val === 'true';
+  if (typeof val === 'string') return val === 'true' || val === '1' || val === 'true';
   return val.status === 'true';
 }
 
