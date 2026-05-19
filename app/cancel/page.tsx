@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { t, detectLang, type Lang } from '@/utils/i18n';
 
 type Step = 'form' | 'token' | 'confirm' | 'success' | 'error';
 
-export default function CancelPage() {
+function CancelPageContent() {
   const searchParams = useSearchParams();
   const [lang, setLang] = useState<Lang>('en');
   const [step, setStep] = useState<Step>('form');
@@ -313,5 +313,13 @@ export default function CancelPage() {
 
       </div>
     </main>
+  );
+}
+
+export default function CancelPage() {
+  return (
+    <Suspense fallback={<div />}>
+      <CancelPageContent />
+    </Suspense>
   );
 }
