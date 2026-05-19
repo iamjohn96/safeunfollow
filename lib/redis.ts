@@ -144,7 +144,9 @@ export async function setCancelToken(email: string, token: string): Promise<void
 
 export async function getCancelToken(email: string): Promise<string | null> {
   const val = await redis.get(`cancel_token:${email.toLowerCase().trim()}`);
-  return typeof val === 'string' ? val : null;
+  console.log('[getCancelToken]', email, 'val:', JSON.stringify(val), typeof val);
+  if (val === null || val === undefined) return null;
+  return String(val);
 }
 
 export async function deleteCancelToken(email: string): Promise<void> {
