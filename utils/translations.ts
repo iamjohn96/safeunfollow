@@ -108,7 +108,41 @@ export type TranslationKey =
   | 'common.close'
   | 'common.or'
   | 'upload.snapshot_prompt'
-  | 'upload.new_file';
+  | 'upload.new_file'
+  | 'footer.cancel'
+  | 'cancel.title'
+  | 'cancel.subtitle'
+  | 'cancel.email_label'
+  | 'cancel.warning_title'
+  | 'cancel.warning1'
+  | 'cancel.warning2'
+  | 'cancel.warning3'
+  | 'cancel.warning4'
+  | 'cancel.sending'
+  | 'cancel.send_code'
+  | 'cancel.changed_mind'
+  | 'cancel.go_home'
+  | 'cancel.check_email'
+  | 'cancel.code_sent'
+  | 'cancel.code_label'
+  | 'cancel.code_expires'
+  | 'cancel.next'
+  | 'cancel.different_email'
+  | 'cancel.confirm_title'
+  | 'cancel.confirm_subtitle'
+  | 'cancel.confirm_warning'
+  | 'cancel.cancelling'
+  | 'cancel.confirm_btn'
+  | 'cancel.keep_btn'
+  | 'cancel.success_title'
+  | 'cancel.success_subtitle'
+  | 'cancel.success_msg'
+  | 'cancel.back_btn'
+  | 'cancel.error_title'
+  | 'cancel.try_again'
+  | 'cancel.go_home_btn'
+  | 'cancel.invalid_email'
+  | 'cancel.network_error';
 
 type Translations = Record<TranslationKey, string>;
 
@@ -221,6 +255,40 @@ const en: Translations = {
   'common.or': 'or',
   'upload.snapshot_prompt': 'Upload another file to compare changes',
   'upload.new_file': 'Upload New File',
+  'footer.cancel': 'Cancel Subscription',
+  'cancel.title': 'Cancel subscription',
+  'cancel.subtitle': 'Enter the email address you used to purchase SafeUnfollow Premium. We\'ll email you a confirmation code before cancelling.',
+  'cancel.email_label': 'Email address',
+  'cancel.warning_title': 'Before you cancel',
+  'cancel.warning1': 'Unlimited snapshots will no longer be available',
+  'cancel.warning2': 'CSV export will be disabled',
+  'cancel.warning3': 'Changes tracking will be locked',
+  'cancel.warning4': 'This action cannot be undone',
+  'cancel.sending': 'Sending code…',
+  'cancel.send_code': 'Send confirmation code',
+  'cancel.changed_mind': 'Changed your mind?',
+  'cancel.go_home': 'Go back home',
+  'cancel.check_email': 'Check your email',
+  'cancel.code_sent': 'We sent a 6-digit confirmation code to:',
+  'cancel.code_label': 'Confirmation code',
+  'cancel.code_expires': 'Code expires in 15 minutes.',
+  'cancel.next': 'Next',
+  'cancel.different_email': 'Use a different email',
+  'cancel.confirm_title': 'Are you sure?',
+  'cancel.confirm_subtitle': 'You are about to cancel the subscription for:',
+  'cancel.confirm_warning': 'Premium access will be removed immediately. You will not receive a refund for the current billing period.',
+  'cancel.cancelling': 'Cancelling…',
+  'cancel.confirm_btn': 'Yes, cancel my subscription',
+  'cancel.keep_btn': 'Keep my subscription',
+  'cancel.success_title': 'Subscription cancelled',
+  'cancel.success_subtitle': 'Your premium access has been removed for:',
+  'cancel.success_msg': 'You can still use SafeUnfollow for free. If you change your mind, you can resubscribe at any time.',
+  'cancel.back_btn': 'Back to SafeUnfollow',
+  'cancel.error_title': 'Something went wrong',
+  'cancel.try_again': 'Try again',
+  'cancel.go_home_btn': 'Go home',
+  'cancel.invalid_email': 'Please enter a valid email address.',
+  'cancel.network_error': 'Network error. Please check your connection and try again.',
 };
 
 const ko: Translations = {
@@ -332,6 +400,40 @@ const ko: Translations = {
   'common.or': '또는',
   'upload.snapshot_prompt': '다른 파일을 업로드하여 변경 사항을 비교하세요',
   'upload.new_file': '새 파일 업로드',
+  'footer.cancel': '구독 취소',
+  'cancel.title': '구독 취소',
+  'cancel.subtitle': 'SafeUnfollow Premium 구매 시 사용한 이메일 주소를 입력하세요. 취소 전에 확인 코드를 이메일로 보내드립니다.',
+  'cancel.email_label': '이메일 주소',
+  'cancel.warning_title': '취소하기 전에',
+  'cancel.warning1': '무제한 스냅샷을 더 이상 사용할 수 없습니다',
+  'cancel.warning2': 'CSV 내보내기가 비활성화됩니다',
+  'cancel.warning3': '변경 사항 추적이 잠깁니다',
+  'cancel.warning4': '이 작업은 취소할 수 없습니다',
+  'cancel.sending': '코드 전송 중…',
+  'cancel.send_code': '확인 코드 전송',
+  'cancel.changed_mind': '마음이 바뀌셨나요?',
+  'cancel.go_home': '홈으로 돌아가기',
+  'cancel.check_email': '이메일을 확인하세요',
+  'cancel.code_sent': '6자리 확인 코드를 다음 주소로 전송했습니다:',
+  'cancel.code_label': '확인 코드',
+  'cancel.code_expires': '코드는 15분 후 만료됩니다.',
+  'cancel.next': '다음',
+  'cancel.different_email': '다른 이메일 사용',
+  'cancel.confirm_title': '정말 취소하시겠습니까?',
+  'cancel.confirm_subtitle': '다음 계정의 구독을 취소하려고 합니다:',
+  'cancel.confirm_warning': '프리미엄 액세스가 즉시 제거됩니다. 현재 청구 기간에 대한 환불은 제공되지 않습니다.',
+  'cancel.cancelling': '취소 중…',
+  'cancel.confirm_btn': '네, 구독을 취소합니다',
+  'cancel.keep_btn': '구독 유지',
+  'cancel.success_title': '구독이 취소되었습니다',
+  'cancel.success_subtitle': '다음 계정의 프리미엄 액세스가 제거되었습니다:',
+  'cancel.success_msg': 'SafeUnfollow는 무료로 계속 사용할 수 있습니다. 마음이 바뀌면 언제든지 다시 구독할 수 있습니다.',
+  'cancel.back_btn': 'SafeUnfollow로 돌아가기',
+  'cancel.error_title': '오류가 발생했습니다',
+  'cancel.try_again': '다시 시도',
+  'cancel.go_home_btn': '홈으로 이동',
+  'cancel.invalid_email': '유효한 이메일 주소를 입력해 주세요.',
+  'cancel.network_error': '네트워크 오류입니다. 연결 상태를 확인하고 다시 시도해 주세요.',
 };
 
 const ja: Translations = {
@@ -443,6 +545,40 @@ const ja: Translations = {
   'common.or': 'または',
   'upload.snapshot_prompt': '別のファイルをアップロードして変更を比較しましょう',
   'upload.new_file': '新しいファイルをアップロード',
+  'footer.cancel': 'サブスクリプションをキャンセル',
+  'cancel.title': 'サブスクリプションのキャンセル',
+  'cancel.subtitle': 'SafeUnfollow Premiumの購入に使用したメールアドレスを入力してください。キャンセル前に確認コードをメールでお送りします。',
+  'cancel.email_label': 'メールアドレス',
+  'cancel.warning_title': 'キャンセルする前に',
+  'cancel.warning1': '無制限スナップショットが利用できなくなります',
+  'cancel.warning2': 'CSVエクスポートが無効になります',
+  'cancel.warning3': '変更追跡がロックされます',
+  'cancel.warning4': 'この操作は元に戻せません',
+  'cancel.sending': 'コードを送信中…',
+  'cancel.send_code': '確認コードを送信',
+  'cancel.changed_mind': '気が変わりましたか？',
+  'cancel.go_home': 'ホームに戻る',
+  'cancel.check_email': 'メールを確認してください',
+  'cancel.code_sent': '6桁の確認コードを以下のアドレスに送信しました：',
+  'cancel.code_label': '確認コード',
+  'cancel.code_expires': 'コードは15分後に期限切れになります。',
+  'cancel.next': '次へ',
+  'cancel.different_email': '別のメールを使用',
+  'cancel.confirm_title': '本当によろしいですか？',
+  'cancel.confirm_subtitle': '以下のアカウントのサブスクリプションをキャンセルしようとしています：',
+  'cancel.confirm_warning': 'プレミアムアクセスはすぐに削除されます。現在の請求期間の返金はありません。',
+  'cancel.cancelling': 'キャンセル中…',
+  'cancel.confirm_btn': 'はい、サブスクリプションをキャンセルします',
+  'cancel.keep_btn': 'サブスクリプションを維持する',
+  'cancel.success_title': 'サブスクリプションがキャンセルされました',
+  'cancel.success_subtitle': '以下のアカウントのプレミアムアクセスが削除されました：',
+  'cancel.success_msg': 'SafeUnfollowは引き続き無料でご利用いただけます。気が変わった場合は、いつでも再登録できます。',
+  'cancel.back_btn': 'SafeUnfollowに戻る',
+  'cancel.error_title': 'エラーが発生しました',
+  'cancel.try_again': 'もう一度試す',
+  'cancel.go_home_btn': 'ホームへ',
+  'cancel.invalid_email': '有効なメールアドレスを入力してください。',
+  'cancel.network_error': 'ネットワークエラーです。接続を確認してもう一度お試しください。',
 };
 
 const es: Translations = {
@@ -554,6 +690,40 @@ const es: Translations = {
   'common.or': 'o',
   'upload.snapshot_prompt': 'Sube otro archivo para comparar los cambios',
   'upload.new_file': 'Subir nuevo archivo',
+  'footer.cancel': 'Cancelar suscripción',
+  'cancel.title': 'Cancelar suscripción',
+  'cancel.subtitle': 'Ingresa el correo electrónico que usaste para comprar SafeUnfollow Premium. Te enviaremos un código de confirmación antes de cancelar.',
+  'cancel.email_label': 'Dirección de correo',
+  'cancel.warning_title': 'Antes de cancelar',
+  'cancel.warning1': 'Las instantáneas ilimitadas ya no estarán disponibles',
+  'cancel.warning2': 'La exportación CSV será desactivada',
+  'cancel.warning3': 'El seguimiento de cambios quedará bloqueado',
+  'cancel.warning4': 'Esta acción no se puede deshacer',
+  'cancel.sending': 'Enviando código…',
+  'cancel.send_code': 'Enviar código de confirmación',
+  'cancel.changed_mind': '¿Cambiaste de opinión?',
+  'cancel.go_home': 'Volver al inicio',
+  'cancel.check_email': 'Revisa tu correo',
+  'cancel.code_sent': 'Enviamos un código de confirmación de 6 dígitos a:',
+  'cancel.code_label': 'Código de confirmación',
+  'cancel.code_expires': 'El código expira en 15 minutos.',
+  'cancel.next': 'Siguiente',
+  'cancel.different_email': 'Usar un correo diferente',
+  'cancel.confirm_title': '¿Estás seguro?',
+  'cancel.confirm_subtitle': 'Estás a punto de cancelar la suscripción de:',
+  'cancel.confirm_warning': 'El acceso premium se eliminará inmediatamente. No recibirás un reembolso por el período de facturación actual.',
+  'cancel.cancelling': 'Cancelando…',
+  'cancel.confirm_btn': 'Sí, cancelar mi suscripción',
+  'cancel.keep_btn': 'Mantener mi suscripción',
+  'cancel.success_title': 'Suscripción cancelada',
+  'cancel.success_subtitle': 'Tu acceso premium ha sido eliminado para:',
+  'cancel.success_msg': 'Puedes seguir usando SafeUnfollow de forma gratuita. Si cambias de opinión, puedes volver a suscribirte en cualquier momento.',
+  'cancel.back_btn': 'Volver a SafeUnfollow',
+  'cancel.error_title': 'Algo salió mal',
+  'cancel.try_again': 'Intentar de nuevo',
+  'cancel.go_home_btn': 'Ir al inicio',
+  'cancel.invalid_email': 'Por favor ingresa una dirección de correo válida.',
+  'cancel.network_error': 'Error de red. Por favor verifica tu conexión e intenta de nuevo.',
 };
 
 export const translations: Record<Lang, Translations> = { en, ko, ja, es };

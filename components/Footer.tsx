@@ -38,7 +38,7 @@ export function Footer() {
             {t('footer.guide', lang)}
           </Link>
           <Link href="/cancel" className="text-zinc-400 hover:text-zinc-700 transition-colors">
-            구독 취소
+            {t('footer.cancel', lang)}
           </Link>
         </div>
 

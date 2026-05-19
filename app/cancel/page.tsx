@@ -1,21 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { t, detectLang, type Lang } from '@/utils/i18n';
 
 type Step = 'form' | 'token' | 'confirm' | 'success' | 'error';
 
 export default function CancelPage() {
+  const searchParams = useSearchParams();
+  const [lang, setLang] = useState<Lang>('en');
   const [step, setStep] = useState<Step>('form');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    setLang(detectLang(searchParams));
+  }, [searchParams]);
+
   // Step 1 — request the OTP
   async function handleRequestCode() {
     if (!email.includes('@')) {
-      setErrorMsg('Please enter a valid email address.');
+      setErrorMsg(t('cancel.invalid_email', lang));
       setStep('error');
       return;
     }
@@ -33,14 +41,14 @@ export default function CancelPage() {
       const data: { error?: string } = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.error ?? 'Something went wrong. Please try again.');
+        setErrorMsg(data.error ?? t('common.error', lang));
         setStep('error');
         return;
       }
 
       setStep('token');
     } catch {
-      setErrorMsg('Network error. Please check your connection and try again.');
+      setErrorMsg(t('cancel.network_error', lang));
       setStep('error');
     } finally {
       setLoading(false);
@@ -62,14 +70,14 @@ export default function CancelPage() {
       const data: { error?: string } = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.error ?? 'Something went wrong. Please try again.');
+        setErrorMsg(data.error ?? t('common.error', lang));
         setStep('error');
         return;
       }
 
       setStep('success');
     } catch {
-      setErrorMsg('Network error. Please check your connection and try again.');
+      setErrorMsg(t('cancel.network_error', lang));
       setStep('error');
     } finally {
       setLoading(false);
@@ -86,15 +94,14 @@ export default function CancelPage() {
         {step === 'form' && (
           <div className="bg-white border border-zinc-100 rounded-2xl p-8 shadow-sm">
             <h1 className="text-2xl font-bold text-zinc-900 mb-2">
-              Cancel subscription
+              {t('cancel.title', lang)}
             </h1>
             <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
-              Enter the email address you used to purchase SafeUnfollow Premium.
-              We&apos;ll email you a confirmation code before cancelling.
+              {t('cancel.subtitle', lang)}
             </p>
 
             <label htmlFor="email" className="block text-sm font-medium text-zinc-700 mb-1.5">
-              Email address
+              {t('cancel.email_label', lang)}
             </label>
             <input
               id="email"
@@ -108,12 +115,12 @@ export default function CancelPage() {
 
             {/* What cancellation means */}
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6 text-sm text-amber-800 space-y-1">
-              <p className="font-semibold">Before you cancel</p>
+              <p className="font-semibold">{t('cancel.warning_title', lang)}</p>
               <ul className="list-disc list-inside space-y-0.5 text-amber-700">
-                <li>Unlimited snapshots will no longer be available</li>
-                <li>CSV export will be disabled</li>
-                <li>Changes tracking will be locked</li>
-                <li>This action cannot be undone</li>
+                <li>{t('cancel.warning1', lang)}</li>
+                <li>{t('cancel.warning2', lang)}</li>
+                <li>{t('cancel.warning3', lang)}</li>
+                <li>{t('cancel.warning4', lang)}</li>
               </ul>
             </div>
 
@@ -122,13 +129,13 @@ export default function CancelPage() {
               disabled={loading}
               className="w-full bg-zinc-900 hover:bg-zinc-800 disabled:opacity-60 text-white font-semibold py-3 rounded-full text-sm transition-colors"
             >
-              {loading ? 'Sending code…' : 'Send confirmation code'}
+              {loading ? t('cancel.sending', lang) : t('cancel.send_code', lang)}
             </button>
 
             <p className="mt-4 text-center text-xs text-zinc-400">
-              Changed your mind?{' '}
+              {t('cancel.changed_mind', lang)}{' '}
               <Link href="/" className="text-pink-600 hover:underline">
-                Go back home
+                {t('cancel.go_home', lang)}
               </Link>
             </p>
           </div>
@@ -147,17 +154,17 @@ export default function CancelPage() {
             </div>
 
             <h2 className="text-xl font-bold text-zinc-900 mb-2">
-              Check your email
+              {t('cancel.check_email', lang)}
             </h2>
             <p className="text-sm text-zinc-500 mb-1">
-              We sent a 6-digit confirmation code to:
+              {t('cancel.code_sent', lang)}
             </p>
             <p className="text-sm font-semibold text-zinc-900 mb-6 break-all">
               {email}
             </p>
 
             <label htmlFor="token" className="block text-sm font-medium text-zinc-700 mb-1.5">
-              Confirmation code
+              {t('cancel.code_label', lang)}
             </label>
             <input
               id="token"
@@ -174,7 +181,7 @@ export default function CancelPage() {
             />
 
             <p className="text-xs text-zinc-400 mb-6 text-center">
-              Code expires in 15 minutes.
+              {t('cancel.code_expires', lang)}
             </p>
 
             <div className="flex flex-col gap-3">
@@ -183,13 +190,13 @@ export default function CancelPage() {
                 disabled={token.length !== 6}
                 className="w-full bg-zinc-900 hover:bg-zinc-800 disabled:opacity-40 text-white font-semibold py-3 rounded-full text-sm transition-colors"
               >
-                Next
+                {t('cancel.next', lang)}
               </button>
               <button
                 onClick={() => { setToken(''); setStep('form'); }}
                 className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-semibold py-3 rounded-full text-sm transition-colors"
               >
-                Use a different email
+                {t('cancel.different_email', lang)}
               </button>
             </div>
           </div>
@@ -208,17 +215,16 @@ export default function CancelPage() {
             </div>
 
             <h2 className="text-xl font-bold text-zinc-900 mb-2">
-              Are you sure?
+              {t('cancel.confirm_title', lang)}
             </h2>
             <p className="text-sm text-zinc-500 mb-1">
-              You are about to cancel the subscription for:
+              {t('cancel.confirm_subtitle', lang)}
             </p>
             <p className="text-sm font-semibold text-zinc-900 mb-6 break-all">
               {email}
             </p>
             <p className="text-sm text-zinc-500 mb-8">
-              Premium access will be removed immediately. You will not receive
-              a refund for the current billing period.
+              {t('cancel.confirm_warning', lang)}
             </p>
 
             <div className="flex flex-col gap-3">
@@ -227,14 +233,14 @@ export default function CancelPage() {
                 disabled={loading}
                 className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-semibold py-3 rounded-full text-sm transition-colors"
               >
-                {loading ? 'Cancelling…' : 'Yes, cancel my subscription'}
+                {loading ? t('cancel.cancelling', lang) : t('cancel.confirm_btn', lang)}
               </button>
               <button
                 onClick={() => setStep('token')}
                 disabled={loading}
                 className="w-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold py-3 rounded-full text-sm transition-colors"
               >
-                Keep my subscription
+                {t('cancel.keep_btn', lang)}
               </button>
             </div>
           </div>
@@ -251,23 +257,22 @@ export default function CancelPage() {
               </svg>
             </div>
             <h2 className="text-xl font-bold text-zinc-900 mb-2">
-              Subscription cancelled
+              {t('cancel.success_title', lang)}
             </h2>
             <p className="text-sm text-zinc-500 mb-1">
-              Your premium access has been removed for:
+              {t('cancel.success_subtitle', lang)}
             </p>
             <p className="text-sm font-semibold text-zinc-900 mb-6 break-all">
               {email}
             </p>
             <p className="text-sm text-zinc-500 mb-8 leading-relaxed">
-              You can still use SafeUnfollow for free. If you change your mind,
-              you can resubscribe at any time.
+              {t('cancel.success_msg', lang)}
             </p>
             <Link
               href="/"
               className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-full text-sm transition-colors"
             >
-              Back to SafeUnfollow
+              {t('cancel.back_btn', lang)}
             </Link>
           </div>
         )}
@@ -284,7 +289,7 @@ export default function CancelPage() {
               </svg>
             </div>
             <h2 className="text-xl font-bold text-zinc-900 mb-2">
-              Something went wrong
+              {t('cancel.error_title', lang)}
             </h2>
             <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
               {errorMsg}
@@ -294,13 +299,13 @@ export default function CancelPage() {
                 onClick={() => setStep('form')}
                 className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold py-3 rounded-full text-sm transition-colors"
               >
-                Try again
+                {t('cancel.try_again', lang)}
               </button>
               <Link
                 href="/"
                 className="w-full text-center bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold py-3 rounded-full text-sm transition-colors"
               >
-                Go home
+                {t('cancel.go_home_btn', lang)}
               </Link>
             </div>
           </div>
