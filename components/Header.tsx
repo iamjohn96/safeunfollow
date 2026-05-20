@@ -20,6 +20,7 @@ export function Header() {
   const navLinks = [
     { href: `/guide${langParam}`, label: t('nav.guide', lang) },
     { href: `/snapshots${langParam}`, label: t('nav.snapshots', lang) },
+    { href: '/blog', label: 'Blog' },
   ];
 
   return (
