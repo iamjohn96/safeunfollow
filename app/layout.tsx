@@ -5,6 +5,7 @@ import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Suspense } from 'react';
+import { Analytics } from '@vercel/analytics/next';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
 
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense>
           <Footer />
         </Suspense>
+        <Analytics />
       </body>
     </html>
   );
