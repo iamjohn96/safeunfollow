@@ -2,6 +2,9 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 dotenv.config({ path: '.env.local' });
+if (!process.env.OPENROUTER_API_KEY) {
+  dotenv.config({ path: '.env' });
+}
 
 const keyword = process.argv[2];
 if (!keyword) {
@@ -11,14 +14,15 @@ if (!keyword) {
 
 const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey) {
-  console.error('Error: OPENROUTER_API_KEY not set in .env.local');
+  console.error('Error: OPENROUTER_API_KEY not set (checked .env.local and .env)');
   process.exit(1);
 }
 
 const MODELS = [
   'meta-llama/llama-3.3-70b-instruct:free',
-  'google/gemma-3-27b-it:free',
-  'mistralai/mistral-7b-instruct:free',
+  'google/gemma-4-26b-a4b-it:free',
+  'qwen/qwen3-coder:free',
+  'openai/gpt-oss-120b:free',
 ];
 
 async function callAPI(model: string): Promise<string> {
@@ -90,7 +94,7 @@ async function main() {
   const slug = keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const outputPath = path.join('content', 'blog', `${slug}.md`);
   fs.writeFileSync(outputPath, content, 'utf-8');
-  console.log(`í³„ Post saved: ${outputPath}`);
+  console.log(`ï¿½ï¿½ï¿½ Post saved: ${outputPath}`);
 }
 
 main().catch(err => { console.error(err); process.exit(1); });
