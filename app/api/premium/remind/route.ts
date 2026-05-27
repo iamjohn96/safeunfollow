@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getPremiumEmailsDueForReminder, getRenewalDate } from '@/lib/redis';
+import { getPremiumEmailsDueForReminder, getRenewalDate, redis } from '@/lib/redis';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://safeunfollow.com';
 const EMAIL_FROM = process.env.EMAIL_FROM ?? 'noreply@safeunfollow.com';
 
-/**
- * Send a renewal reminder email via the Resend API.
- * Set RESEND_API_KEY in your environment to enable sending.
- */
 async function sendReminderEmail(email: string, renewalDate: string): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -23,28 +19,7 @@ async function sendReminderEmail(email: string, renewalDate: string): Promise<bo
 
   const cancelUrl = `${APP_URL}/cancel`;
 
-  const html = `
-    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#18181b">
-      <h2 style="color:#db2777">Subscription renewing soon</h2>
-      <p>Hi there,</p>
-      <p>
-        Your <strong>SafeUnfollow Premium</strong> subscription will automatically
-        renew on <strong>${formatted}</strong>.
-      </p>
-      <p>No action is needed if you want to continue. If you'd like to cancel
-        before your renewal date, use the link below:</p>
-      <p>
-        <a href="${cancelUrl}"
-           style="display:inline-block;background:#db2777;color:#fff;padding:10px 22px;
-                  border-radius:9999px;text-decoration:none;font-weight:600;font-size:14px">
-          Cancel my subscription
-        </a>
-      </p>
-      <p style="font-size:12px;color:#71717a;margin-top:32px">
-        SafeUnfollow &mdash; 100% private, no Instagram login required.
-      </p>
-    </div>
-  `;
+  const html = `<div><p>Your SafeUnfollow Premium subscription renews on <strong>${formatted}</strong>.</p><p><a href="${cancelUrl}">Cancel</a></p></div>`;
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -60,29 +35,28 @@ async function sendReminderEmail(email: string, renewalDate: string): Promise<bo
     }),
   });
 
-  if (!response.ok) {
-    const err = await response.text().catch(() => '');
-    console.error(`[remind] Resend error for ${email}: ${response.status} ${err}`);
-    return false;
-  }
-
-  return true;
+  return response.ok;
 }
 
-/**
- * GET /api/premium/remind
- *
- * Scans Redis for premium users whose subscription renews within 7 days and
- * sends them a reminder email. Designed to be called by a daily cron job.
- *
- * Protect with the CRON_SECRET environment variable:
- *   Authorization: Bearer <CRON_SECRET>
- */
+function getReminderDedupeKey(email: string, renewalDate: string): string {
+  return `reminder_sent:${email}:${renewalDate}`;
+}
+
+async function markReminderSent(email: string, renewalDate: string): Promise<void> {
+  const renewalTs = new Date(renewalDate).getTime();
+  const now = Date.now();
+  const ttlSeconds = Math.max(24 * 60 * 60, Math.floor((renewalTs - now) / 1000));
+  await redis.set(getReminderDedupeKey(email, renewalDate), '1', { ex: ttlSeconds });
+}
+
+async function reminderAlreadySent(email: string, renewalDate: string): Promise<boolean> {
+  const val = await redis.get(getReminderDedupeKey(email, renewalDate));
+  return val !== null;
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  // CRON_SECRET must be configured — fail closed rather than allowing open access
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
-    console.error('[remind] CRON_SECRET is not configured');
     return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
   }
 
@@ -94,25 +68,30 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const emails = await getPremiumEmailsDueForReminder();
 
-    const results: Array<{ email: string; sent: boolean; renewalDate: string | null }> = [];
+    const results: Array<{ email: string; sent: boolean; renewalDate: string | null; skipped?: string }> = [];
 
     for (const email of emails) {
       const renewalDate = await getRenewalDate(email);
       if (!renewalDate) continue;
 
+      if (await reminderAlreadySent(email, renewalDate)) {
+        results.push({ email, sent: false, renewalDate, skipped: 'already_sent_for_cycle' });
+        continue;
+      }
+
       const sent = await sendReminderEmail(email, renewalDate);
+      if (sent) {
+        await markReminderSent(email, renewalDate);
+      }
       results.push({ email, sent, renewalDate });
     }
-
-    console.log(`[remind] Processed ${results.length} reminder(s)`);
 
     return NextResponse.json({
       success: true,
       processed: results.length,
       results,
     });
-  } catch (err) {
-    console.error('[remind] Unexpected error:', err);
+  } catch {
     return NextResponse.json({ error: 'Failed to process reminders' }, { status: 500 });
   }
 }
