@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
+
 dotenv.config({ path: '.env.local' });
 if (!process.env.OPENROUTER_API_KEY) {
   dotenv.config({ path: '.env' });
@@ -8,22 +9,23 @@ if (!process.env.OPENROUTER_API_KEY) {
 
 const keyword = process.argv[2];
 if (!keyword) {
-  console.error('Usage: npx ts-node --project tsconfig.json scripts/generate-post.ts "your keyword"');
+  console.error('Usage: npx tsx scripts/generate-post.ts "your keyword"');
   process.exit(1);
 }
 
 const apiKey = process.env.OPENROUTER_API_KEY;
 if (!apiKey) {
-  console.error('Error: OPENROUTER_API_KEY not set (checked .env.local and .env)');
+  console.error('Error: OPENROUTER_API_KEY not set');
   process.exit(1);
 }
 
+const primaryModel = process.env.SAFEUNFOLLOW_BLOG_MODEL || 'google/gemini-2.5-flash';
+
 const MODELS = [
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'google/gemma-4-26b-a4b-it:free',
-  'qwen/qwen3-coder:free',
+  primaryModel,
+  'google/gemini-2.5-flash',
   'openai/gpt-oss-120b:free',
-];
+].filter((model, index, arr) => model && arr.indexOf(model) === index);
 
 async function callAPI(model: string): Promise<string> {
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -32,25 +34,71 @@ async function callAPI(model: string): Promise<string> {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://safeunfollow.com',
+      'X-Title': 'SafeUnfollow Blog Automation',
     },
     body: JSON.stringify({
       model,
-      max_tokens: 2000,
+      max_tokens: 2600,
+      temperature: 0.55,
       messages: [
         {
           role: 'system',
-          content: `You are an SEO content writer for SafeUnfollow.com, a privacy-first Instagram unfollow tracker. Write a 600-800 word blog post in markdown format. Include frontmatter with: title, description, date (today's date in YYYY-MM-DD), slug (from the keyword), keywords (array). The post should naturally mention SafeUnfollow.com as the recommended tool, target the provided keyword, include 2-3 H2 sections, and include a FAQ section. Return ONLY the raw markdown including frontmatter. No extra explanation, no code fences.
+          content: `You are the official SEO content writer for SafeUnfollow.com.
 
-CRITICAL — SafeUnfollow Product Facts (MUST follow):
-- SafeUnfollow does NOT require Instagram login. No OAuth, no API integration.
-- Users download their Instagram data directly from Instagram app/settings, then upload the file to SafeUnfollow.
-- Data file download from Instagram settings takes up to 48 hours to be ready.
-- NEVER mention: "Instagram API", "OAuth authentication", "account connection", "30 scans/month free", "free tier up to 30 scans"
-- NEVER mention: engagement score, inactive follower alerts, or any features that don't exist
-- NEVER suggest SafeUnfollow directly connects to or logs into Instagram
-- Premium plan: $3.99/month or $19.99/year, includes unlimited snapshots + CSV export + change history
-- The tool works by analyzing the Instagram data file the user provides — no server-side Instagram access
-`,
+Write a 700-900 word blog post in raw markdown.
+
+Return ONLY raw markdown.
+Do not use code fences.
+Do not add explanations outside the markdown.
+
+Frontmatter must include:
+title
+description
+date
+slug
+keywords
+
+SafeUnfollow product facts:
+- SafeUnfollow helps users check who unfollowed them on Instagram.
+- SafeUnfollow does not require Instagram login.
+- SafeUnfollow does not require account connection.
+- SafeUnfollow does not use Instagram OAuth.
+- SafeUnfollow does not use the Instagram API.
+- Users request their Instagram data from Instagram.
+- Users download the Instagram ZIP file.
+- Users upload the downloaded Instagram data file to SafeUnfollow.
+- SafeUnfollow analyzes followers and following data from that uploaded file.
+- Premium is $3.99/month or $19.99/year.
+- Premium includes unlimited snapshots, CSV export, and change history timeline.
+
+Required usage flow:
+1. Request Instagram data.
+2. Download the Instagram ZIP file.
+3. Upload the file to SafeUnfollow.
+4. Review the results.
+
+Required positioning:
+- No Login Required
+- No OAuth
+- No API
+- Zero Ban Risk
+- Privacy First
+
+Do not invent features.
+
+Never say:
+- connect your Instagram account
+- log in with Instagram
+- sign in with Instagram
+- account syncing
+- account linking
+- 30 scans/month
+- engagement score
+- inactive follower alerts
+
+The article should explain why the data-file method is safer than login-based unfollow tracker apps.
+Include 2-4 H2 sections and a FAQ section.
+Naturally mention SafeUnfollow.com as the recommended privacy-first option.`,
         },
         { role: 'user', content: keyword },
       ],
@@ -60,6 +108,7 @@ CRITICAL — SafeUnfollow Product Facts (MUST follow):
   if (response.status === 429 || response.status === 503) {
     throw new Error(`RATE_LIMIT:${response.status}`);
   }
+
   if (!response.ok) {
     const err = await response.text();
     throw new Error(`API_ERROR:${response.status}:${err}`);
@@ -82,6 +131,7 @@ async function main() {
       if (e.message.startsWith('RATE_LIMIT')) {
         console.log(`⏱ Rate limited on ${model}, waiting 15s...`);
         await new Promise(r => setTimeout(r, 15000));
+
         try {
           content = await callAPI(model);
           console.log(`✅ Got response from: ${model} (retry)`);
@@ -104,8 +154,12 @@ async function main() {
 
   const slug = keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const outputPath = path.join('content', 'blog', `${slug}.md`);
+
   fs.writeFileSync(outputPath, content, 'utf-8');
-  console.log(`��� Post saved: ${outputPath}`);
+  console.log(`✅ Post saved: ${outputPath}`);
 }
 
-main().catch(err => { console.error(err); process.exit(1); });
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
