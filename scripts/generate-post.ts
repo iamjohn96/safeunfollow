@@ -86,15 +86,24 @@ Required positioning:
 
 Do not invent features.
 
-Never say:
+Forbidden wording:
+Do not write these exact phrases anywhere, even when describing competing tools:
 - connect your Instagram account
+- connect an Instagram account
 - log in with Instagram
+- login with Instagram
 - sign in with Instagram
 - account syncing
 - account linking
 - 30 scans/month
 - engagement score
 - inactive follower alerts
+
+Safer alternatives:
+- login-based tracker apps
+- password-based tracker apps
+- apps that require direct Instagram access
+- apps that ask for account access
 
 The article should explain why the data-file method is safer than login-based unfollow tracker apps.
 Include 2-4 H2 sections and a FAQ section.
