@@ -1,7 +1,7 @@
 ---
 title: "The Safest Way to Check Who Unfollowed You on Instagram: No Login Required"
 description: "Discover how to use an Instagram unfollow tracker without risking your account. SafeUnfollow.com offers a secure, privacy-first method to see who unfollowed you, all without needing your login details."
-date: "2024-03-20"
+date: 2026-06-26
 slug: "instagram-unfollow-tracker-no-login"
 keywords: ["instagram unfollow tracker no login", "who unfollowed me instagram", "instagram unfollow app safe", "privacy first instagram unfollow", "safeunfollow", "instagram data download"]
 ---
