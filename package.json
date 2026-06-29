@@ -10,6 +10,7 @@
     "blog:publish": "node --import tsx scripts/generate-post.ts",
     "seo:report": "tsx scripts/search-console-report.ts",
     "seo:weekly": "tsx scripts/search-console-report.ts --telegram --update-keywords",
+    "clusters:sync": "node --import tsx scripts/sync-topic-clusters.ts",
     "test:automation": "node --import tsx --test scripts/*.test.ts"
   },
   "dependencies": {

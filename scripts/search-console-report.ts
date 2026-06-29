@@ -5,6 +5,8 @@ import os from 'os';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { GoogleAuth } from 'google-auth-library';
+import { assignRegistryClusters, buildClusterHealth, syncClusterContent } from './topic-clusters';
+import type { ClusterHealth, OrphanFinding, TopicClusters } from './topic-clusters';
 
 dotenv.config({ path: '.env.local', quiet: true });
 dotenv.config({ path: '.env', quiet: true });
@@ -53,6 +55,7 @@ interface KeywordEntry {
   avg_position?: number | null;
   last_seen_in_gsc?: string | null;
   discovered_at?: string;
+  cluster?: string;
 }
 
 interface RegistryUpdate {
@@ -68,6 +71,8 @@ interface SeoReport {
   topPages: SearchConsoleRow[];
   opportunities: SearchConsoleRow[];
   keywordIdeas: string[];
+  clusterHealth: ClusterHealth[];
+  orphans: OrphanFinding[];
 }
 
 type QueryExecutor = (dimensions: Dimension[], range: DateRange) => Promise<SearchConsoleRow[]>;
@@ -194,6 +199,13 @@ const CONFIG = {
     relevantPattern: /\b(?:instagram|unfollow(?:ed|ers?|ing)?|followers?|ghost followers?|data download)\b/i,
     excludedPattern: /\bsafeunfollow(?:\.com)?\b/i,
     expansionSuffixes: ['guide', 'without login', 'safely', 'step by step', 'tips'],
+  },
+  clusters: {
+    registryPath: path.join('automation', 'topic-clusters.json'),
+    roadmapPath: path.join('automation', 'content-roadmap.md'),
+    blogDirectory: path.join('content', 'blog'),
+    pillarDirectory: path.join('content', 'pillars'),
+    navigationPath: path.join('content', 'blog', 'index.md'),
   },
   telegram: {
     tokenEnv: 'TELEGRAM_BOT_TOKEN',
@@ -453,6 +465,8 @@ function buildSeoReport(
   data: SearchConsoleData,
   range: DateRange,
   existingKeywords: string[],
+  clusterHealth: ClusterHealth[] = [],
+  orphans: OrphanFinding[] = [],
 ): SeoReport {
   const opportunities = detectOpportunities(data.queries);
   return {
@@ -466,7 +480,17 @@ function buildSeoReport(
       .slice(0, CONFIG.reporting.topPageCount),
     opportunities,
     keywordIdeas: discoverKeywordIdeas(data.queries, opportunities, existingKeywords),
+    clusterHealth,
+    orphans,
   };
+}
+
+function loadTopicClusters(): TopicClusters {
+  return JSON.parse(fs.readFileSync(CONFIG.clusters.registryPath, 'utf8')) as TopicClusters;
+}
+
+function saveTopicClusters(clusters: TopicClusters): void {
+  fs.writeFileSync(CONFIG.clusters.registryPath, `${JSON.stringify(clusters, null, 2)}\n`, 'utf8');
 }
 
 function loadKeywordRegistry(): KeywordEntry[] {
@@ -560,6 +584,18 @@ function formatConsoleReport(report: SeoReport): string {
     `${index + 1}. ${row.keys[0]} — ${row.impressions} impressions, ${percentage(row.ctr)}, position ${position(row.position)}`,
   );
   const ideaLines = report.keywordIdeas.map((idea, index) => `${index + 1}. ${idea}`);
+  const clusterLines = report.clusterHealth.flatMap(cluster => [
+    `### ${cluster.label}`,
+    `Articles: ${cluster.articles}`,
+    `Clicks: ${cluster.clicks}`,
+    `Impressions: ${cluster.impressions}`,
+    `CTR: ${percentage(cluster.ctr)}`,
+    `Coverage: ${percentage(cluster.coverage)}`,
+    ...(cluster.weakAreas.length ? ['Weak Areas', ...cluster.weakAreas.map(area => `- ${area}`)] : []),
+  ]);
+  const orphanLines = report.orphans.map(orphan =>
+    `- ${orphan.slug}: ${orphan.reasons.join(', ')}. ${orphan.recommendations.join(' ')}`,
+  );
 
   return [
     '# SafeUnfollow Weekly SEO',
@@ -583,6 +619,12 @@ function formatConsoleReport(report: SeoReport): string {
     '',
     '## New Keyword Ideas',
     ...(ideaLines.length ? ideaLines : ['No new keyword ideas.']),
+    '',
+    '## Topic Clusters',
+    ...(clusterLines.length ? clusterLines : ['No cluster data.']),
+    '',
+    '## Orphan Articles',
+    ...(orphanLines.length ? orphanLines : ['No orphan articles detected.']),
   ].join('\n');
 }
 
@@ -598,6 +640,9 @@ function formatTelegramReport(report: SeoReport): string {
   const recommendations = report.keywordIdeas
     .slice(0, CONFIG.reporting.telegramListCount)
     .map((idea, index) => `${index + 1}. ${idea}`);
+  const clusters = report.clusterHealth
+    .slice(0, CONFIG.reporting.telegramListCount)
+    .map(cluster => `${cluster.label}: ${cluster.articles} articles, ${cluster.impressions} imp, ${percentage(cluster.coverage)} coverage`);
 
   return [
     '📈 SafeUnfollow Weekly SEO',
@@ -618,6 +663,12 @@ function formatTelegramReport(report: SeoReport): string {
     'Opportunities', ...(opportunities.length ? opportunities : ['None']),
     '',
     'Recommended Next Posts', ...(recommendations.length ? recommendations : ['None']),
+    '',
+    'Topic Clusters', ...(clusters.length ? clusters : ['No data']),
+    '',
+    'Weak Areas', ...(report.orphans.length
+      ? report.orphans.slice(0, 3).map(orphan => `${orphan.slug}: ${orphan.reasons.join(', ')}`)
+      : ['None']),
   ].join('\n').slice(0, CONFIG.telegram.maxMessageLength);
 }
 
@@ -828,7 +879,8 @@ async function main(): Promise<void> {
     const executor = await createQueryExecutor();
 
     stage = 'Keyword Registry';
-    const registry = loadKeywordRegistry();
+    let registry = loadKeywordRegistry();
+    const topicClusters = loadTopicClusters();
 
     stage = 'Ingestion';
     const data = await fetchSearchConsoleData(executor, range);
@@ -836,20 +888,54 @@ async function main(): Promise<void> {
     pageCount = data.pages.length;
 
     stage = 'Analysis';
-    const report = buildSeoReport(data, range, registry.map(entry => entry.keyword));
-    console.log(formatConsoleReport(report));
+    const preliminaryReport = buildSeoReport(data, range, registry.map(entry => entry.keyword));
 
     if (flags.updateKeywords) {
       stage = 'Keyword Registry';
       const update = updateKeywordRegistry(
         registry,
         data.queries,
-        report.keywordIdeas,
+        preliminaryReport.keywordIdeas,
         range.endDate,
       );
-      saveKeywordRegistry(update.entries);
+      registry = update.entries;
       console.log(`\nKeyword registry: ${update.updatedExisting} updated, ${update.addedKeywords} added.`);
     }
+
+    assignRegistryClusters(registry, topicClusters);
+    saveKeywordRegistry(registry);
+    saveTopicClusters(topicClusters);
+    const clusterSync = syncClusterContent({
+      clusters: topicClusters,
+      entries: registry,
+      blogDirectory: CONFIG.clusters.blogDirectory,
+      pillarDirectory: CONFIG.clusters.pillarDirectory,
+      roadmapPath: CONFIG.clusters.roadmapPath,
+      navigationPath: CONFIG.clusters.navigationPath,
+    });
+    for (const article of clusterSync.articles) {
+      const pageRow = data.pages.find(row => {
+        try {
+          return new URL(row.keys[0] || '').pathname.replace(/\/$/, '').endsWith(`/blog/${article.slug}`);
+        } catch {
+          return false;
+        }
+      });
+      if (pageRow) {
+        article.clicks = pageRow.clicks;
+        article.impressions = pageRow.impressions;
+      }
+    }
+    const clusterHealth = buildClusterHealth(topicClusters, clusterSync.articles, clusterSync.orphans);
+    const report = buildSeoReport(
+      data,
+      range,
+      registry.map(entry => entry.keyword),
+      clusterHealth,
+      clusterSync.orphans,
+    );
+    report.keywordIdeas = preliminaryReport.keywordIdeas;
+    console.log(formatConsoleReport(report));
 
     if (flags.telegram) {
       stage = 'Telegram';

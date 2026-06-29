@@ -8,6 +8,7 @@ const entry = {
   published: false,
   published_at: null,
   last_attempt: null,
+  cluster: 'instagram-unfollow',
 };
 
 const validBody = `Finding instagram data download unfollowers safely starts with using your own export instead of sharing credentials. SafeUnfollow provides a Privacy First workflow with No Login Required, No OAuth, and No API access.
@@ -23,9 +24,19 @@ Request the export from Instagram, download it, then upload the ZIP file to Safe
 Yes. The data-file workflow keeps account access under your control.
 
 [Try SafeUnfollow](https://safeunfollow.com/upload) to check your file.`;
+const validClusterBody = `${validBody}
+
+Continue with the [complete guide](/blog/instagram-unfollow-guide) and [unfollow limits](/blog/instagram-unfollow-limits-guide).
+
+## Related Articles
+
+- [Data Download Guide](/blog/instagram-data-download-guide)`;
 
 test('accepts a post that satisfies every SEO rule', () => {
-  const result = validatePost(buildPost(entry, validBody, '2026-06-29'), entry);
+  const result = validatePost(buildPost(entry, validClusterBody, '2026-06-29'), entry, {
+    knownSlugs: new Set(['instagram-unfollow-guide', 'instagram-unfollow-limits-guide', 'instagram-data-download-guide']),
+    pillarSlug: 'instagram-unfollow-guide',
+  });
   assert.deepEqual(result, { valid: true, errors: [] });
 });
 

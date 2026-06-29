@@ -3,6 +3,7 @@ title: "Who Unfollowed Me Instagram Checker: Find Lost Followers Without Logging
 description: "Discover how to identify who unfollowed you on Instagram using a privacy-first checker. Learn the step‑by‑step process and why SafeUnfollow.com is the best tool for the job."
 date: 2026-05-27
 slug: who-unfollowed-me-instagram-checker
+cluster: instagram-unfollow
 keywords:
   - who unfollowed me instagram checker
   - Instagram unfollower tracker
@@ -101,3 +102,12 @@ A: The tool is web‑based, so you can access it from any browser on any device�
 ---
 
 If you’ve been searching for a trustworthy **who unfollowed me Instagram checker**, SafeUnfollow.com offers the most transparent, secure, and accurate solution on the market. By leveraging Instagram’s own data export, you get a clear picture of follower loss without ever compromising your login credentials. Start with a free snapshot today and see exactly who’s slipped away.
+
+<!-- AUTO:RELATED_START -->
+Start with the [Instagram Unfollow complete guide](/blog/instagram-unfollow-guide) for the full topic overview.
+
+## Related Articles
+
+- [How to Find Instagram Unfollowers in 2026 (Safe, No Login)](/blog/how-to-find-instagram-unfollowers-2026)
+- [Instagram Data Download Unfollowers](/blog/instagram-data-download-unfollowers)
+<!-- AUTO:RELATED_END -->

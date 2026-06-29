@@ -5,6 +5,15 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 import { pathToFileURL } from 'url';
 import matter from 'gray-matter';
+import {
+  assignRegistryClusters,
+  buildRelatedSection,
+  insertInternalLinks,
+  loadArticles,
+  syncClusterContent,
+  upsertMarkerBlock,
+} from './topic-clusters';
+import type { ArticleRecord, TopicClusters } from './topic-clusters';
 
 dotenv.config({ path: '.env.local', quiet: true });
 dotenv.config({ path: '.env', quiet: true });
@@ -17,7 +26,7 @@ type PipelineStage =
   | 'Deployment'
   | 'Notification';
 
-type LogName = 'generation' | 'validation' | 'publish';
+type LogName = 'generation' | 'validation' | 'publish' | 'cluster';
 
 interface KeywordEntry {
   keyword: string;
@@ -25,11 +34,19 @@ interface KeywordEntry {
   published: boolean;
   published_at: string | null;
   last_attempt: string | null;
+  cluster?: string;
+  impressions?: number;
+  clicks?: number;
 }
 
 interface ValidationResult {
   valid: boolean;
   errors: string[];
+}
+
+interface ClusterValidationContext {
+  knownSlugs: Set<string>;
+  pillarSlug: string;
 }
 
 interface GeneratedPost {
@@ -52,7 +69,11 @@ class PipelineError extends Error {
 const CONFIG = {
   paths: {
     keywordRegistry: path.join('automation', 'keywords.json'),
+    topicClusters: path.join('automation', 'topic-clusters.json'),
+    roadmap: path.join('automation', 'content-roadmap.md'),
     blogDirectory: path.join('content', 'blog'),
+    pillarDirectory: path.join('content', 'pillars'),
+    navigation: path.join('content', 'blog', 'index.md'),
     logDirectory: path.join(os.homedir(), '.hermes', 'logs', 'safeunfollow'),
   },
   generation: {
@@ -97,7 +118,7 @@ const CONFIG = {
     maxDescriptionLength: 160,
     keywordWordWindow: 100,
     minimumH2Count: 2,
-    frontmatterFields: ['title', 'description', 'date', 'slug', 'keywords'],
+    frontmatterFields: ['title', 'description', 'date', 'slug', 'keywords', 'cluster'],
     bannedPhrases: [
       'connect your Instagram account',
       'connect an Instagram account',
@@ -239,6 +260,25 @@ function saveKeywords(entries: KeywordEntry[]): void {
   fs.writeFileSync(CONFIG.paths.keywordRegistry, `${JSON.stringify(entries, null, 2)}\n`, 'utf8');
 }
 
+function loadTopicClusters(): TopicClusters {
+  const parsed: unknown = JSON.parse(fs.readFileSync(CONFIG.paths.topicClusters, 'utf8'));
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    throw new PipelineError('Generation', 'Topic cluster registry root must be an object');
+  }
+  return parsed as TopicClusters;
+}
+
+function saveTopicClusters(clusters: TopicClusters): void {
+  fs.writeFileSync(CONFIG.paths.topicClusters, `${JSON.stringify(clusters, null, 2)}\n`, 'utf8');
+}
+
+function writeClusterLog(keyword: string, event: string, details: Record<string, unknown>): void {
+  fs.mkdirSync(CONFIG.paths.logDirectory, { recursive: true });
+  fs.appendFileSync(path.join(CONFIG.paths.logDirectory, 'cluster.log'), `${JSON.stringify({
+    timestamp: nowIso(), keyword, event, ...details,
+  })}\n`, 'utf8');
+}
+
 function selectKeyword(entries: KeywordEntry[]): KeywordEntry | null {
   for (const entry of entries) {
     if (entry.published) continue;
@@ -277,6 +317,7 @@ function buildPost(entry: KeywordEntry, body: string, date: string): string {
     `description: "${escapeYaml(description)}"`,
     `date: "${date}"`,
     `slug: "${escapeYaml(entry.slug)}"`,
+    `cluster: "${escapeYaml(entry.cluster || '')}"`,
     'keywords:',
     ...keywords.map(keyword => `  - "${escapeYaml(keyword)}"`),
     '---',
@@ -298,7 +339,11 @@ function markdownWords(markdown: string): string[] {
     .filter(Boolean);
 }
 
-function validatePost(source: string, entry: KeywordEntry): ValidationResult {
+function validatePost(
+  source: string,
+  entry: KeywordEntry,
+  clusterContext?: ClusterValidationContext,
+): ValidationResult {
   const errors: string[] = [];
   let parsed: matter.GrayMatterFile<string>;
 
@@ -324,6 +369,11 @@ function validatePost(source: string, entry: KeywordEntry): ValidationResult {
   if (data.slug !== entry.slug) errors.push('Frontmatter slug does not match keyword registry');
   if (!Array.isArray(data.keywords) || data.keywords.length === 0) {
     errors.push('Frontmatter keywords must be a non-empty array');
+  }
+  if (typeof data.cluster !== 'string' || !data.cluster.trim()) {
+    errors.push('Cluster metadata must be a non-empty string');
+  } else if (entry.cluster && data.cluster !== entry.cluster) {
+    errors.push('Frontmatter cluster does not match keyword registry');
   }
   const dateValue = data.date instanceof Date
     ? data.date.toISOString().slice(0, 10)
@@ -360,6 +410,20 @@ function validatePost(source: string, entry: KeywordEntry): ValidationResult {
     return url.toLowerCase().includes(configuredHost) && CONFIG.validation.ctaLanguage.test(label);
   });
   if (!hasCta) errors.push('Missing CTA link directing users to SafeUnfollow');
+
+  if (!/^##\s+Related Articles/im.test(content)) errors.push('Missing Related Articles section');
+  const internalLinkOccurrences = [...content.matchAll(/\[[^\]]+\]\(\/blog\/([a-z0-9-]+)(?:[?#][^)]*)?\)/gi)]
+    .map(match => match[1])
+    .filter(slug => slug !== entry.slug);
+  const internalSlugs = [...new Set(internalLinkOccurrences)];
+  if (internalSlugs.length < 2) errors.push('Expected at least 2 unique internal links');
+  if (internalLinkOccurrences.length !== internalSlugs.length) errors.push('Duplicate internal links found');
+  if (clusterContext) {
+    if (!internalSlugs.includes(clusterContext.pillarSlug)) errors.push('Missing cluster pillar link');
+    for (const slug of internalSlugs) {
+      if (!clusterContext.knownSlugs.has(slug)) errors.push(`Broken internal link: /blog/${slug}`);
+    }
+  }
 
   const lowerSource = source.toLowerCase();
   for (const phrase of CONFIG.validation.bannedPhrases) {
@@ -533,6 +597,8 @@ async function main(): Promise<void> {
 
   try {
     const entries = loadKeywords();
+    const clusters = loadTopicClusters();
+    assignRegistryClusters(entries, clusters);
     const entry = selectKeyword(entries);
     if (!entry) {
       console.log(CONFIG.notifications.noKeywords);
@@ -542,6 +608,9 @@ async function main(): Promise<void> {
     }
 
     activeKeyword = entry.keyword;
+    if (!entry.cluster) throw new PipelineError('Generation', 'Selected keyword has no topic cluster');
+    saveTopicClusters(clusters);
+    writeClusterLog(entry.keyword, 'cluster selected', { cluster: entry.cluster });
     entry.last_attempt = nowIso();
     saveKeywords(entries);
     articlePath = path.join(CONFIG.paths.blogDirectory, `${entry.slug}.md`);
@@ -551,13 +620,44 @@ async function main(): Promise<void> {
     writeLog('generation', entry.keyword, 'Generation', generated.durationMs, 'success');
 
     const publicationDate = todayLocal();
-    const source = buildPost(entry, generated.body, publicationDate);
+    const definition = clusters[entry.cluster];
+    if (!definition) throw new PipelineError('Generation', `Unknown topic cluster: ${entry.cluster}`);
+    const existingArticles = loadArticles(
+      CONFIG.paths.blogDirectory,
+      CONFIG.paths.pillarDirectory,
+      entries,
+      clusters,
+    );
+    const linkedBody = insertInternalLinks(
+      generated.body,
+      { slug: entry.slug, title: titleFromKeyword(entry.keyword), cluster: entry.cluster },
+      existingArticles,
+      definition.pillar,
+    );
+    const draftArticle: ArticleRecord = {
+      slug: entry.slug,
+      title: titleFromKeyword(entry.keyword),
+      cluster: entry.cluster,
+      source: '',
+      content: linkedBody,
+      filePath: articlePath,
+      impressions: Number(entry.impressions || 0),
+      clicks: Number(entry.clicks || 0),
+      isPillar: false,
+    };
+    const related = buildRelatedSection(draftArticle, [...existingArticles, draftArticle], definition.pillar);
+    const source = buildPost(entry, upsertMarkerBlock(linkedBody, related.markdown), publicationDate);
     fs.mkdirSync(CONFIG.paths.blogDirectory, { recursive: true });
     fs.writeFileSync(articlePath, source, { encoding: 'utf8', flag: 'wx' });
     articleCreated = true;
 
     const validationStartedAt = Date.now();
-    const validation = validatePost(source, entry);
+    const knownSlugs = new Set([
+      ...existingArticles.map(article => article.slug),
+      ...Object.values(clusters).map(cluster => cluster.pillar),
+      entry.slug,
+    ]);
+    const validation = validatePost(source, entry, { knownSlugs, pillarSlug: definition.pillar });
     if (!validation.valid) {
       const reason = validation.errors.join('; ');
       writeLog('validation', entry.keyword, 'Validation', elapsedMs(validationStartedAt), 'failure', reason);
@@ -568,12 +668,32 @@ async function main(): Promise<void> {
     }
     writeLog('validation', entry.keyword, 'Validation', elapsedMs(validationStartedAt), 'success');
 
+    const clusterSync = syncClusterContent({
+      clusters,
+      entries,
+      blogDirectory: CONFIG.paths.blogDirectory,
+      pillarDirectory: CONFIG.paths.pillarDirectory,
+      roadmapPath: CONFIG.paths.roadmap,
+      navigationPath: CONFIG.paths.navigation,
+    });
+    writeClusterLog(entry.keyword, 'related articles inserted', { count: related.count, slug: entry.slug });
+    writeClusterLog(entry.keyword, 'pillar updated', { pillar: definition.pillar });
+    writeClusterLog(entry.keyword, 'roadmap updated', { path: CONFIG.paths.roadmap });
+
     const title = titleFromKeyword(entry.keyword);
     const commitStartedAt = Date.now();
     stageStartedAt = commitStartedAt;
-    runGit(['add', '--', articlePath], 'Git Commit');
+    const clusterPaths = [...new Set([
+      articlePath,
+      CONFIG.paths.topicClusters,
+      CONFIG.paths.roadmap,
+      CONFIG.paths.navigation,
+      ...clusterSync.articles.filter(article => !article.isPillar).map(article => article.filePath),
+      ...clusterSync.updatedPillars.map(slug => path.join(CONFIG.paths.pillarDirectory, `${slug}.md`)),
+    ])];
+    runGit(['add', '--', ...clusterPaths], 'Git Commit');
     runGit(
-      ['commit', '--only', '-m', CONFIG.github.publicationCommit(title), '--', articlePath],
+      ['commit', '--only', '-m', CONFIG.github.publicationCommit(title), '--', ...clusterPaths],
       'Git Commit',
     );
     const commit = runGit(['rev-parse', '--short', 'HEAD'], 'Git Commit');

@@ -8,16 +8,23 @@ import { remark } from 'remark';
 import html from 'remark-html';
 
 const BASE_URL = 'https://safeunfollow.com';
+const BLOG_DIR = path.join(process.cwd(), 'content', 'blog');
+const PILLAR_DIR = path.join(process.cwd(), 'content', 'pillars');
 
-function getBlogDir() {
-  return path.join(process.cwd(), 'content/blog');
+function markdownFiles(directory: string): string[] {
+  if (!fs.existsSync(directory)) return [];
+  return fs.readdirSync(directory)
+    .filter(file => file.endsWith('.md') && file !== 'index.md')
+    .map(file => path.join(directory, file));
+}
+
+function getContentFiles(): string[] {
+  return [...markdownFiles(BLOG_DIR), ...markdownFiles(PILLAR_DIR)];
 }
 
 function getPost(slug: string) {
-  const dir = getBlogDir();
-  const files = fs.readdirSync(dir).filter(f => f.endsWith('.md'));
-  for (const file of files) {
-    const raw = fs.readFileSync(path.join(dir, file), 'utf-8');
+  for (const file of getContentFiles()) {
+    const raw = fs.readFileSync(file, 'utf-8');
     const { data, content } = matter(raw);
     if (data.slug === slug) {
       return { data, content };
@@ -27,10 +34,8 @@ function getPost(slug: string) {
 }
 
 export async function generateStaticParams() {
-  const dir = getBlogDir();
-  const files = fs.readdirSync(dir).filter(f => f.endsWith('.md'));
-  return files.map(file => {
-    const raw = fs.readFileSync(path.join(dir, file), 'utf-8');
+  return getContentFiles().map(file => {
+    const raw = fs.readFileSync(file, 'utf-8');
     const { data } = matter(raw);
     return { slug: data.slug as string };
   });

@@ -3,6 +3,7 @@ title: "Instagram Ghost Followers: What They Are and How to Remove Them"
 description: "Ghost followers hurt your engagement rate. Learn what they are, how to find them, and the safe way to clean your Instagram following list."
 date: "2026-05-18"
 slug: "instagram-ghost-followers-guide"
+cluster: "instagram-ghost-followers"
 keywords: ["instagram ghost followers", "remove ghost followers instagram", "instagram engagement rate"]
 ---
 
@@ -31,3 +32,11 @@ For most accounts, 10–20% is typical. Focus on engagement rate improvement, no
 
 **Will removing ghost followers increase my reach?**
 Yes. Fewer inactive followers means your engagement rate improves, which signals quality to the algorithm.
+
+<!-- AUTO:RELATED_START -->
+Start with the [Instagram Ghost Followers complete guide](/blog/instagram-ghost-followers-guide-complete) for the full topic overview.
+
+## Related Articles
+
+More supporting guides are coming soon.
+<!-- AUTO:RELATED_END -->
