@@ -2,11 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   MissingCredentialsError,
+  TelegramApiError,
+  TelegramDeliveryError,
   buildSeoReport,
   createGoogleAuth,
   detectOpportunities,
   fetchSearchConsoleData,
   formatTelegramReport,
+  parseTelegramEnvironment,
+  sendTelegram,
   updateKeywordRegistry,
 } from './search-console-report';
 import type { DateRange, KeywordEntry, QueryExecutor, SearchConsoleRow } from './search-console-report';
@@ -129,4 +133,157 @@ test('missing credentials fail before any API request with setup instructions', 
       return true;
     },
   );
+});
+
+test('parses Telegram env values with whitespace and inline comments', () => {
+  assert.deepEqual(parseTelegramEnvironment({
+    TELEGRAM_BOT_TOKEN: '  test-token  ',
+    TELEGRAM_CHAT_ID: '602408241                   # Default chat for cron delivery',
+  }), {
+    token: 'test-token',
+    chatId: '602408241',
+  });
+});
+
+test('sends a Telegram message successfully with fetch', async () => {
+  let sentPayload = '';
+  const logs: string[] = [];
+
+  await sendTelegram('Weekly report', {
+    TELEGRAM_BOT_TOKEN: 'test-token',
+    TELEGRAM_CHAT_ID: '602408241',
+  }, {
+    logger: { log: message => logs.push(String(message)), error: message => logs.push(String(message)) },
+    maxAttempts: 1,
+    request: async (_endpoint, payload) => {
+      sentPayload = payload;
+      return { statusCode: 200, body: '{"ok":true}' };
+    },
+  });
+
+  assert.deepEqual(JSON.parse(sentPayload), {
+    chat_id: '602408241',
+    text: 'Weekly report',
+    disable_web_page_preview: true,
+  });
+  assert.deepEqual(logs, [
+    'Telegram API response status: 200',
+    'Telegram API response body: {"ok":true}',
+  ]);
+});
+
+test('reports a Telegram API non-200 response with status and body', async () => {
+  const errors: string[] = [];
+
+  await assert.rejects(
+    sendTelegram('Weekly report', {
+      TELEGRAM_BOT_TOKEN: 'test-token',
+      TELEGRAM_CHAT_ID: '602408241',
+    }, {
+      logger: { log: () => undefined, error: message => errors.push(String(message)) },
+      maxAttempts: 1,
+      request: async () => ({ statusCode: 400, body: '{"ok":false,"description":"Bad Request"}' }),
+    }),
+    (error: unknown) => {
+      assert(error instanceof TelegramApiError);
+      assert.equal(error.statusCode, 400);
+      assert.match(error.responseBody, /Bad Request/);
+      return true;
+    },
+  );
+  assert.deepEqual(errors, [
+    'Telegram API response status: 400',
+    'Telegram API response body: {"ok":false,"description":"Bad Request"}',
+  ]);
+});
+
+test('falls back to curl after fetch network failure', async () => {
+  const logs: string[] = [];
+  let curlPayload = '';
+
+  await sendTelegram('Weekly report', {
+    TELEGRAM_BOT_TOKEN: 'test-token',
+    TELEGRAM_CHAT_ID: '602408241',
+  }, {
+    logger: { log: message => logs.push(String(message)), error: message => logs.push(String(message)) },
+    maxAttempts: 1,
+    request: async () => { throw new Error('socket hang up'); },
+    curlRequest: async (_endpoint, payload) => {
+      curlPayload = payload;
+      return { exitCode: 0, statusCode: 200, body: '{"ok":true}', stderr: '' };
+    },
+  });
+
+  assert.equal(JSON.parse(curlPayload).chat_id, '602408241');
+  assert.deepEqual(logs, [
+    'Telegram fetch network error (attempt 1/1): socket hang up',
+    'Telegram fetch retries exhausted; falling back to curl.',
+    'Telegram curl response status: 200',
+    'Telegram curl response body: {"ok":true}',
+  ]);
+});
+
+test('reports fetch and curl details when both transports fail', async () => {
+  const errors: string[] = [];
+
+  await assert.rejects(
+    sendTelegram('Weekly report', {
+      TELEGRAM_BOT_TOKEN: 'test-token',
+      TELEGRAM_CHAT_ID: '602408241',
+    }, {
+      logger: { log: () => undefined, error: message => errors.push(String(message)) },
+      maxAttempts: 1,
+      request: async () => { throw new Error('fetch socket hang up'); },
+      curlRequest: async () => ({
+        exitCode: 7,
+        statusCode: 0,
+        body: 'partial response',
+        stderr: 'curl: (7) connection refused',
+      }),
+    }),
+    (error: unknown) => {
+      assert(error instanceof TelegramDeliveryError);
+      assert.match(error.message, /fetch network error: fetch socket hang up/i);
+      assert.match(error.message, /curl failure \(exit code 7, HTTP status unavailable\)/);
+      assert.match(error.message, /stderr: curl: \(7\) connection refused/);
+      assert.match(error.message, /response body: partial response/);
+      return true;
+    },
+  );
+  assert.deepEqual(errors, [
+    'Telegram fetch network error (attempt 1/1): fetch socket hang up',
+    'Telegram fetch retries exhausted; falling back to curl.',
+    'Telegram curl failure (exit code 7, HTTP status unavailable); stderr: curl: (7) connection refused; response body: partial response',
+  ]);
+});
+
+test('redacts the bot token from fetch and curl error logs', async () => {
+  const token = 'secret-bot-token';
+  const errors: string[] = [];
+
+  let thrownMessage = '';
+  await assert.rejects(
+    sendTelegram('Weekly report', {
+      TELEGRAM_BOT_TOKEN: token,
+      TELEGRAM_CHAT_ID: '602408241',
+    }, {
+      logger: { log: () => undefined, error: message => errors.push(String(message)) },
+      maxAttempts: 1,
+      request: async endpoint => { throw new Error(`fetch failed for ${endpoint}`); },
+      curlRequest: async endpoint => ({
+        exitCode: 6,
+        statusCode: 0,
+        body: `request rejected for ${endpoint}`,
+        stderr: `could not resolve ${endpoint}`,
+      }),
+    }),
+    (error: unknown) => {
+      thrownMessage = String(error);
+      return true;
+    },
+  );
+
+  const output = `${errors.join('\n')}\n${thrownMessage}`;
+  assert.doesNotMatch(output, new RegExp(token));
+  assert.match(output, /\[REDACTED\]/);
 });

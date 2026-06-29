@@ -274,7 +274,8 @@
     "clicks": 0,
     "ctr": 0,
     "avg_position": null,
-    "discovered_at": "2026-06-27"
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
   },
   {
     "keyword": "safe unfollow without login",
@@ -287,7 +288,8 @@
     "clicks": 0,
     "ctr": 0,
     "avg_position": null,
-    "discovered_at": "2026-06-27"
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
   },
   {
     "keyword": "safe unfollow safely",
@@ -300,7 +302,8 @@
     "clicks": 0,
     "ctr": 0,
     "avg_position": null,
-    "discovered_at": "2026-06-27"
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
   },
   {
     "keyword": "safe unfollow step by step",
@@ -313,11 +316,148 @@
     "clicks": 0,
     "ctr": 0,
     "avg_position": null,
-    "discovered_at": "2026-06-27"
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
   },
   {
     "keyword": "safe unfollow tips",
     "slug": "safe-unfollow-tips",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
+  },
+  {
+    "keyword": "instagram unfollow limit guide",
+    "slug": "instagram-unfollow-limit-guide",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
+  },
+  {
+    "keyword": "instagram unfollow limit without login",
+    "slug": "instagram-unfollow-limit-without-login",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
+  },
+  {
+    "keyword": "instagram unfollow limit safely",
+    "slug": "instagram-unfollow-limit-safely",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
+  },
+  {
+    "keyword": "instagram unfollow limit step by step",
+    "slug": "instagram-unfollow-limit-step-by-step",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
+  },
+  {
+    "keyword": "instagram unfollow limit tips",
+    "slug": "instagram-unfollow-limit-tips",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27",
+    "last_seen_in_gsc": null
+  },
+  {
+    "keyword": "is who unfollowed me safe guide",
+    "slug": "is-who-unfollowed-me-safe-guide",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27"
+  },
+  {
+    "keyword": "is who unfollowed me safe without login",
+    "slug": "is-who-unfollowed-me-safe-without-login",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27"
+  },
+  {
+    "keyword": "is who unfollowed me safe safely",
+    "slug": "is-who-unfollowed-me-safe-safely",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27"
+  },
+  {
+    "keyword": "is who unfollowed me safe step by step",
+    "slug": "is-who-unfollowed-me-safe-step-by-step",
+    "published": false,
+    "published_at": null,
+    "last_attempt": null,
+    "source": "search_console",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "discovered_at": "2026-06-27"
+  },
+  {
+    "keyword": "is who unfollowed me safe tips",
+    "slug": "is-who-unfollowed-me-safe-tips",
     "published": false,
     "published_at": null,
     "last_attempt": null,

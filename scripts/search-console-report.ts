@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import fs from 'fs';
+import { spawn } from 'node:child_process';
 import os from 'os';
 import path from 'path';
 import { pathToFileURL } from 'url';
@@ -71,11 +72,82 @@ interface SeoReport {
 
 type QueryExecutor = (dimensions: Dimension[], range: DateRange) => Promise<SearchConsoleRow[]>;
 type Environment = Record<string, string | undefined>;
+type TelegramFetchRequest = (
+  endpoint: string,
+  payload: string,
+  timeoutMs: number,
+) => Promise<TelegramResponse>;
+type TelegramCurlRequest = (
+  endpoint: string,
+  payload: string,
+  timeoutMs: number,
+) => Promise<TelegramCurlResponse>;
+
+interface TelegramResponse {
+  statusCode: number;
+  body: string;
+}
+
+interface TelegramCurlResponse extends TelegramResponse {
+  exitCode: number;
+  stderr: string;
+}
+
+interface TelegramSendOptions {
+  curlRequest?: TelegramCurlRequest;
+  logger?: Pick<Console, 'error' | 'log'>;
+  maxAttempts?: number;
+  request?: TelegramFetchRequest;
+  retryDelayMs?: number;
+}
 
 class MissingCredentialsError extends Error {
   constructor(message = CONFIG.credentials.instructions) {
     super(message);
     this.name = 'MissingCredentialsError';
+  }
+}
+
+class TelegramApiError extends Error {
+  constructor(
+    readonly statusCode: number,
+    readonly responseBody: string,
+  ) {
+    super(`Telegram API error (${statusCode}): ${responseBody}`);
+    this.name = 'TelegramApiError';
+  }
+}
+
+class TelegramNetworkError extends Error {
+  constructor(message: string) {
+    super(`Telegram fetch network error: ${message}`);
+    this.name = 'TelegramNetworkError';
+  }
+}
+
+class TelegramCurlError extends Error {
+  constructor(
+    readonly exitCode: number,
+    readonly statusCode: number,
+    readonly stderr: string,
+    readonly responseBody: string,
+  ) {
+    super([
+      `Telegram curl failure (exit code ${exitCode}, HTTP status ${statusCode || 'unavailable'})`,
+      `stderr: ${stderr || '(empty)'}`,
+      `response body: ${responseBody || '(empty)'}`,
+    ].join('; '));
+    this.name = 'TelegramCurlError';
+  }
+}
+
+class TelegramDeliveryError extends Error {
+  constructor(
+    readonly fetchError: TelegramNetworkError,
+    readonly curlError: TelegramCurlError,
+  ) {
+    super(`Telegram delivery failed after fetch and curl. ${fetchError.message}; ${curlError.message}`);
+    this.name = 'TelegramDeliveryError';
   }
 }
 
@@ -128,6 +200,10 @@ const CONFIG = {
     chatIdEnv: 'TELEGRAM_CHAT_ID',
     apiBaseUrl: 'https://api.telegram.org',
     maxMessageLength: 4096,
+    maxAttempts: 3,
+    requestTimeoutMs: 10_000,
+    retryDelayMs: 500,
+    retryableStatusCodes: [429, 500, 502, 503, 504],
   },
   logging: {
     directory: path.join(os.homedir(), '.hermes', 'logs', 'safeunfollow'),
@@ -545,18 +621,192 @@ function formatTelegramReport(report: SeoReport): string {
   ].join('\n').slice(0, CONFIG.telegram.maxMessageLength);
 }
 
-async function sendTelegram(message: string, env: Environment = process.env): Promise<void> {
-  const token = env[CONFIG.telegram.tokenEnv];
-  const chatId = env[CONFIG.telegram.chatIdEnv];
+function parseEnvValue(value: string | undefined): string {
+  if (!value) return '';
+  const trimmed = value.trim();
+  const quote = trimmed[0] === '"' || trimmed[0] === "'" ? trimmed[0] : null;
+
+  if (quote) {
+    const closingQuote = trimmed.indexOf(quote, 1);
+    if (closingQuote !== -1) return trimmed.slice(1, closingQuote).trim();
+  }
+
+  const inlineComment = trimmed.indexOf('#');
+  return (inlineComment === -1 ? trimmed : trimmed.slice(0, inlineComment)).trim();
+}
+
+function parseTelegramEnvironment(env: Environment): { token: string; chatId: string } {
+  const token = parseEnvValue(env[CONFIG.telegram.tokenEnv]);
+  const chatId = parseEnvValue(env[CONFIG.telegram.chatIdEnv]);
   if (!token || !chatId) {
     throw new Error(`Set ${CONFIG.telegram.tokenEnv} and ${CONFIG.telegram.chatIdEnv} to enable Telegram reporting.`);
   }
-  const response = await fetch(`${CONFIG.telegram.apiBaseUrl}/bot${token}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text: message, disable_web_page_preview: true }),
+  return { token, chatId };
+}
+
+async function requestTelegramWithFetch(
+  endpoint: string,
+  payload: string,
+  timeoutMs: number,
+): Promise<TelegramResponse> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: payload,
+      signal: controller.signal,
+    });
+    return { statusCode: response.status, body: await response.text() };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function requestTelegramWithCurl(
+  endpoint: string,
+  payload: string,
+  timeoutMs: number,
+): Promise<TelegramCurlResponse> {
+  const statusMarker = '\n__TELEGRAM_HTTP_STATUS__:';
+  const args = [
+    '--silent',
+    '--show-error',
+    '--request', 'POST',
+    '--header', 'Content-Type: application/json',
+    '--data-binary', payload,
+    '--max-time', String(Math.ceil(timeoutMs / 1000)),
+    '--write-out', `${statusMarker}%{http_code}`,
+    endpoint,
+  ];
+
+  return new Promise(resolve => {
+    const child = spawn('curl', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '';
+    let stderr = '';
+    let settled = false;
+
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', chunk => { stdout += String(chunk); });
+    child.stderr.on('data', chunk => { stderr += String(chunk); });
+
+    const finish = (exitCode: number) => {
+      if (settled) return;
+      settled = true;
+      const markerIndex = stdout.lastIndexOf(statusMarker);
+      const statusCode = markerIndex === -1
+        ? 0
+        : Number.parseInt(stdout.slice(markerIndex + statusMarker.length).trim(), 10) || 0;
+      const body = markerIndex === -1 ? stdout : stdout.slice(0, markerIndex);
+      resolve({ exitCode, statusCode, body, stderr: stderr.trim() });
+    };
+
+    child.on('error', error => {
+      stderr = [stderr.trim(), error.message].filter(Boolean).join('\n');
+      finish(-1);
+    });
+    child.on('close', code => finish(code ?? -1));
   });
-  if (!response.ok) throw new Error(`Telegram API ${response.status}: ${await response.text()}`);
+}
+
+function redactToken(value: string, token: string): string {
+  return token ? value.split(token).join('[REDACTED]') : value;
+}
+
+function errorMessage(error: unknown, token: string): string {
+  if (!(error instanceof Error)) return redactToken(String(error), token);
+
+  const cause = 'cause' in error ? error.cause : undefined;
+  const causeMessage = cause instanceof Error ? cause.message : cause ? String(cause) : '';
+  const message = causeMessage && causeMessage !== error.message
+    ? `${error.message}: ${causeMessage}`
+    : error.message;
+  return redactToken(message, token);
+}
+
+function sleep(milliseconds: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+async function sendTelegram(
+  message: string,
+  env: Environment = process.env,
+  options: TelegramSendOptions = {},
+): Promise<void> {
+  const { token, chatId } = parseTelegramEnvironment(env);
+  const logger = options.logger || console;
+  const maxAttempts = options.maxAttempts ?? CONFIG.telegram.maxAttempts;
+  const retryDelayMs = options.retryDelayMs ?? CONFIG.telegram.retryDelayMs;
+  const request = options.request || requestTelegramWithFetch;
+  const curlRequest = options.curlRequest || requestTelegramWithCurl;
+  const endpoint = `${CONFIG.telegram.apiBaseUrl}/bot${token}/sendMessage`;
+  const payload = JSON.stringify({
+    chat_id: chatId,
+    text: message,
+    disable_web_page_preview: true,
+  });
+
+  let finalNetworkError: TelegramNetworkError | null = null;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    let response: TelegramResponse;
+    try {
+      response = await request(endpoint, payload, CONFIG.telegram.requestTimeoutMs);
+    } catch (error) {
+      const reason = errorMessage(error, token);
+      logger.error(`Telegram fetch network error (attempt ${attempt}/${maxAttempts}): ${reason}`);
+      finalNetworkError = new TelegramNetworkError(reason);
+      if (attempt === maxAttempts) break;
+      await sleep(retryDelayMs * attempt);
+      continue;
+    }
+
+    const logResponse = response.statusCode >= 200 && response.statusCode < 300
+      ? logger.log.bind(logger)
+      : logger.error.bind(logger);
+    logResponse(`Telegram API response status: ${response.statusCode}`);
+    logResponse(`Telegram API response body: ${redactToken(response.body, token)}`);
+
+    if (response.statusCode >= 200 && response.statusCode < 300) return;
+
+    const apiError = new TelegramApiError(response.statusCode, redactToken(response.body, token));
+    const retryable = CONFIG.telegram.retryableStatusCodes.some(
+      statusCode => statusCode === response.statusCode,
+    );
+    if (!retryable || attempt === maxAttempts) throw apiError;
+    await sleep(retryDelayMs * attempt);
+  }
+
+  if (!finalNetworkError) {
+    throw new TelegramNetworkError('fetch did not complete and no network error was captured');
+  }
+
+  logger.error('Telegram fetch retries exhausted; falling back to curl.');
+  const curlResponse = await curlRequest(endpoint, payload, CONFIG.telegram.requestTimeoutMs);
+  const safeStderr = redactToken(curlResponse.stderr, token);
+  const safeBody = redactToken(curlResponse.body, token);
+  if (
+    curlResponse.exitCode === 0 &&
+    curlResponse.statusCode >= 200 &&
+    curlResponse.statusCode < 300
+  ) {
+    logger.log(`Telegram curl response status: ${curlResponse.statusCode}`);
+    logger.log(`Telegram curl response body: ${safeBody}`);
+    return;
+  }
+
+  const curlError = new TelegramCurlError(
+    curlResponse.exitCode,
+    curlResponse.statusCode,
+    safeStderr,
+    safeBody,
+  );
+  logger.error(curlError.message);
+  throw new TelegramDeliveryError(finalNetworkError, curlError);
 }
 
 function parseFlags(args: string[]): { telegram: boolean; updateKeywords: boolean } {
@@ -640,6 +890,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
 export {
   CONFIG,
   MissingCredentialsError,
+  TelegramApiError,
+  TelegramCurlError,
+  TelegramDeliveryError,
+  TelegramNetworkError,
   buildSeoReport,
   createGoogleAuth,
   detectOpportunities,
@@ -649,6 +903,16 @@ export {
   formatTelegramReport,
   getDateRange,
   normalizeKeyword,
+  parseTelegramEnvironment,
+  sendTelegram,
   updateKeywordRegistry,
 };
-export type { DateRange, KeywordEntry, QueryExecutor, SearchConsoleData, SearchConsoleRow };
+export type {
+  DateRange,
+  KeywordEntry,
+  QueryExecutor,
+  SearchConsoleData,
+  SearchConsoleRow,
+  TelegramCurlRequest,
+  TelegramFetchRequest,
+};
