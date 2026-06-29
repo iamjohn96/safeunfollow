@@ -59,7 +59,7 @@ export default function BlogPage() {
           return <section key={cluster}>
             <div className="mb-5 flex items-end justify-between gap-4">
               <h2 className="text-xl font-bold text-zinc-900">{label}</h2>
-              <Link href={`/blog/${definition.pillar}`} className="text-sm font-medium text-pink-600 hover:text-pink-700">
+              <Link href={`/pillars/${definition.pillar}`} className="text-sm font-medium text-pink-600 hover:text-pink-700">
                 Complete guide →
               </Link>
             </div>
