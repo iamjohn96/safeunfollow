@@ -14,6 +14,8 @@ function LandingContent() {
   const [openFaq, setOpenFaq] = useState(0);
 
   useEffect(() => {
+    // Locale detection depends on browser APIs and must run after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLang(detectLang(searchParams));
   }, [searchParams]);
 
@@ -43,9 +45,16 @@ function LandingContent() {
       num: '03',
       title: t('how.step3.title', lang),
       desc: t('how.step3.desc', lang),
+      icon: '⬆️',
+    },
+    {
+      num: '04',
+      title: t('how.step4.title', lang),
+      desc: t('how.step4.desc', lang),
       icon: '✅',
     },
   ];
+  const visibleHowSteps = lang === 'en' || lang === 'ko' ? howSteps : howSteps.slice(0, 3);
 
   const features = [
     {
@@ -108,13 +117,13 @@ function LandingContent() {
           {/* Trust row */}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-5 text-xs text-zinc-400">
             <span className="flex items-center gap-1.5">
-              <span className="text-green-500">✓</span> No Instagram login
+              <span className="text-green-500">✓</span> {t('trust.no_login', lang)}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-green-500">✓</span> No ban risk
+              <span className="text-green-500">✓</span> {t('trust.no_ban_risk', lang)}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-green-500">✓</span> 100% private
+              <span className="text-green-500">✓</span> {t('trust.private', lang)}
             </span>
           </div>
         </div>
@@ -125,8 +134,8 @@ function LandingContent() {
         <h2 id="how-heading" className="text-2xl font-bold text-zinc-900 text-center mb-12">
           {t('how.title', lang)}
         </h2>
-        <div className="grid sm:grid-cols-3 gap-6">
-          {howSteps.map((step, i) => (
+        <div className={`grid gap-6 ${visibleHowSteps.length === 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3'}`}>
+          {visibleHowSteps.map((step, i) => (
             <div key={i} className="bg-white border border-zinc-100 rounded-2xl p-6 text-center hover:border-pink-200 hover:shadow-sm transition-all">
               <div className="text-3xl mb-3">{step.icon}</div>
               <div className="text-xs font-bold text-zinc-300 mb-2 tracking-widest">{step.num}</div>
@@ -213,7 +222,9 @@ function LandingContent() {
               <span className="ml-2 text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full">{t('premium.save', lang)}</span>
             </button>
           </div>
-          <p className="mt-4 text-white/60 text-xs">{t('premium.monthly', lang)} also available</p>
+          <p className="mt-4 text-white/60 text-xs">
+            {t('premium.monthly_available', lang, { price: t('premium.monthly', lang) })}
+          </p>
         </div>
       </section>
     </>
