@@ -1,14 +1,16 @@
 # SafeUnfollow
 
-SafeUnfollow is a Next.js application with a cron-compatible SEO publishing pipeline. The pipeline turns a registered keyword into a validated Markdown article, commits and pushes it, waits for the Vercel URL to become available, and reports the result through Telegram.
+SafeUnfollow is a Next.js application with a cron-compatible SEO publishing pipeline. `npm run blog:publish` is the only weekly publication entrypoint and owns the complete state transition.
 
 ## Architecture
 
 - `app/` contains the Next.js application and Markdown blog renderer.
 - `content/blog/` contains published Markdown articles.
 - `automation/keywords.json` is the publishing queue and durable keyword registry.
-- `scripts/generate-post.ts` owns generation, validation, Git publication, deployment polling, logging, and notifications.
-- `scripts/search-console-report.ts` ingests Search Console performance data, finds SEO opportunities, and optionally enriches the keyword registry.
+- `scripts/blog-publish.ts` owns locking, stage ordering, Git commit/push, deployment polling, rollback, and publication notifications.
+- `scripts/generate-post.ts` only selects, generates, validates, and records one article locally.
+- `scripts/search-console-report.ts` ingests Search Console data and is repository read-only unless `--update-keywords` is passed.
+- `scripts/sync-topic-clusters.ts` updates pillars, related links, and the roadmap after generation.
 - `~/.hermes/logs/safeunfollow/` contains JSON Lines operational logs.
 
 The LLM generates only the article body. Code generates `title`, `description`, `date`, `slug`, and `keywords` frontmatter. The blog page renders the frontmatter title as the article's only H1.
@@ -16,26 +18,26 @@ The LLM generates only the article body. Code generates `title`, `description`, 
 ## Workflow
 
 ```text
-Keyword registry
-→ Gemini 2.5 Flash via OpenRouter
-→ Markdown body + code-generated frontmatter
-→ SEO validation
-→ Git commit
-→ GitHub push
+Publication lock + clean worktree
+→ Search Console refresh (`--update-keywords`)
+→ SEO registry/cluster commit + push (when changed)
+→ registry-selected article generation + validation
+→ pillar/related-link/roadmap sync
+→ one publication-state commit + push
 → Vercel deployment check
-→ Telegram notification
+→ Telegram publication notification
 ```
 
-The first unpublished keyword whose slug does not already exist is selected. Existing articles are never overwritten. After validation, the article is committed using `feat(blog): publish "<title>"` and pushed. Only after that push succeeds is the published registry state written and persisted in a small follow-up commit. A failed generation or validation never reaches Git. A failed push leaves the local commit intact for recovery.
+The first unpublished keyword whose slug does not already exist is selected. Existing articles are never overwritten. Registry, article, pillar, related-link, and roadmap changes are committed together. A failure before that commit restores tracked files and removes pipeline-created untracked files. A push or deployment failure leaves a clean, durable local commit. The next run pushes a pending publication commit and exits without generating a second article.
 
-Search Console intelligence is a separate feedback loop and does not change the publishing path:
+The standalone report remains available for diagnostics:
 
 ```text
 Search Console performance data
 → Weekly SEO report
 → Opportunity detection
-→ Optional keyword registry update
-→ Telegram recommendations
+→ Optional keyword registry update only with `--update-keywords`
+→ Optional Telegram recommendations only with `--telegram`
 ```
 
 ## Environment variables
@@ -48,7 +50,6 @@ Copy the relevant values from `.env.local.example` into `.env.local` on the auto
 | `SAFEUNFOLLOW_BLOG_MODEL` | No | Primary model; defaults to `google/gemini-2.5-flash` |
 | `SAFEUNFOLLOW_BLOG_URL` | No | Public blog base URL |
 | `SAFEUNFOLLOW_CTA_URL` | No | Product CTA target used by the prompt |
-| `SAFEUNFOLLOW_GITHUB_REPOSITORY` | No | Repository identity for operations/documentation |
 | `SAFEUNFOLLOW_GIT_REMOTE` | No | Git remote; defaults to `origin` |
 | `SAFEUNFOLLOW_GIT_BRANCH` | No | Push branch; defaults to `main` |
 | `SAFEUNFOLLOW_DEPLOY_ATTEMPTS` | No | Maximum deployment URL checks |
@@ -102,25 +103,30 @@ npm ci
 npm run blog:publish
 ```
 
-There is no keyword argument. Selection always comes from the registry so cron and manual runs use identical state transitions. If no eligible keywords remain, the command exits successfully and sends `No unpublished keywords remaining.`
+There is no keyword argument. Selection always comes from the registry so cron and manual runs use identical state transitions. `npm run seo:weekly` is an alias of this same entrypoint. Use `npm run blog:publish -- --dry-run` to verify entrypoint and lock wiring without changing files, Git, or network services.
 
 ## Cron schedule
 
-Run from the repository root. This example publishes every Monday at 09:00 in the host timezone and uses a lock to prevent overlapping jobs:
+Run from the repository root. The TypeScript entrypoint has its own atomic process lock, so cron and manual runs cannot overlap:
 
 ```cron
-0 9 * * 1 cd /absolute/path/to/instagram-unfollow-tracker && /usr/bin/flock -n /tmp/safeunfollow-blog.lock npm run blog:publish >> ~/.hermes/logs/safeunfollow/cron.log 2>&1
+0 9 * * 1 cd /absolute/path/to/instagram-unfollow-tracker && git pull --ff-only && npm run blog:publish >> ~/.hermes/logs/safeunfollow/cron.log 2>&1
 ```
 
-Confirm the paths to `npm` and `flock` on the cron host. Cron must have access to the environment file, Git credentials, DNS, OpenRouter, GitHub, the deployed site, and Telegram.
+Confirm the paths to `git` and `npm` on the cron host. Cron must have access to the environment file, Git credentials, DNS, Google Search Console, OpenRouter, GitHub, the deployed site, and Telegram.
 
-Run Search Console intelligence every Monday at 09:00 KST when the host cron uses its UTC+9 local timezone:
+If an external Python scheduler must remain, reduce it to process invocation only:
 
-```cron
-0 0 * * 1 cd /Users/jeongjaelee/Desktop/instagram-unfollow-tracker && npm run seo:weekly >> /Users/jeongjaelee/.hermes/logs/safeunfollow/search-console-cron.log 2>&1
+```python
+from pathlib import Path
+import subprocess
+
+repository = Path("/absolute/path/to/instagram-unfollow-tracker")
+subprocess.run(["git", "pull", "--ff-only"], cwd=repository, check=True)
+subprocess.run(["npm", "run", "blog:publish"], cwd=repository, check=True)
 ```
 
-The supplied expression itself runs at local midnight. Therefore it is Monday 09:00 KST only when the cron scheduler interprets the expression as UTC; for a host configured directly to Asia/Seoul, use `0 9 * * 1`. Verify the scheduler timezone rather than assuming it.
+The Python wrapper must not select keywords, validate content, commit or push Git changes, or send Telegram messages. Scheduling stays in cron. For an Asia/Seoul host, `0 9 * * 1` means Monday 09:00 KST. No crontab is modified by this repository.
 
 ## Adding keywords
 
@@ -138,7 +144,14 @@ Append an object to `automation/keywords.json`:
 
 Keep keywords in the desired publication order. Slugs must be unique and should contain lowercase ASCII letters, numbers, and hyphens. Commit registry additions before the next cron run.
 
-Search Console candidates use `source: "search_console"` and include discovery and performance fields. Matching is case-insensitive and whitespace-normalized, so existing keywords are not duplicated. `npm run seo:report` never changes the registry. `npm run seo:weekly` writes metric updates and new candidates to the working tree but does not create a Git commit; review and commit those changes explicitly.
+Search Console candidates use `source: "search_console"` and include discovery and performance fields. Matching is case-insensitive and whitespace-normalized, so existing keywords are not duplicated. `npm run seo:report` never changes repository files. The weekly publication entrypoint explicitly requests keyword updates and commits/pushes them before generation.
+
+Audit registry/content consistency without writing, or explicitly reconcile existing Markdown files:
+
+```bash
+npm run blog:reconcile
+npm run blog:reconcile -- --write
+```
 
 ## Search Console weekly report
 
@@ -148,10 +161,10 @@ Run a read-only console report for the last 28 complete Search Console days:
 npm run seo:report
 ```
 
-Run the automated report, Telegram summary, and registry enrichment:
+Explicitly update the registry outside the weekly publication flow only for maintenance:
 
 ```bash
-npm run seo:weekly
+npm run seo:report -- --update-keywords
 ```
 
 The report queries summary, `query`, `page`, and `query + page` dimensions. It prints total clicks, impressions, CTR, average position, the top 10 queries by impressions, top 10 pages by clicks, opportunities, and 5–10 keyword recommendations.
@@ -162,28 +175,29 @@ Structured results are appended to `~/.hermes/logs/safeunfollow/search-console.l
 
 ## Publishing lifecycle
 
-1. The first unpublished, non-duplicate entry is selected.
-2. `last_attempt` is updated.
-3. The body is generated with model fallback and retry handling.
-4. Frontmatter is generated with the current local system date.
-5. SEO QA runs before Git.
-6. The article commit is pushed.
-7. `published` and `published_at` are updated, committed, and pushed so registry state is durable across cron hosts.
-8. The public article URL is polled until available.
-9. Telegram receives title, keyword, slug, URL, short article commit, model, generation time, publication date, and the Search Console indexing action.
+1. Acquire the shared lock and reject a dirty worktree.
+2. Push a clean pending automation commit left by an earlier push interruption.
+3. Refresh Search Console data with explicit write mode; commit and push SEO registry/cluster changes.
+4. Select the first unpublished, non-duplicate registry entry.
+5. Generate the body and frontmatter, then run SEO validation.
+6. Mark the entry published and run cluster, pillar, related-link, and roadmap sync.
+7. Commit and push all publication state together.
+8. Poll the public article URL and send the Telegram result.
 
-Logs are JSON Lines records in `generation.log`, `validation.log`, and `publish.log`. Every entry includes `timestamp`, `keyword`, `stage`, `duration_ms`, `status`, and `error`.
+Logs are JSON Lines records in `generation.log`, `validation.log`, and `publish.log`. Generation/validation records include keyword and duration; orchestrator records include timestamp, stage, status, and error.
+
+`content/blog/index.md` is not generated because the `/blog` UI reads article files directly. `npm run clusters:sync -- --navigation` is the explicit opt-in if a standalone Markdown navigation artifact is needed later. Pillar links use their canonical `/pillars/<slug>` routes.
 
 ## Recovery procedure
 
-- **Generation or validation failure:** Read the matching logs and Telegram reason. Fix configuration or prompt/rules as needed, then rerun. The keyword stays unpublished.
-- **Git commit failure:** Inspect `git status`, resolve the reported repository problem, and rerun after ensuring no generated article will be overwritten.
-- **Git push failure:** Restore network/authentication and run `git push origin HEAD:main` (adjust remote/branch if configured). The article or registry-state commit remains local; inspect `git log -2 --oneline` to see which phase failed. Do not regenerate the article.
+- **Generation, validation, sync, or pre-commit failure:** The orchestrator restores its tracked changes and removes its newly created files. The keyword stays unpublished and the worktree stays clean.
+- **Git commit failure:** The same rollback runs. Inspect the error, correct Git configuration or hooks, and rerun.
+- **Git push failure:** The completed commit remains local with a clean worktree. Restore network/authentication and rerun; pending commits are pushed before new work starts.
 - **Deployment failure:** The push already succeeded. Inspect the Vercel deployment, fix or redeploy it, then verify the article URL manually. Registry state is already published.
 - **Telegram failure:** Publication may already be complete. Use `publish.log`, the Git commit, and the public URL to confirm before rerunning.
 - **Search Console credential failure:** Confirm that both direct credential variables are set together, or that `GOOGLE_APPLICATION_CREDENTIALS` points to a readable JSON file. Then verify the service-account email is a Search Console property user.
-- **Search Console API failure:** Confirm the API is enabled, `GOOGLE_SITE_URL` exactly matches the property, and inspect `search-console.log`. A reporting failure does not affect blog publishing.
-- **Registry update recovery:** `seo:weekly` does not commit. Review `git diff -- automation/keywords.json`; keep and commit valid recommendations or restore that file manually before the next run.
+- **Search Console API failure:** Confirm the API is enabled, `GOOGLE_SITE_URL` exactly matches the property, and inspect `search-console.log`. A standalone report only fails itself; the weekly entrypoint aborts before generation and restores uncommitted SEO changes.
+- **Lock contention:** Another cron or manual publication is active. Let it finish. A lock owned by a dead PID is removed automatically on the next run.
 
 ## Troubleshooting
 

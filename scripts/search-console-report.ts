@@ -5,7 +5,12 @@ import os from 'os';
 import path from 'path';
 import { pathToFileURL } from 'url';
 import { GoogleAuth } from 'google-auth-library';
-import { assignRegistryClusters, buildClusterHealth, syncClusterContent } from './topic-clusters';
+import {
+  assignRegistryClusters,
+  buildClusterHealth,
+  detectOrphans,
+  loadArticles,
+} from './topic-clusters';
 import type { ClusterHealth, OrphanFinding, TopicClusters } from './topic-clusters';
 
 dotenv.config({ path: '.env.local', quiet: true });
@@ -202,10 +207,8 @@ const CONFIG = {
   },
   clusters: {
     registryPath: path.join('automation', 'topic-clusters.json'),
-    roadmapPath: path.join('automation', 'content-roadmap.md'),
     blogDirectory: path.join('content', 'blog'),
     pillarDirectory: path.join('content', 'pillars'),
-    navigationPath: path.join('content', 'blog', 'index.md'),
   },
   telegram: {
     tokenEnv: 'TELEGRAM_BOT_TOKEN',
@@ -899,21 +902,19 @@ async function main(): Promise<void> {
         range.endDate,
       );
       registry = update.entries;
+      assignRegistryClusters(registry, topicClusters);
+      saveKeywordRegistry(registry);
+      saveTopicClusters(topicClusters);
       console.log(`\nKeyword registry: ${update.updatedExisting} updated, ${update.addedKeywords} added.`);
     }
 
-    assignRegistryClusters(registry, topicClusters);
-    saveKeywordRegistry(registry);
-    saveTopicClusters(topicClusters);
-    const clusterSync = syncClusterContent({
-      clusters: topicClusters,
-      entries: registry,
-      blogDirectory: CONFIG.clusters.blogDirectory,
-      pillarDirectory: CONFIG.clusters.pillarDirectory,
-      roadmapPath: CONFIG.clusters.roadmapPath,
-      navigationPath: CONFIG.clusters.navigationPath,
-    });
-    for (const article of clusterSync.articles) {
+    const articles = loadArticles(
+      CONFIG.clusters.blogDirectory,
+      CONFIG.clusters.pillarDirectory,
+      registry,
+      topicClusters,
+    );
+    for (const article of articles) {
       const pageRow = data.pages.find(row => {
         try {
           return new URL(row.keys[0] || '').pathname.replace(/\/$/, '').endsWith(`/blog/${article.slug}`);
@@ -926,13 +927,14 @@ async function main(): Promise<void> {
         article.impressions = pageRow.impressions;
       }
     }
-    const clusterHealth = buildClusterHealth(topicClusters, clusterSync.articles, clusterSync.orphans);
+    const orphans = detectOrphans(articles, topicClusters);
+    const clusterHealth = buildClusterHealth(topicClusters, articles, orphans);
     const report = buildSeoReport(
       data,
       range,
       registry.map(entry => entry.keyword),
       clusterHealth,
-      clusterSync.orphans,
+      orphans,
     );
     report.keywordIdeas = preliminaryReport.keywordIdeas;
     console.log(formatConsoleReport(report));
@@ -990,6 +992,7 @@ export {
   getDateRange,
   normalizeKeyword,
   parseTelegramEnvironment,
+  parseFlags,
   sendTelegram,
   updateKeywordRegistry,
 };

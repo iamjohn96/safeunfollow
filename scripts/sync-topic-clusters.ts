@@ -26,7 +26,7 @@ const result = syncClusterContent({
   blogDirectory: paths.blog,
   pillarDirectory: paths.pillars,
   roadmapPath: paths.roadmap,
-  navigationPath: paths.navigation,
+  navigationPath: process.argv.includes('--navigation') ? paths.navigation : undefined,
 });
 
 fs.mkdirSync(path.dirname(paths.log), { recursive: true });

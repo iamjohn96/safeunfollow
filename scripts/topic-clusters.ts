@@ -156,7 +156,7 @@ function assignRegistryClusters(entries: ClusterKeywordEntry[], clusters: TopicC
 }
 
 function parseInternalSlugs(source: string): string[] {
-  const slugs = [...source.matchAll(/\[[^\]]+\]\(\/blog\/([a-z0-9-]+)(?:[?#][^)]*)?\)/gi)]
+  const slugs = [...source.matchAll(/\[[^\]]+\]\(\/(?:blog|pillars)\/([a-z0-9-]+)(?:[?#][^)]*)?\)/gi)]
     .map(match => match[1]);
   return [...new Set(slugs)];
 }
@@ -199,7 +199,7 @@ function buildRelatedSection(
   return {
     markdown: [
       ...(pillarSlug && pillarSlug !== article.slug
-        ? [`Start with the [${labelFromSlug(article.cluster)} complete guide](/blog/${pillarSlug}) for the full topic overview.`, '']
+        ? [`Start with the [${labelFromSlug(article.cluster)} complete guide](/pillars/${pillarSlug}) for the full topic overview.`, '']
         : []),
       '## Related Articles',
       '',
@@ -216,14 +216,18 @@ function insertInternalLinks(
   pillarSlug: string,
 ): string {
   const existing = new Set(parseInternalSlugs(body));
-  const links: Array<{ title: string; slug: string }> = [];
+  const links: Array<{ title: string; slug: string; section: 'blog' | 'pillars' }> = [];
   if (pillarSlug !== article.slug && !existing.has(pillarSlug)) {
-    links.push({ title: `${labelFromSlug(article.cluster)} complete guide`, slug: pillarSlug });
+    links.push({
+      title: `${labelFromSlug(article.cluster)} complete guide`,
+      slug: pillarSlug,
+      section: 'pillars',
+    });
   }
   for (const candidate of rankRelated({ ...article, source: '', content: '', filePath: '', impressions: 0, clicks: 0, isPillar: false }, articles)) {
     if (links.length >= 2) break;
     if (!existing.has(candidate.slug) && !links.some(link => link.slug === candidate.slug)) {
-      links.push({ title: candidate.title, slug: candidate.slug });
+      links.push({ title: candidate.title, slug: candidate.slug, section: 'blog' });
     }
   }
   for (const candidate of articles
@@ -231,12 +235,12 @@ function insertInternalLinks(
     .sort((a, b) => b.impressions - a.impressions || similarity(article.title, b.title) - similarity(article.title, a.title))) {
     if (links.length >= 2) break;
     if (!existing.has(candidate.slug) && !links.some(link => link.slug === candidate.slug)) {
-      links.push({ title: candidate.title, slug: candidate.slug });
+      links.push({ title: candidate.title, slug: candidate.slug, section: 'blog' });
     }
   }
   if (!links.length) return body;
 
-  const sentence = `Continue with ${links.map(link => `[${link.title}](/blog/${link.slug})`).join(', ')} for more context.`;
+  const sentence = `Continue with ${links.map(link => `[${link.title}](/${link.section}/${link.slug})`).join(', ')} for more context.`;
   const faqIndex = body.search(/^##\s+.*(?:FAQ|Frequently Asked Questions)/im);
   return faqIndex === -1
     ? `${body.trimEnd()}\n\n${sentence}`
@@ -451,7 +455,7 @@ function generateNavigation(clusters: TopicClusters, articles: ArticleRecord[]):
     return [
       `## ${labelFromSlug(cluster)}`,
       '',
-      `- [${labelFromSlug(cluster)} Guide](/blog/${definition.pillar})`,
+      `- [${labelFromSlug(cluster)} Guide](/pillars/${definition.pillar})`,
       ...supporting.map(article => `- [${article.title}](/blog/${article.slug})`),
     ].join('\n');
   });
@@ -464,7 +468,7 @@ function syncClusterContent(options: {
   blogDirectory: string;
   pillarDirectory: string;
   roadmapPath: string;
-  navigationPath: string;
+  navigationPath?: string;
   updateArticleRelated?: boolean;
 }): SyncResult {
   let articles = loadArticles(options.blogDirectory, options.pillarDirectory, options.entries, options.clusters);
@@ -484,7 +488,9 @@ function syncClusterContent(options: {
   const health = buildClusterHealth(options.clusters, articles, orphans);
   fs.mkdirSync(path.dirname(options.roadmapPath), { recursive: true });
   fs.writeFileSync(options.roadmapPath, generateRoadmap(options.clusters, options.entries, articles), 'utf8');
-  fs.writeFileSync(options.navigationPath, generateNavigation(options.clusters, articles), 'utf8');
+  if (options.navigationPath) {
+    fs.writeFileSync(options.navigationPath, generateNavigation(options.clusters, articles), 'utf8');
+  }
   return { articles, health, orphans, updatedPillars, relatedCounts };
 }
 

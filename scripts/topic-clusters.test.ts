@@ -120,11 +120,11 @@ test('cluster sync creates pillars, related sections, navigation, and roadmap fr
   fs.mkdirSync(blog);
   fs.writeFileSync(path.join(blog, 'one.md'), markdown(
     'one', 'One', 'instagram-unfollow',
-    '[Pillar](/blog/instagram-unfollow-guide)\n\n## Related Articles\n\n- [Two](/blog/two)',
+    '[Pillar](/pillars/instagram-unfollow-guide)\n\n## Related Articles\n\n- [Two](/blog/two)',
   ));
   fs.writeFileSync(path.join(blog, 'two.md'), markdown(
     'two', 'Two', 'instagram-unfollow',
-    '[Pillar](/blog/instagram-unfollow-guide)\n\n## Related Articles\n\n- [One](/blog/one)',
+    '[Pillar](/pillars/instagram-unfollow-guide)\n\n## Related Articles\n\n- [One](/blog/one)',
   ));
   const entries: ClusterKeywordEntry[] = [
     { keyword: 'who unfollowed me instagram', slug: 'one', published: true, cluster: 'instagram-unfollow' },

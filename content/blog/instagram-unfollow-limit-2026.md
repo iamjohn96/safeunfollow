@@ -27,7 +27,7 @@ The Instagram algorithm plays a significant role in how your content is seen and
   A: Yes, SafeUnfollow.com is designed with privacy and safety in mind. It does not store your login credentials or any sensitive information, making it a secure option for managing your Instagram account.
 
 <!-- AUTO:RELATED_START -->
-Start with the [Instagram Unfollow Limits complete guide](/blog/instagram-unfollow-limits-guide) for the full topic overview.
+Start with the [Instagram Unfollow Limits complete guide](/pillars/instagram-unfollow-limits-guide) for the full topic overview.
 
 ## Related Articles
 

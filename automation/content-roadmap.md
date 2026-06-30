@@ -9,6 +9,8 @@
 ○ Who Stopped Following Me On Instagram
 ✓ Who Unfollowed Me On Instagram
 ○ How To See Recently Unfollowed Accounts On Instagram 2026
+✓ Instagram Unfollowers
+✓ Who Unfollowed Me Instagram Checker
 
 Priority score: ★★☆☆☆
 
@@ -51,6 +53,7 @@ Priority score: ★★★☆☆
 ✓ Is Who Unfollowed Me Safe Safely
 ○ Is Who Unfollowed Me Safe Step By Step
 ○ Is Who Unfollowed Me Safe Tips
+✓ Instagram Unfollow Tracker No Login
 
 Priority score: ★★★☆☆
 

@@ -26,7 +26,7 @@ Yes. The data-file workflow keeps account access under your control.
 [Try SafeUnfollow](https://safeunfollow.com/upload) to check your file.`;
 const validClusterBody = `${validBody}
 
-Continue with the [complete guide](/blog/instagram-unfollow-guide) and [unfollow limits](/blog/instagram-unfollow-limits-guide).
+Continue with the [complete guide](/pillars/instagram-unfollow-guide) and [unfollow limits](/pillars/instagram-unfollow-limits-guide).
 
 ## Related Articles
 

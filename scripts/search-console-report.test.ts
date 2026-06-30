@@ -9,6 +9,7 @@ import {
   detectOpportunities,
   fetchSearchConsoleData,
   formatTelegramReport,
+  parseFlags,
   parseTelegramEnvironment,
   sendTelegram,
   updateKeywordRegistry,
@@ -20,6 +21,11 @@ const range: DateRange = {
   endDate: '2026-06-28',
   label: 'Last 28 days',
 };
+
+test('report flags are read-only unless keyword updates are explicitly requested', () => {
+  assert.deepEqual(parseFlags([]), { telegram: false, updateKeywords: false });
+  assert.deepEqual(parseFlags(['--update-keywords']), { telegram: false, updateKeywords: true });
+});
 
 function row(
   key: string,
