@@ -14,7 +14,6 @@ import {
 } from './search-console-report';
 import type { DateRange, SearchConsoleData, SearchConsoleRow } from './search-console-report';
 import {
-  buildRelatedSection,
   loadArticles,
   parseInternalSlugs,
   upsertMarkerBlock,
@@ -78,10 +77,49 @@ interface ParsedFlags {
   limit: number;
 }
 
+interface AppliedChange {
+  candidate: RefreshCandidate;
+  filePath: string;
+  before: string;
+  after: string;
+  changed: boolean;
+  summary: string;
+  details: string[];
+}
+
 const REFRESH_START = '<!-- AUTO:EVERGREEN_REFRESH_START -->';
 const REFRESH_END = '<!-- AUTO:EVERGREEN_REFRESH_END -->';
 const FAQ_START = '<!-- AUTO:EVERGREEN_FAQ_START -->';
 const FAQ_END = '<!-- AUTO:EVERGREEN_FAQ_END -->';
+
+const FAQ_ITEMS = [
+  {
+    question: 'Does SafeUnfollow connect to my Instagram account?',
+    answer: 'No. SafeUnfollow uses No Login, No OAuth, no Instagram API, and No Account Connection. You stay in control of the file you choose to upload.',
+  },
+  {
+    question: 'Why is the Instagram Data ZIP workflow safer?',
+    answer: 'You complete an Instagram Data Download, keep the Instagram Data ZIP intact, and upload that ZIP to SafeUnfollow. The file-based, Privacy First process has Zero Ban Risk because SafeUnfollow never performs actions on your Instagram account.',
+  },
+] as const;
+
+const RECOMMENDED_RELATED: Record<string, string[]> = {
+  'instagram-unfollow-limits': [
+    'instagram-unfollow-tracker-no-login',
+    'how-to-find-instagram-unfollowers-2026',
+    'instagram-data-download-unfollowers',
+  ],
+  'instagram-unfollow': [
+    'how-to-find-instagram-unfollowers-2026',
+    'instagram-data-download-unfollowers',
+    'instagram-unfollow-tracker-no-login',
+  ],
+  'instagram-unfollow-safety': [
+    'instagram-unfollow-tracker-no-login',
+    'how-to-find-instagram-unfollowers-2026',
+    'instagram-data-download-unfollowers',
+  ],
+};
 
 const CONFIG = {
   paths: {
@@ -118,13 +156,28 @@ const OUTDATED_PATTERNS: Array<{ label: string; pattern: RegExp; replacement: st
   },
   {
     label: 'fixed 48-hour export promise',
-    pattern: /(?:up to|within) 48\s*hours?/gi,
-    replacement: 'after Instagram finishes preparing it',
+    pattern: /^(\s*-\s*)?[^.!?\n]*(?:up to|within)\s*48[\s\u00a0\u202f-]*hours?[^.!?\n]*[.!?]?/gim,
+    replacement: '$1Instagram will notify you when the export is ready; preparation time varies.',
   },
   {
     label: 'legacy extracted JSON upload instruction',
-    pattern: /(?:extract|unzip)[^.!?\n]{0,100}(?:followers_1\.json|JSON file)[^.!?\n]*[.!?]?/gi,
+    pattern: /(?:extract|unzip)[^.!?\n]{0,160}(?:followers_1\.json|JSON file)[^.!?\n]*[.!?]?/gi,
     replacement: 'Keep the downloaded ZIP intact and upload the Instagram Data ZIP to SafeUnfollow.',
+  },
+  {
+    label: 'legacy extracted JSON upload instruction',
+    pattern: /^\s*-\s*(?:unzip|extract)\b[^\n]*$/gim,
+    replacement: '- Keep the downloaded Instagram Data ZIP intact.',
+  },
+  {
+    label: 'legacy extracted JSON upload instruction',
+    pattern: /^\s*-\s*(?:locate|find)\b[^\n]*(?:followers_1\.json|\.json\b|JSON file)[^\n]*$/gim,
+    replacement: '- Upload the intact Instagram Data ZIP to SafeUnfollow.',
+  },
+  {
+    label: 'legacy extracted JSON upload instruction',
+    pattern: /\b(?:select|upload)\s+(?:the\s+)?(?:`?followers_1\.json`?|JSON file)\b/gi,
+    replacement: 'upload the intact Instagram Data ZIP',
   },
 ];
 
@@ -188,6 +241,13 @@ function titleCase(value: string): string {
 }
 
 function suggestedTitle(keyword: string): string {
+  const normalized = keyword.toLowerCase().trim();
+  if (/^how many people can (?:i|you) unfollow on instagram$/.test(normalized)) {
+    return 'Instagram Unfollow Limit: How Many Can You Safely Unfollow?';
+  }
+  if (/^is who unfollowed me safe$/.test(normalized)) {
+    return 'Who Unfollowed Me Checker: Safe, No Login or OAuth';
+  }
   const base = titleCase(keyword).replace(/\s+202[0-9]\b/g, '');
   const suffix = ': Safe, No Login';
   const maximum = 60 - suffix.length;
@@ -199,6 +259,13 @@ function suggestedTitle(keyword: string): string {
 
 function suggestedDescription(keyword: string): string {
   const normalizedKeyword = keyword.replace(/\bi\b/g, 'I');
+  const normalized = normalizedKeyword.toLowerCase().trim();
+  if (/^how many people can i unfollow on instagram$/.test(normalized)) {
+    return 'Learn how Instagram unfollow limits work with a privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.';
+  }
+  if (/^is who unfollowed me safe$/.test(normalized)) {
+    return 'Check who unfollowed you with a privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.';
+  }
   const prefix = `Learn ${normalizedKeyword} with a privacy-first Instagram Data ZIP workflow.`;
   const suffix = ' No Login, No OAuth, no Instagram API, and Zero Ban Risk.';
   const value = `${prefix}${suffix}`;
@@ -243,10 +310,40 @@ function countInbound(articles: ArticleRecord[]): Map<string, number> {
   return inbound;
 }
 
+function relatedSection(source: string): string {
+  const content = matter(source).content;
+  return content.match(/(?:^|\n)##\s+Related Articles[^\n]*\n([\s\S]*?)(?=\n##\s+|$)/i)?.[1] || '';
+}
+
 function findOutdatedPhrases(source: string): string[] {
-  return OUTDATED_PATTERNS
+  return [...new Set(OUTDATED_PATTERNS
     .filter(item => new RegExp(item.pattern.source, item.pattern.flags.replace('g', '')).test(source))
-    .map(item => item.label);
+    .map(item => item.label))];
+}
+
+function selectRelatedArticles(article: ArticleRecord, articles: ArticleRecord[]): ArticleRecord[] {
+  const available = articles.filter(item => !item.isPillar && item.slug !== article.slug);
+  const bySlug = new Map(available.map(item => [item.slug, item]));
+  const selected: ArticleRecord[] = [];
+  const add = (item: ArticleRecord | undefined) => {
+    if (item && !selected.some(candidate => candidate.slug === item.slug)) selected.push(item);
+  };
+
+  available
+    .filter(item => item.cluster === article.cluster)
+    .sort((a, b) => b.impressions - a.impressions || a.title.localeCompare(b.title))
+    .forEach(add);
+  for (const slug of RECOMMENDED_RELATED[article.cluster] || []) add(bySlug.get(slug));
+  available
+    .sort((a, b) => b.impressions - a.impressions || a.title.localeCompare(b.title))
+    .forEach(add);
+
+  return selected.slice(0, Math.max(CONFIG.thresholds.minimumRelatedLinks, 3));
+}
+
+function relatedLinks(article: ArticleRecord, articles: ArticleRecord[]): RefreshProposal['internalLinks'] {
+  return selectRelatedArticles(article, articles)
+    .map(item => ({ slug: item.slug, title: item.title, url: `/blog/${item.slug}` }));
 }
 
 function primaryKeyword(entry: ClusterKeywordEntry | undefined, queryRows: SearchConsoleRow[], title: string): string {
@@ -279,7 +376,7 @@ function buildRefreshReport(
     const ageDays = daysBetween(parsed.data.updated || parsed.data.date, now);
     const pillar = clusters[article.cluster]?.pillar || '';
     const slugs = parseInternalSlugs(article.source);
-    const relatedBlock = parsed.content.match(/^##\s+Related Articles\s*\n([\s\S]*?)(?=^##\s+|$)/im)?.[1] || '';
+    const relatedBlock = relatedSection(article.source);
     const relatedCount = parseInternalSlugs(relatedBlock).filter(slug => slug !== pillar).length;
     const signals: RefreshSignals = {
       searchOpportunity: metrics.impressions >= CONFIG.thresholds.minimumImpressions && metrics.position !== null &&
@@ -304,9 +401,7 @@ function buildRefreshReport(
     const score = search + ctr + freshness + links;
     if (score < CONFIG.thresholds.minimumScore) return [];
 
-    const related = articles.filter(item =>
-      !item.isPillar && item.slug !== article.slug && item.cluster === article.cluster,
-    ).sort((a, b) => b.impressions - a.impressions || a.title.localeCompare(b.title)).slice(0, 3);
+    const related = relatedLinks(article, articles);
     const reasons = [
       signals.searchOpportunity ? `Average position ${metrics.position?.toFixed(1)} is in the 8–30 opportunity range.` : '',
       signals.lowCtr ? `CTR ${(metrics.ctr * 100).toFixed(1)}% is below 2.0%.` : '',
@@ -336,7 +431,7 @@ function buildRefreshReport(
           'Does SafeUnfollow connect to my Instagram account?',
           'Why does the Instagram Data ZIP workflow have Zero Ban Risk?',
         ],
-        internalLinks: related.map(item => ({ slug: item.slug, title: item.title, url: `/blog/${item.slug}` })),
+        internalLinks: related,
         pillarLink: pillar ? `/pillars/${pillar}` : '',
         outdatedPhrases: findOutdatedPhrases(article.source),
       },
@@ -416,23 +511,56 @@ function removeOutdatedPhrasing(source: string): string {
   return next;
 }
 
+function withoutMarkerBlock(content: string, start: string, end: string): string {
+  const startIndex = content.indexOf(start);
+  const endIndex = content.indexOf(end);
+  if (startIndex === -1 || endIndex <= startIndex) return content;
+  return `${content.slice(0, startIndex)}${content.slice(endIndex + end.length)}`;
+}
+
+function normalizedQuestion(value: string): string {
+  return value.toLowerCase().replace(/\bq\s*:\s*/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
 function upsertFaq(content: string): string {
-  const body = [
-    '### Does SafeUnfollow connect to my Instagram account?',
-    '',
-    'No. SafeUnfollow uses No Login, No OAuth, no Instagram API, and No Account Connection. You stay in control of the file you choose to upload.',
-    '',
-    '### Why is the Instagram Data ZIP workflow safer?',
-    '',
-    'You complete an Instagram Data Download, keep the Instagram Data ZIP intact, and upload that ZIP to SafeUnfollow. The file-based, Privacy First process has Zero Ban Risk because SafeUnfollow never performs actions on your Instagram account.',
-  ].join('\n');
+  const contentWithoutGeneratedFaq = withoutMarkerBlock(content, FAQ_START, FAQ_END);
+  const normalizedContent = normalizedQuestion(contentWithoutGeneratedFaq);
+  const missing = FAQ_ITEMS.filter(item => !normalizedContent.includes(normalizedQuestion(item.question)));
+  const body = missing.flatMap(item => [`### ${item.question}`, '', item.answer, '']).join('\n').trim();
+  if (!body) return contentWithoutGeneratedFaq.replace(/\n{3,}/g, '\n\n');
   const block = markerBlock(FAQ_START, FAQ_END, body);
   const start = content.indexOf(FAQ_START);
   const end = content.indexOf(FAQ_END);
   if (start !== -1 && end > start) return `${content.slice(0, start)}${block}${content.slice(end + FAQ_END.length)}`;
-  const heading = /^##\s+.*(?:FAQ|Frequently Asked Questions).*$/im;
+  const heading = /^#{2,3}\s+.*(?:FAQ|Frequently Asked Questions).*$/im;
   if (heading.test(content)) return content.replace(heading, match => `${match}\n\n${block}`);
   return `${content.trimEnd()}\n\n## FAQ\n\n${block}\n`;
+}
+
+function canonicalizePillarLink(content: string, pillarSlug: string): string {
+  const escaped = pillarSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return content.replace(
+    new RegExp(`(\\[[^\\]]+\\]\\()\\/blog\\/${escaped}((?:[?#][^)]*)?\\))`, 'gi'),
+    `$1/pillars/${pillarSlug}$2`,
+  );
+}
+
+function buildRefreshRelatedSection(
+  candidate: RefreshCandidate,
+  article: ArticleRecord,
+  articles: ArticleRecord[],
+  pillarSlug: string,
+): string {
+  const links = relatedLinks(article, articles);
+  return [
+    `Start with the [${titleCase(candidate.cluster.replace(/-/g, ' '))} complete guide](/pillars/${pillarSlug}) for the full topic overview.`,
+    '',
+    '## Related Articles',
+    '',
+    ...(links.length
+      ? links.map(link => `- [${link.title}](${link.url})`)
+      : ['More supporting guides are coming soon.']),
+  ].join('\n');
 }
 
 function applyCandidate(
@@ -460,9 +588,9 @@ function applyCandidate(
 
   const definition = clusters[candidate.cluster];
   if (!definition) throw new Error(`Unknown topic cluster: ${candidate.cluster}`);
-  const refreshedArticle = { ...article, title: candidate.proposal.title, content, source: content };
-  const related = buildRelatedSection(refreshedArticle, articles, definition.pillar);
-  content = upsertMarkerBlock(content, related.markdown);
+  content = canonicalizePillarLink(content, definition.pillar);
+  const related = buildRefreshRelatedSection(candidate, article, articles, definition.pillar);
+  content = upsertMarkerBlock(content, related);
   const refreshed = matter.stringify(content, parsed.data);
   validateRefreshedContent(refreshed, candidate, entries, clusters, articles);
   return refreshed;
@@ -493,17 +621,95 @@ function validateRefreshedContent(
   const known = new Set([...articles.map(article => article.slug), ...Object.values(clusters).map(item => item.pillar)]);
   for (const slug of links) if (!known.has(slug)) errors.push(`Broken internal link: ${slug}`);
   if (!/^##\s+Related Articles/im.test(parsed.content)) errors.push('Missing Related Articles section');
-  if (!parsed.content.includes(FAQ_START)) errors.push('Missing refreshed FAQ block');
+  if (!/^#{2,3}\s+.*(?:FAQ|Frequently Asked Questions)/im.test(parsed.content)) errors.push('Missing FAQ section');
+  const normalizedContent = normalizedQuestion(parsed.content);
+  for (const item of FAQ_ITEMS) {
+    if (!normalizedContent.includes(normalizedQuestion(item.question))) errors.push(`Missing FAQ answer: ${item.question}`);
+  }
+  if (pillar) {
+    const escaped = pillar.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    if (!new RegExp(String.raw`\]\(/pillars/${escaped}(?:[?#][^)]*)?\)`, 'i').test(source)) {
+      errors.push('Missing canonical cluster pillar link');
+    }
+  }
   if (errors.length) throw new Error(`${candidate.slug} failed refresh validation: ${errors.join('; ')}`);
 }
 
-function diffSummary(before: string, after: string): string {
+function relatedArticleCount(source: string): number {
+  return parseInternalSlugs(relatedSection(source)).length;
+}
+
+function markerContents(source: string, start: string, end: string): string {
+  const startIndex = source.indexOf(start);
+  const endIndex = source.indexOf(end);
+  return startIndex !== -1 && endIndex > startIndex
+    ? source.slice(startIndex + start.length, endIndex).trim()
+    : '';
+}
+
+function buildChangeSummary(
+  candidate: RefreshCandidate,
+  filePath: string,
+  before: string,
+  after: string,
+  clusters: TopicClusters,
+): AppliedChange {
   const beforeLines = before.split('\n');
   const afterLines = after.split('\n');
-  let changed = 0;
+  let changedPositions = 0;
   const length = Math.max(beforeLines.length, afterLines.length);
-  for (let index = 0; index < length; index += 1) if (beforeLines[index] !== afterLines[index]) changed += 1;
-  return `${beforeLines.length} → ${afterLines.length} lines; ${changed} line positions changed`;
+  for (let index = 0; index < length; index += 1) {
+    if (beforeLines[index] !== afterLines[index]) changedPositions += 1;
+  }
+  const changed = before !== after;
+  if (!changed) {
+    return {
+      candidate,
+      filePath,
+      before,
+      after,
+      changed: false,
+      summary: 'NO-OP — generated SEO fields and sections already match the current candidate proposal',
+      details: ['Search Console signals can keep a fully refreshed article in the candidate list until its performance improves.'],
+    };
+  }
+
+  const beforeParsed = matter(before);
+  const afterParsed = matter(after);
+  const details: string[] = [];
+  if (beforeParsed.data.title !== afterParsed.data.title) {
+    details.push(`title: "${String(beforeParsed.data.title || '')}" → "${String(afterParsed.data.title || '')}"`);
+  }
+  if (beforeParsed.data.description !== afterParsed.data.description) {
+    details.push(`description updated (${String(beforeParsed.data.description || '').length} → ${String(afterParsed.data.description || '').length} chars)`);
+  }
+  if (String(beforeParsed.data.updated || '') !== String(afterParsed.data.updated || '')) details.push(`updated date: ${String(afterParsed.data.updated)}`);
+
+  const outdated = findOutdatedPhrases(before);
+  if (outdated.length) details.push(`outdated phrasing replaced: ${outdated.join(', ')}`);
+  if (markerContents(before, FAQ_START, FAQ_END) !== markerContents(after, FAQ_START, FAQ_END)) details.push('FAQ added or enriched without duplicate generated questions');
+  if (markerContents(before, REFRESH_START, REFRESH_END) !== markerContents(after, REFRESH_START, REFRESH_END)) details.push('privacy-first positioning refreshed');
+
+  const pillar = clusters[candidate.cluster]?.pillar;
+  if (pillar) {
+    const canonical = `/pillars/${pillar}`;
+    if (!before.includes(canonical) && after.includes(canonical)) details.push(`canonical pillar link added: ${canonical}`);
+    if (before.includes(`/blog/${pillar}`) && !after.includes(`/blog/${pillar}`)) details.push(`legacy pillar route canonicalized: /blog/${pillar} → ${canonical}`);
+  }
+  const beforeRelated = relatedArticleCount(before);
+  const afterRelated = relatedArticleCount(after);
+  if (beforeRelated !== afterRelated) details.push(`Related Articles: ${beforeRelated} → ${afterRelated} links`);
+  if (!details.length) details.push('Markdown structure normalized');
+
+  return {
+    candidate,
+    filePath,
+    before,
+    after,
+    changed: true,
+    summary: `CHANGED — ${beforeLines.length} → ${afterLines.length} lines; ${changedPositions} line positions changed`,
+    details,
+  };
 }
 
 function ensureCleanTree(): void {
@@ -570,12 +776,21 @@ async function apply(limit: number, dryRun: boolean): Promise<void> {
     if (!filePath.startsWith(blogRoot)) throw new Error(`Candidate path escaped blog directory: ${candidate.slug}`);
     const before = fs.readFileSync(filePath, 'utf8');
     const after = applyCandidate(candidate, entries, clusters, articles, today);
-    return { candidate, filePath, before, after, summary: diffSummary(before, after) };
+    return buildChangeSummary(candidate, filePath, before, after, clusters);
   });
   console.log('Proposed refresh diff summary:');
-  for (const change of changes) console.log(`- ${change.candidate.file}: ${change.summary}`);
+  for (const change of changes) {
+    console.log(`- ${change.candidate.file}: ${change.summary}`);
+    for (const detail of change.details) console.log(`  - ${detail}`);
+  }
   if (dryRun) {
     console.log('Dry run complete. No lock, repository files, Git history, network services, or notifications were changed.');
+    return;
+  }
+
+  const changed = changes.filter(change => change.changed);
+  if (!changed.length) {
+    console.log('Apply complete: no-op. No content files required changes.');
     return;
   }
 
@@ -583,18 +798,18 @@ async function apply(limit: number, dryRun: boolean): Promise<void> {
   try {
     ensureCleanTree();
     try {
-      for (const change of changes) fs.writeFileSync(change.filePath, change.after, 'utf8');
+      for (const change of changed) fs.writeFileSync(change.filePath, change.after, 'utf8');
     } catch (error) {
-      for (const change of changes) fs.writeFileSync(change.filePath, change.before, 'utf8');
+      for (const change of changed) fs.writeFileSync(change.filePath, change.before, 'utf8');
       throw error;
     }
     console.log('Applied refresh diff summary:');
-    for (const change of changes) console.log(`- ${change.candidate.file}: ${change.summary}`);
+    for (const change of changed) console.log(`- ${change.candidate.file}: ${change.summary}`);
     if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
       await sendTelegram([
         '✅ SafeUnfollow Evergreen Refresh Applied',
         '',
-        ...changes.map(change => `${change.candidate.slug}: ${change.candidate.score}/100`),
+        ...changed.map(change => `${change.candidate.slug}: ${change.candidate.score}/100`),
       ].join('\n'));
     } else {
       console.warn('Telegram skipped: TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are not both set.');
@@ -624,6 +839,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
 export {
   CONFIG,
   applyCandidate,
+  buildChangeSummary,
   buildRefreshReport,
   findOutdatedPhrases,
   formatRoadmap,

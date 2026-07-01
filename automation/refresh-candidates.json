@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-06-30T09:31:58.487Z",
+  "generatedAt": "2026-07-01T06:16:03.248Z",
   "range": {
     "startDate": "2026-06-02",
     "endDate": "2026-06-29",
@@ -23,14 +23,14 @@
       "keyword": "how many people can i unfollow on instagram",
       "cluster": "instagram-unfollow-limits",
       "file": "content/blog/instagram-unfollow-limit-2026.md",
-      "title": "Understanding the Instagram Unfollow Limit in 2026",
+      "title": "How Many People Can I Unfollow on Instagram: Safe, No Login",
       "publishedAt": "2026-05-20",
-      "ageDays": 41,
+      "ageDays": 0,
       "metrics": {
         "clicks": 0,
-        "impressions": 63,
+        "impressions": 64,
         "ctr": 0,
-        "position": 15.80952380952381
+        "position": 15.703125
       },
       "score": 64,
       "scoreBreakdown": {
@@ -48,18 +48,34 @@
         "noInboundLinks": false
       },
       "reasons": [
-        "Average position 15.8 is in the 8–30 opportunity range.",
+        "Average position 15.7 is in the 8–30 opportunity range.",
         "CTR 0.0% is below 2.0%.",
         "Related Articles has 0 supporting link(s)."
       ],
       "proposal": {
-        "title": "How Many People Can I Unfollow on Instagram: Safe, No Login",
-        "description": "Learn how many people can I unfollow on instagram with a privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.",
+        "title": "Instagram Unfollow Limit: How Many Can You Safely Unfollow?",
+        "description": "Learn how Instagram unfollow limits work with a privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.",
         "faq": [
           "Does SafeUnfollow connect to my Instagram account?",
           "Why does the Instagram Data ZIP workflow have Zero Ban Risk?"
         ],
-        "internalLinks": [],
+        "internalLinks": [
+          {
+            "slug": "instagram-unfollow-tracker-no-login",
+            "title": "The Safest Way to Check Who Unfollowed You on Instagram: No Login Required",
+            "url": "/blog/instagram-unfollow-tracker-no-login"
+          },
+          {
+            "slug": "how-to-find-instagram-unfollowers-2026",
+            "title": "How to Find Instagram Unfollowers in 2026 (Safe, No Login)",
+            "url": "/blog/how-to-find-instagram-unfollowers-2026"
+          },
+          {
+            "slug": "instagram-data-download-unfollowers",
+            "title": "Instagram Data Download Unfollowers",
+            "url": "/blog/instagram-data-download-unfollowers"
+          }
+        ],
         "pillarLink": "/pillars/instagram-unfollow-limits-guide",
         "outdatedPhrases": []
       }
@@ -72,36 +88,35 @@
       "file": "content/blog/who-unfollowed-me-instagram-checker.md",
       "title": "Who Unfollowed Me Instagram Checker: Find Lost Followers Without Logging In",
       "publishedAt": "2026-05-27",
-      "ageDays": 34,
+      "ageDays": 35,
       "metrics": {
         "clicks": 1,
         "impressions": 61,
         "ctr": 0.01639344262295082,
         "position": 11.819672131147541
       },
-      "score": 43,
+      "score": 36,
       "scoreBreakdown": {
         "search": 31,
         "ctr": 5,
         "freshness": 0,
-        "links": 7
+        "links": 0
       },
       "signals": {
         "searchOpportunity": true,
         "lowCtr": true,
         "stale": false,
         "missingPillarLink": false,
-        "fewRelatedLinks": true,
+        "fewRelatedLinks": false,
         "noInboundLinks": false
       },
       "reasons": [
         "Average position 11.8 is in the 8–30 opportunity range.",
-        "CTR 1.6% is below 2.0%.",
-        "Related Articles has 1 supporting link(s)."
+        "CTR 1.6% is below 2.0%."
       ],
       "proposal": {
-        "title": "Is Who Unfollowed Me Safe: Safe, No Login",
-        "description": "Learn is who unfollowed me safe with a privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.",
+        "title": "Who Unfollowed Me Checker: Safe, No Login or OAuth",
+        "description": "Check who unfollowed you with a privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.",
         "faq": [
           "Does SafeUnfollow connect to my Instagram account?",
           "Why does the Instagram Data ZIP workflow have Zero Ban Risk?"
@@ -116,6 +131,11 @@
             "slug": "instagram-data-download-unfollowers",
             "title": "Instagram Data Download Unfollowers",
             "url": "/blog/instagram-data-download-unfollowers"
+          },
+          {
+            "slug": "instagram-unfollow-tracker-no-login",
+            "title": "The Safest Way to Check Who Unfollowed You on Instagram: No Login Required",
+            "url": "/blog/instagram-unfollow-tracker-no-login"
           }
         ],
         "pillarLink": "/pillars/instagram-unfollow-guide",
