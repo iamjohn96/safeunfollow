@@ -198,7 +198,8 @@ function suggestedTitle(keyword: string): string {
 }
 
 function suggestedDescription(keyword: string): string {
-  const prefix = `Learn ${keyword} with a privacy-first Instagram Data ZIP workflow.`;
+  const normalizedKeyword = keyword.replace(/\bi\b/g, 'I');
+  const prefix = `Learn ${normalizedKeyword} with a privacy-first Instagram Data ZIP workflow.`;
   const suffix = ' No Login, No OAuth, no Instagram API, and Zero Ban Risk.';
   const value = `${prefix}${suffix}`;
   return value.length <= 160 ? value : `Use SafeUnfollow's privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.`;

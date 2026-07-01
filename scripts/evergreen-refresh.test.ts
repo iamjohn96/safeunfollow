@@ -146,4 +146,5 @@ test('parses safe plan and apply flags', () => {
 
 test('keeps generated meta descriptions within the search snippet limit', () => {
   assert(suggestedDescription('an extremely long keyword '.repeat(20)).length <= 160);
+  assert.match(suggestedDescription('how many people can i unfollow on instagram'), /can I unfollow/);
 });
