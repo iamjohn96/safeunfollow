@@ -183,6 +183,7 @@ const CONFIG = {
     rowLimit: 25_000,
     searchType: 'web',
     dataState: 'final',
+    requestTimeoutMs: 30_000,
   },
   reporting: {
     lookbackDays: 28,
@@ -339,12 +340,30 @@ function createGoogleAuth(env: Environment = process.env): GoogleAuth {
   throw new MissingCredentialsError();
 }
 
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timeout: NodeJS.Timeout | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_resolve, reject) => {
+        timeout = setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
+}
+
 async function createQueryExecutor(env: Environment = process.env): Promise<QueryExecutor> {
   const auth = createGoogleAuth(env);
   const client = await auth.getClient();
 
   return async (dimensions, range) => {
-    const tokenResult = await client.getAccessToken();
+    const tokenResult = await withTimeout(
+      client.getAccessToken(),
+      CONFIG.api.requestTimeoutMs,
+      'Google access token request',
+    );
     const accessToken = typeof tokenResult === 'string' ? tokenResult : tokenResult.token;
     if (!accessToken) throw new Error('Google authentication returned no access token');
 
@@ -364,6 +383,7 @@ async function createQueryExecutor(env: Environment = process.env): Promise<Quer
         type: CONFIG.api.searchType,
         dataState: CONFIG.api.dataState,
       }),
+      signal: AbortSignal.timeout(CONFIG.api.requestTimeoutMs),
     });
 
     if (!response.ok) {
@@ -984,6 +1004,7 @@ export {
   TelegramNetworkError,
   buildSeoReport,
   createGoogleAuth,
+  createQueryExecutor,
   detectOpportunities,
   discoverKeywordIdeas,
   fetchSearchConsoleData,

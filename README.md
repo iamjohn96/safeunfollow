@@ -10,6 +10,7 @@ SafeUnfollow is a Next.js application with a cron-compatible SEO publishing pipe
 - `scripts/blog-publish.ts` owns locking, stage ordering, Git commit/push, deployment polling, rollback, and publication notifications.
 - `scripts/generate-post.ts` only selects, generates, validates, and records one article locally.
 - `scripts/search-console-report.ts` ingests Search Console data and is repository read-only unless `--update-keywords` is passed.
+- `scripts/evergreen-refresh.ts` ranks published pages from Search Console performance, freshness, and cluster-link gaps; only explicit apply mode changes articles.
 - `scripts/sync-topic-clusters.ts` updates pillars, related links, and the roadmap after generation.
 - `~/.hermes/logs/safeunfollow/` contains JSON Lines operational logs.
 
@@ -38,6 +39,16 @@ Search Console performance data
 → Opportunity detection
 → Optional keyword registry update only with `--update-keywords`
 → Optional Telegram recommendations only with `--telegram`
+```
+
+Evergreen refresh is a separate, non-publishing workflow. It reuses the publication lock only while article changes are applied, so it cannot overlap `blog:publish`:
+
+```text
+Search Console page/query-page data
+→ deterministic candidate scoring
+→ refresh-candidates.json + refresh-roadmap.md
+→ explicit apply with shared lock + clean-tree check
+→ policy/link validation + success-only Telegram summary
 ```
 
 ## Environment variables
@@ -172,6 +183,44 @@ The report queries summary, `query`, `page`, and `query + page` dimensions. It p
 An opportunity must have at least 20 impressions, CTR below 2%, and average position from 5 through 30. These queries are candidates for title/meta improvements, new articles, or internal links. Search Console returns CTR as a ratio; the registry stores that original ratio while reports display percentages.
 
 Structured results are appended to `~/.hermes/logs/safeunfollow/search-console.log`. Every JSON Lines record contains timestamp, stage, status, date range, query/page counts, and errors.
+
+## Evergreen refresh engine
+
+Generate the refresh plan from the last 28 complete Search Console days:
+
+```bash
+npm run refresh:plan
+```
+
+This reads `automation/keywords.json`, `automation/topic-clusters.json`, and published Markdown without changing them. It writes only the two review artifacts:
+
+- `automation/refresh-candidates.json` — machine-readable metrics, score breakdown, reasons, and proposed changes.
+- `automation/refresh-roadmap.md` — operator-readable ranked roadmap.
+
+Use `npm run refresh:plan -- --dry-run` to calculate and print candidates without writing even the reports. Candidate priority combines:
+
+- impressions with average position 8–30 (up to 35 points);
+- CTR below 2% (up to 25 points);
+- age of at least 180 days (up to 20 points);
+- missing pillar link, fewer than two related links, and no inbound links (up to 20 points).
+
+The minimum candidate score is 20. Search Console page metrics are preferred; query-page rows provide the target query and a metric fallback.
+
+Review and commit the generated plan before applying it, because actual apply requires a clean worktree. Preview the top candidate without changing files:
+
+```bash
+npm run refresh:apply -- --limit=1 --dry-run
+```
+
+Apply an approved candidate:
+
+```bash
+npm run refresh:apply -- --limit=1
+```
+
+Apply defaults to one article. It uses the same atomic lock as `blog:publish`, rejects a dirty worktree, prints before/after line summaries, and rolls article writes back if a write fails. The deterministic update refreshes title and description, adds an `updated` date, inserts current privacy positioning and FAQ marker blocks, rebuilds the related-article block with its cluster pillar, and replaces known stale instructions. Validation rejects banned phrases, missing No Login/No OAuth/no Instagram API/No Account Connection/Instagram Data ZIP/Zero Ban Risk/Privacy First positioning, overlong descriptions, missing pillar or related sections, and broken internal links.
+
+Telegram is sent only after a non-dry-run apply succeeds. The engine does not commit or push; inspect the diff, run the normal validation commands, and commit the approved content change manually. `npm run refresh:weekly` is a plan-only alias suitable for a separate scheduled review job.
 
 ## Publishing lifecycle
 
