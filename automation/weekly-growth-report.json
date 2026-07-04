@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-04T06:02:33.657Z",
+  "week": "2026-27",
+  "weeklyWindow": {
+    "start": "2026-06-27",
+    "end": "2026-07-04"
+  },
+  "searchConsole": {
+    "available": true,
+    "range": {
+      "startDate": "2026-06-05",
+      "endDate": "2026-07-02",
+      "label": "Last 28 days"
+    },
+    "error": null,
+    "metrics": {
+      "clicks": {
+        "current": 36,
+        "previous": 36,
+        "delta": 0,
+        "percentChange": 0
+      },
+      "impressions": {
+        "current": 225,
+        "previous": 225,
+        "delta": 0,
+        "percentChange": 0
+      },
+      "ctr": {
+        "current": 0.16,
+        "previous": 0.16,
+        "delta": 0,
+        "percentChange": 0
+      },
+      "position": {
+        "current": 13.017777777777777,
+        "previous": 13.017777777777777,
+        "delta": 0,
+        "percentChange": 0
+      }
+    }
+  },
+  "content": {
+    "newArticles": 1,
+    "evergreenRefreshes": 2,
+    "researchBriefs": 0
+  },
+  "topOpportunities": [
+    {
+      "keyword": "is who unfollowed me safe",
+      "impressions": 5,
+      "position": 64.2,
+      "ctr": 0,
+      "recommendation": "Improve title and description; Strengthen topical coverage and internal links"
+    },
+    {
+      "keyword": "ghost followers instagram",
+      "impressions": 4,
+      "position": 49.5,
+      "ctr": 0,
+      "recommendation": "Improve title and description; Strengthen topical coverage and internal links"
+    },
+    {
+      "keyword": "instagram unfollow limit per day 2026",
+      "impressions": 2,
+      "position": 17,
+      "ctr": 0,
+      "recommendation": "Improve title and description; Refresh or expand the matching content"
+    },
+    {
+      "keyword": "how many people can you unfollow on instagram",
+      "impressions": 2,
+      "position": 31.5,
+      "ctr": 0,
+      "recommendation": "Improve title and description; Strengthen topical coverage and internal links"
+    },
+    {
+      "keyword": "how many people can i unfollow on instagram",
+      "impressions": 2,
+      "position": 35.5,
+      "ctr": 0,
+      "recommendation": "Improve title and description; Strengthen topical coverage and internal links"
+    }
+  ],
+  "contentHealth": {
+    "publishedArticles": 7,
+    "topicClusters": 4,
+    "pillars": 4,
+    "orphanPages": 1,
+    "evergreenCandidates": 2
+  },
+  "premium": {
+    "newSubscriptions": null,
+    "renewals": null,
+    "cancellations": null,
+    "note": "Not Available — no weekly billing event ledger is available to this read-only report."
+  },
+  "systemHealth": [
+    {
+      "component": "Cron",
+      "level": "healthy",
+      "detail": "Recent automation activity: 2026-06-29T05:23:46.382Z"
+    },
+    {
+      "component": "Redis",
+      "level": "healthy",
+      "detail": "PING succeeded in 305 ms."
+    },
+    {
+      "component": "Research",
+      "level": "warning",
+      "detail": "No recent research artifact or brief found."
+    },
+    {
+      "component": "Publish",
+      "level": "healthy",
+      "detail": "1 article(s) published this week."
+    },
+    {
+      "component": "Search Console",
+      "level": "healthy",
+      "detail": "Metrics loaded successfully."
+    }
+  ],
+  "recommendations": [
+    {
+      "rule": "Keyword position is 8–20",
+      "action": "Refresh content targeting “instagram unfollow limit per day 2026”."
+    },
+    {
+      "rule": "Orphan pages detected",
+      "action": "Add contextual links from pillars and related high-impression articles."
+    },
+    {
+      "rule": "Evergreen candidates available",
+      "action": "Review the highest-ranked Evergreen candidate before the next publish cycle."
+    }
+  ]
+}
