@@ -15,6 +15,12 @@
     "refresh:apply": "node --import tsx scripts/evergreen-refresh.ts apply",
     "refresh:weekly": "npm run refresh:plan",
     "clusters:sync": "node --import tsx scripts/sync-topic-clusters.ts",
+    "research": "node --import tsx scripts/research/research.ts run",
+    "research:keyword": "node --import tsx scripts/research/research.ts keyword",
+    "research:brief": "node --import tsx scripts/research/research.ts brief",
+    "redis:health": "node --import tsx scripts/redis-ops.ts health",
+    "redis:ping": "node --import tsx scripts/redis-ops.ts ping",
+    "redis:monitor": "node --import tsx scripts/redis-monitor.ts",
     "test:automation": "node --import tsx --test scripts/*.test.ts"
   },
   "dependencies": {
