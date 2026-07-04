@@ -54,19 +54,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const normalised = email.toLowerCase().trim();
   const ip = getClientIp(request);
 
-  const ipAllowed = await checkOtpSendRateLimit(`ip:${ip}`);
-  const emailAllowed = await checkOtpSendRateLimit(`email:${normalised}`);
-  if (!ipAllowed || !emailAllowed) {
-    return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
-  }
-
-  const hasPremium = await isPremiumEmail(normalised);
-  if (!hasPremium) {
-    return NextResponse.json({ message: 'If eligible, a confirmation code has been sent.' });
-  }
-
   const token = String(randomInt(100000, 1000000));
-  await setCancelToken(normalised, token);
+  try {
+    const ipAllowed = await checkOtpSendRateLimit(`ip:${ip}`);
+    const emailAllowed = await checkOtpSendRateLimit(`email:${normalised}`);
+    if (!ipAllowed || !emailAllowed) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 });
+    }
+
+    const hasPremium = await isPremiumEmail(normalised);
+    if (!hasPremium) {
+      return NextResponse.json({ message: 'If eligible, a confirmation code has been sent.' });
+    }
+
+    await setCancelToken(normalised, token);
+  } catch (error) {
+    console.error('[cancel/verify] Redis unavailable while preparing cancellation', error);
+    return NextResponse.json(
+      { error: 'Cancellation service is temporarily unavailable. Please try again later.' },
+      { status: 503 },
+    );
+  }
 
   const sent = await sendCancelTokenEmail(normalised, token);
   if (!sent) {

@@ -91,7 +91,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       processed: results.length,
       results,
     });
-  } catch {
+  } catch (error) {
+    console.error('[remind] Failed to process renewal reminders', error);
     return NextResponse.json({ error: 'Failed to process reminders' }, { status: 500 });
   }
 }

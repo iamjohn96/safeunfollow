@@ -132,6 +132,30 @@ For a weekly Monday 10:00 check in the machine's local timezone, the recommended
 
 Create the log directory before registering that entry. This repository does not install or modify the crontab; register it manually only after verifying `npm run redis:monitor` with the intended runtime environment.
 
+### Weekly Growth Dashboard
+
+Generate the consolidated read-only operations and growth report with:
+
+```bash
+npm run growth:report
+```
+
+This reads Search Console, content frontmatter, topic-cluster and Evergreen inventories, Research artifacts, operational logs, and Redis `PING` status. It does not update SEO registries, content, Research, Redis keys, billing, payment, or the publish flow. It writes only these report artifacts:
+
+- `automation/weekly-growth-report.md`
+- `automation/weekly-growth-report.json`
+- `reports/weekly/YYYY-WW.md`
+
+The current JSON file is the comparison baseline for the next execution. If Search Console is unavailable, the report is still generated with `Not Available` metrics and an unhealthy Search Console status. Premium subscription, renewal, and cancellation counts remain `Not Available` until a read-only weekly billing event ledger exists; current Redis entitlement keys are not treated as historical billing events.
+
+Generate the same files and send the concise Telegram summary with:
+
+```bash
+npm run growth:weekly
+```
+
+`growth:weekly` requires `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`. The rule engine recommends title improvements below 2% CTR, refreshes for positions 8–20, internal links for orphan pages, and review when Evergreen candidates exist. System health reports Cron evidence, Redis, Research, Publish, and Search Console as healthy, warning, or unhealthy. Cron health is inferred from recent operational log activity and does not claim that crontab registration was directly verified.
+
 Upstash documents that inactive Free databases may be archived after a minimum of 14 days. For an archived database:
 
 1. Open the Upstash Console from the Vercel Marketplace integration and locate the archived database backup.

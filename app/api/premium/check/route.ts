@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isPremiumEmail, checkRateLimit } from '@/lib/redis';
+import { withRedisFallback } from '@/lib/redis-resilience';
 
 function getClientIp(request: NextRequest): string {
   return (
@@ -13,7 +14,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const ip = getClientIp(request);
 
   // Rate limit: max 10 requests per IP per 60-second window
-  const rateLimit = await checkRateLimit(ip);
+  const rateLimit = await withRedisFallback(
+    () => checkRateLimit(ip),
+    null,
+    'Premium check rate limiter unavailable',
+  );
+  if (!rateLimit) {
+    return NextResponse.json({ isPremium: false });
+  }
+
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: 'Too many requests' },
@@ -35,18 +44,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
   }
 
-  try {
-    const premium = await isPremiumEmail(email);
-    return NextResponse.json(
-      { isPremium: premium },
-      {
-        headers: {
-          'X-RateLimit-Limit': '10',
-          'X-RateLimit-Remaining': String(rateLimit.remaining),
-        },
+  const premium = await withRedisFallback(
+    () => isPremiumEmail(email),
+    false,
+    'Premium status lookup unavailable',
+  );
+
+  return NextResponse.json(
+    { isPremium: premium },
+    {
+      headers: {
+        'X-RateLimit-Limit': '10',
+        'X-RateLimit-Remaining': String(rateLimit.remaining),
       },
-    );
-  } catch {
-    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
-  }
+    },
+  );
 }

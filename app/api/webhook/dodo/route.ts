@@ -188,8 +188,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (isCancellation) {
     const email = extractEmail(body);
     if (email) {
-      await removePremiumEmail(email);
-      console.log(`[webhook/dodo] Removed premium for ${email} (event: ${eventType})`);
+      try {
+        await removePremiumEmail(email);
+        console.log(`[webhook/dodo] Removed premium for ${email} (event: ${eventType})`);
+      } catch (error) {
+        console.error(
+          `[webhook/dodo] Failed to revoke premium for ${email} (event: ${eventType})`,
+          error,
+        );
+        return NextResponse.json({ error: 'Failed to revoke premium status' }, { status: 500 });
+      }
     }
     return NextResponse.json({ received: true });
   }
@@ -232,8 +240,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error('[webhook/dodo] Failed to save premium status:', err);
+  } catch (error) {
+    console.error(
+      `[webhook/dodo] Failed to process premium update for ${email} (event: ${eventType})`,
+      error,
+    );
     return NextResponse.json({ error: 'Failed to save premium status' }, { status: 500 });
   }
 }

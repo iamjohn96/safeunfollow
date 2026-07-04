@@ -51,40 +51,48 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
 
   const normalised = email.toLowerCase().trim();
 
-  const storedToken = await getCancelToken(normalised);
-  if (!storedToken || storedToken !== token.trim()) {
-    const attempts = await registerOtpFailure(normalised);
-    if (attempts > getOtpFailLimit()) {
-      return NextResponse.json({ error: 'Too many failed attempts. Try again later.' }, { status: 429 });
+  try {
+    const storedToken = await getCancelToken(normalised);
+    if (!storedToken || storedToken !== token.trim()) {
+      const attempts = await registerOtpFailure(normalised);
+      if (attempts > getOtpFailLimit()) {
+        return NextResponse.json({ error: 'Too many failed attempts. Try again later.' }, { status: 429 });
+      }
+      return NextResponse.json({ error: 'Invalid or expired confirmation code' }, { status: 401 });
     }
-    return NextResponse.json({ error: 'Invalid or expired confirmation code' }, { status: 401 });
-  }
 
-  const hasPremium = await isPremiumEmail(normalised);
-  if (!hasPremium) {
-    await deleteCancelToken(normalised);
-    return NextResponse.json({ error: 'No active subscription found for this email' }, { status: 404 });
-  }
-
-  const subscriptionId = await getSubscriptionId(normalised);
-  if (subscriptionId) {
-    const cancelled = await cancelDodoSubscription(subscriptionId);
-    if (!cancelled) {
-      return NextResponse.json(
-        { error: 'Failed to cancel with payment provider; please try again' },
-        { status: 502 },
-      );
+    const hasPremium = await isPremiumEmail(normalised);
+    if (!hasPremium) {
+      await deleteCancelToken(normalised);
+      return NextResponse.json({ error: 'No active subscription found for this email' }, { status: 404 });
     }
+
+    const subscriptionId = await getSubscriptionId(normalised);
+    if (subscriptionId) {
+      const cancelled = await cancelDodoSubscription(subscriptionId);
+      if (!cancelled) {
+        return NextResponse.json(
+          { error: 'Failed to cancel with payment provider; please try again' },
+          { status: 502 },
+        );
+      }
+    }
+
+    await Promise.all([
+      deleteCancelToken(normalised),
+      clearOtpFailures(normalised),
+      removePremiumEmail(normalised),
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      message: 'Your subscription has been cancelled successfully.',
+    });
+  } catch (error) {
+    console.error('[cancel] Cancellation dependency unavailable', error);
+    return NextResponse.json(
+      { error: 'Cancellation service is temporarily unavailable. Please try again later.' },
+      { status: 503 },
+    );
   }
-
-  await Promise.all([
-    deleteCancelToken(normalised),
-    clearOtpFailures(normalised),
-    removePremiumEmail(normalised),
-  ]);
-
-  return NextResponse.json({
-    success: true,
-    message: 'Your subscription has been cancelled successfully.',
-  });
 }

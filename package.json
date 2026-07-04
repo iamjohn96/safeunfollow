@@ -21,6 +21,8 @@
     "redis:health": "node --import tsx scripts/redis-ops.ts health",
     "redis:ping": "node --import tsx scripts/redis-ops.ts ping",
     "redis:monitor": "node --import tsx scripts/redis-monitor.ts",
+    "growth:report": "node --import tsx scripts/growth-report.ts report",
+    "growth:weekly": "node --import tsx scripts/growth-report.ts weekly",
     "test:automation": "node --import tsx --test scripts/*.test.ts"
   },
   "dependencies": {
