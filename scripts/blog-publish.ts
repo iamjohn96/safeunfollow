@@ -133,10 +133,14 @@ async function notify(message: string): Promise<void> {
   await sendTelegram(message);
 }
 
-function parseFlags(args: string[]): { dryRun: boolean } {
-  const unknown = args.filter(arg => arg !== '--dry-run');
+function parseFlags(args: string[]): { dryRun: boolean; skipSearchConsole: boolean } {
+  const knownFlags = new Set(['--dry-run', '--skip-search-console']);
+  const unknown = args.filter(arg => !knownFlags.has(arg));
   if (unknown.length) throw new Error(`Unknown option(s): ${unknown.join(', ')}`);
-  return { dryRun: args.includes('--dry-run') };
+  return {
+    dryRun: args.includes('--dry-run'),
+    skipSearchConsole: args.includes('--skip-search-console'),
+  };
 }
 
 async function main(): Promise<void> {
@@ -147,9 +151,13 @@ async function main(): Promise<void> {
 
   try {
     if (flags.dryRun) {
+      const workflow = flags.skipSearchConsole
+        ? 'article generation → cluster sync → publication commit/push'
+        : 'Search Console update → SEO commit/push → article generation → cluster sync → publication commit/push';
       console.log([
         'Dry run: publication lock acquired.',
-        'Workflow: Search Console update → SEO commit/push → article generation → cluster sync → publication commit/push.',
+        `Workflow: ${workflow}.`,
+        'Optional: --skip-search-console starts the workflow at article generation.',
         'No repository files, network services, Git history, or notifications were changed.',
       ].join('\n'));
       return;
@@ -162,15 +170,20 @@ async function main(): Promise<void> {
       return;
     }
 
-    try {
-      stage = 'Search Console';
-      run(process.execPath, ['--import', 'tsx', 'scripts/search-console-report.ts', '--update-keywords']);
-      const seoCommit = commitIfChanged(CONFIG.seoPaths, 'chore(seo): refresh Search Console keyword data');
-      if (seoCommit) push();
-      writePublishLog(stage, 'success');
-    } catch (error) {
-      rollback(CONFIG.seoPaths);
-      throw error;
+    if (flags.skipSearchConsole) {
+      console.log('Skipping Search Console update and SEO commit.');
+      writePublishLog('Search Console', 'skipped');
+    } else {
+      try {
+        stage = 'Search Console';
+        run(process.execPath, ['--import', 'tsx', 'scripts/search-console-report.ts', '--update-keywords']);
+        const seoCommit = commitIfChanged(CONFIG.seoPaths, 'chore(seo): refresh Search Console keyword data');
+        if (seoCommit) push();
+        writePublishLog(stage, 'success');
+      } catch (error) {
+        rollback(CONFIG.seoPaths);
+        throw error;
+      }
     }
 
     const publishedBefore = new Set(
