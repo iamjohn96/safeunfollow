@@ -99,7 +99,7 @@ const FAQ_ITEMS = [
   },
   {
     question: 'Why is the Instagram Data ZIP workflow safer?',
-    answer: 'You complete an Instagram Data Download, keep the Instagram Data ZIP intact, and upload that ZIP to SafeUnfollow. The file-based, Privacy First process has Zero Ban Risk because SafeUnfollow never performs actions on your Instagram account.',
+    answer: 'You complete an Instagram Data Download, keep the Instagram Data ZIP intact, and upload that ZIP to SafeUnfollow. This no-login, Privacy First workflow avoids direct account access and reduces account-access risk.',
   },
 ] as const;
 
@@ -192,6 +192,8 @@ const BANNED_REPLACEMENTS = new Map<string, string>([
   ['30 scans/month', 'usage limits'],
   ['engagement score', 'unsupported metric'],
   ['inactive follower alerts', 'unsupported alerts'],
+  ['zero ban risk', 'reduced account-access risk'],
+  ['absolutely no risk', 'reduced account-access risk'],
 ]);
 
 function readJson<T>(filePath: string): T {
@@ -261,15 +263,15 @@ function suggestedDescription(keyword: string): string {
   const normalizedKeyword = keyword.replace(/\bi\b/g, 'I');
   const normalized = normalizedKeyword.toLowerCase().trim();
   if (/^how many people can i unfollow on instagram$/.test(normalized)) {
-    return 'Learn how Instagram unfollow limits work with a privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.';
+    return 'Learn how Instagram unfollow limits work with a privacy-first Instagram Data ZIP workflow that avoids direct account access.';
   }
   if (/^is who unfollowed me safe$/.test(normalized)) {
-    return 'Check who unfollowed you with a privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.';
+    return 'Check who unfollowed you with a privacy-first Instagram Data ZIP workflow that avoids direct account access.';
   }
   const prefix = `Learn ${normalizedKeyword} with a privacy-first Instagram Data ZIP workflow.`;
-  const suffix = ' No Login, No OAuth, no Instagram API, and Zero Ban Risk.';
+  const suffix = ' No login, no OAuth, no Instagram API, and no direct account access.';
   const value = `${prefix}${suffix}`;
-  return value.length <= 160 ? value : `Use SafeUnfollow's privacy-first Instagram Data ZIP workflow. No Login, No OAuth, no Instagram API, and Zero Ban Risk.`;
+  return value.length <= 160 ? value : `Use SafeUnfollow's privacy-first Instagram Data ZIP workflow with no login or direct account access.`;
 }
 
 function matchingPageRow(rows: SearchConsoleRow[], slug: string): SearchConsoleRow | undefined {
@@ -429,7 +431,7 @@ function buildRefreshReport(
         description: suggestedDescription(keyword),
         faq: [
           'Does SafeUnfollow connect to my Instagram account?',
-          'Why does the Instagram Data ZIP workflow have Zero Ban Risk?',
+          'Why does the Instagram Data ZIP workflow reduce account-access risk?',
         ],
         internalLinks: related,
         pillarLink: pillar ? `/pillars/${pillar}` : '',
@@ -581,7 +583,7 @@ function applyCandidate(
   const freshness = [
     '## Privacy-First Workflow (Current)',
     '',
-    `Reviewed ${today}. SafeUnfollow requires No Login, No OAuth, no Instagram API, and No Account Connection. Complete an Instagram Data Download, keep the Instagram Data ZIP intact, then upload the ZIP to SafeUnfollow. This Privacy First, file-based workflow provides Zero Ban Risk because it never performs actions on your Instagram account.`,
+    `Reviewed ${today}. SafeUnfollow uses No Login, No OAuth, no Instagram API, and No Account Connection. Complete an Instagram Data Download, keep the Instagram Data ZIP intact, then upload the ZIP to SafeUnfollow. This Privacy First, no-login workflow avoids direct account access and reduces account-access risk.`,
   ].join('\n');
   content = upsertBlock(content, REFRESH_START, REFRESH_END, freshness);
   content = upsertFaq(content);
@@ -613,7 +615,9 @@ function validateRefreshedContent(
     if (!requirement.pattern.test(parsed.content)) errors.push(`Missing positioning: ${requirement.label}`);
   }
   if (!/\bNo Account Connection\b/i.test(parsed.content)) errors.push('Missing positioning: No Account Connection');
-  if (!/\bZero Ban Risk\b/i.test(parsed.content)) errors.push('Missing positioning: Zero Ban Risk');
+  if (!/\breduced? account-access risk\b|\breduces account-access risk\b/i.test(parsed.content)) {
+    errors.push('Missing positioning: reduced account-access risk');
+  }
   if (typeof parsed.data.description !== 'string' || parsed.data.description.length > 160) errors.push('Invalid meta description');
   const pillar = clusters[candidate.cluster]?.pillar;
   const links = parseInternalSlugs(source);

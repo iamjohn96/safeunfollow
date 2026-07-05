@@ -241,7 +241,11 @@ function insertInternalLinks(
   }
   if (!links.length) return body;
 
-  const sentence = `Continue with ${links.map(link => `[${link.title}](/${link.section}/${link.slug})`).join(', ')} for more context.`;
+  const linkedTitles = links.map(link => `[${link.title}](/${link.section}/${link.slug})`);
+  const readingList = linkedTitles.length === 1
+    ? linkedTitles[0]
+    : `${linkedTitles.slice(0, -1).join(', ')} and ${linkedTitles.at(-1)}`;
+  const sentence = `For more context, read ${readingList}.`;
   const faqIndex = body.search(/^##\s+.*(?:FAQ|Frequently Asked Questions)/im);
   return faqIndex === -1
     ? `${body.trimEnd()}\n\n${sentence}`

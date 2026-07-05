@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import { remark } from 'remark';
-import html from 'remark-html';
 import type { MarkdownDocument } from '@/lib/markdown-content';
+import { renderMarkdown } from '@/lib/markdown-rendering';
+import styles from './markdown-article.module.css';
 
 export default async function MarkdownArticle({
   document,
@@ -12,7 +12,7 @@ export default async function MarkdownArticle({
   backHref: string;
   backLabel: string;
 }) {
-  const processedContent = await remark().use(html).process(document.content);
+  const processedContent = await renderMarkdown(document.content);
 
   return (
     <article className="max-w-2xl mx-auto px-4 py-16">
@@ -38,8 +38,8 @@ export default async function MarkdownArticle({
       </header>
 
       <div
-        className="prose prose-zinc prose-sm max-w-none"
-        dangerouslySetInnerHTML={{ __html: processedContent.toString() }}
+        className={styles.content}
+        dangerouslySetInnerHTML={{ __html: processedContent }}
       />
 
       <section className="mt-16 bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 rounded-2xl p-8 text-center">
@@ -47,7 +47,7 @@ export default async function MarkdownArticle({
           Ready to see who unfollowed you?
         </h2>
         <p className="text-sm text-zinc-500 mb-6">
-          No login required. 100% private. Results in seconds.
+          Use your Instagram data export. No login, OAuth, or direct account access.
         </p>
         <Link
           href="/upload"

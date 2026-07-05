@@ -1,0 +1,159 @@
+.content {
+  color: #3f3f46;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.content > *:first-child {
+  margin-top: 0;
+}
+
+.content h2 {
+  margin: 3.5rem 0 1.25rem;
+  padding-top: 0.25rem;
+  color: #18181b;
+  font-size: clamp(1.5rem, 4vw, 1.875rem);
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.content h3 {
+  margin: 2rem 0 0.75rem;
+  color: #27272a;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.content p {
+  margin: 0 0 1.35rem;
+}
+
+.content ol,
+.content ul {
+  margin: 1.25rem 0 1.75rem;
+  padding-left: 1.6rem;
+}
+
+.content ol {
+  list-style: decimal;
+}
+
+.content ul {
+  list-style: disc;
+}
+
+.content li {
+  margin: 0.65rem 0;
+  padding-left: 0.35rem;
+}
+
+.content li::marker {
+  color: #db2777;
+  font-weight: 700;
+}
+
+.content li > p {
+  margin: 0.35rem 0;
+}
+
+.content strong {
+  color: #27272a;
+  font-weight: 700;
+}
+
+.content a {
+  color: #be185d;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: #f9a8d4;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color 150ms ease, text-decoration-color 150ms ease;
+}
+
+.content a:hover {
+  color: #9d174d;
+  text-decoration-color: currentColor;
+}
+
+.content :global(.markdown-faq-heading) {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid #f4f4f5;
+}
+
+.content :global(.markdown-faq-question) {
+  margin-top: 1.5rem;
+  padding: 1.1rem 1.25rem 0;
+  border: 1px solid #f4f4f5;
+  border-bottom: 0;
+  border-radius: 0.9rem 0.9rem 0 0;
+  background: #fafafa;
+}
+
+.content :global(.markdown-faq-answer) {
+  margin: 0 0 1rem;
+  padding: 0.15rem 1.25rem 1.15rem;
+  border: 1px solid #f4f4f5;
+  border-top: 0;
+  border-radius: 0 0 0.9rem 0.9rem;
+  background: #fafafa;
+}
+
+.content :global(.markdown-related-heading) {
+  margin-top: 3.5rem;
+  margin-bottom: 0;
+  padding: 1.5rem 1.5rem 0.5rem;
+  border: 1px solid #fce7f3;
+  border-bottom: 0;
+  border-radius: 1rem 1rem 0 0;
+  background: #fdf2f8;
+  font-size: 1.35rem;
+}
+
+.content :global(.markdown-related-copy),
+.content :global(.markdown-related-list) {
+  margin: 0;
+  padding: 0.5rem 1.5rem 1.5rem 3rem;
+  border: 1px solid #fce7f3;
+  border-top: 0;
+  border-radius: 0 0 1rem 1rem;
+  background: #fdf2f8;
+}
+
+.content :global(.markdown-related-copy) {
+  padding-left: 1.5rem;
+}
+
+.content :global(.markdown-inline-cta) {
+  margin: 2.5rem 0;
+  padding: 1.25rem;
+  border: 1px solid #fbcfe8;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #fdf2f8, #fff1f2);
+  color: #3f3f46;
+  text-align: center;
+}
+
+.content :global(.markdown-inline-cta) a {
+  display: inline-flex;
+  justify-content: center;
+  padding: 0.7rem 1.15rem;
+  border-radius: 9999px;
+  background: #db2777;
+  color: #fff;
+  text-decoration: none;
+}
+
+.content :global(.markdown-inline-cta) a:hover {
+  background: #be185d;
+  color: #fff;
+}
+
+@media (min-width: 640px) {
+  .content {
+    font-size: 1.0625rem;
+  }
+}

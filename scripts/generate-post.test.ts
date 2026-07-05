@@ -5,6 +5,8 @@ import {
   deduplicateInternalLinks,
   repairGeneratedBody,
   selectKeyword,
+  SYSTEM_PROMPT,
+  titleFromKeyword,
   validatePost,
 } from './generate-post';
 
@@ -75,7 +77,7 @@ test('selects the first unpublished keyword whose article does not exist', () =>
 });
 
 test('repairs model output to enforce keyword and SafeUnfollow positioning', () => {
-  const repaired = repairGeneratedBody(`A generic opening that says users connect your Instagram account.
+  const repaired = repairGeneratedBody(`A generic opening that says users connect your Instagram account. SafeUnfollow.com has zero ban risk.
 
 ## Workflow
 
@@ -89,6 +91,31 @@ Request your information and review it safely.`, entry.keyword);
   assert.match(repaired, /no Instagram API/i);
   assert.match(repaired, /upload[^.]*ZIP|ZIP[^.]*upload/i);
   assert.doesNotMatch(repaired, /connect your Instagram account/i);
+  assert.doesNotMatch(repaired, /SafeUnfollow\.com|zero ban risk/i);
+  assert.match(repaired, /reduced account-access risk/i);
+});
+
+test('generation prompt requires readable Markdown and qualified product wording', () => {
+  assert.match(SYSTEM_PROMPT, /H2 headings for every major section/);
+  assert.match(SYSTEM_PROMPT, /FAQ question as an H3/);
+  assert.match(SYSTEM_PROMPT, /Markdown ordered list/);
+  assert.match(SYSTEM_PROMPT, /Keep paragraphs short/);
+  assert.match(SYSTEM_PROMPT, /Use bold text sparingly/);
+  assert.match(SYSTEM_PROMPT, /natural, descriptive anchor text/);
+  assert.match(SYSTEM_PROMPT, /reduced account-access risk/i);
+  assert.doesNotMatch(SYSTEM_PROMPT, /Required positioning:[\s\S]*Zero Ban Risk/);
+  assert.equal(titleFromKeyword('safe unfollow'), 'SafeUnfollow');
+});
+
+test('rejects inconsistent product names and absolute risk claims', () => {
+  const inconsistent = validClusterBody
+    .replace('SafeUnfollow provides', 'SafeUnfollow.com provides')
+    .replace('keeps account access under your control', 'has zero ban risk');
+  const result = validatePost(buildPost(entry, inconsistent, '2026-06-29'), entry);
+
+  assert.equal(result.valid, false);
+  assert(result.errors.some(error => error.includes('Product name must be written as SafeUnfollow')));
+  assert(result.errors.some(error => error.includes('zero ban risk')));
 });
 
 test('deduplicates internal destinations while preserving readable link labels', () => {

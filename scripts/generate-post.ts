@@ -82,7 +82,7 @@ const CONFIG = {
   },
   site: {
     name: 'SafeUnfollow',
-    domain: 'SafeUnfollow.com',
+    domain: 'safeunfollow.com',
     blogUrl: process.env.SAFEUNFOLLOW_BLOG_URL || 'https://safeunfollow.com/blog',
     ctaUrl: process.env.SAFEUNFOLLOW_CTA_URL || 'https://safeunfollow.com/upload',
   },
@@ -102,6 +102,8 @@ const CONFIG = {
       '30 scans/month',
       'engagement score',
       'inactive follower alerts',
+      'zero ban risk',
+      'absolutely no risk',
     ],
     requiredMessages: [
       { label: 'No Login', pattern: /\bno[ -]?login(?: required)?\b/i },
@@ -116,7 +118,7 @@ const CONFIG = {
   },
   frontmatter: {
     descriptionTemplate: (keyword: string) =>
-      `Learn ${keyword} using SafeUnfollow's privacy-first data-file method. No login, no OAuth, no API, and zero ban risk.`,
+      `Learn ${keyword} using SafeUnfollow's privacy-first data-file method. No login, no OAuth, no API, and no direct account access.`,
     secondaryKeywords: [
       'Instagram unfollow tracker',
       'No login Instagram tracker',
@@ -136,9 +138,15 @@ Do not include YAML frontmatter or an H1 heading. The application renders the H1
 Do not include title metadata, date metadata, slug metadata, or keywords metadata.
 Do not use code fences.
 Start with a short introduction paragraph, then use H2 sections.
+Use H2 headings for every major section. Do not use H3 headings except for individual FAQ questions.
+Format the required four-step workflow as a Markdown ordered list using "1.", "2.", and so on.
+Use Markdown bullet lists for concise benefits, warnings, or comparisons where they improve readability.
+Keep paragraphs short: usually two or three sentences, with one idea per paragraph.
+Use bold text sparingly and only for important SafeUnfollow product positioning, not as a substitute for headings.
 Use the exact primary keyword naturally in the introduction and within the first 100 words.
 Use the exact product phrase "Instagram Data Download" at least once.
 Never link to the same internal /blog/ or /pillars/ destination more than once.
+Use natural, descriptive anchor text for internal links. Do not invent internal destinations; verified links are added by the publishing pipeline.
 
 SafeUnfollow product facts:
 - SafeUnfollow helps users check who unfollowed them on Instagram.
@@ -163,15 +171,22 @@ Required positioning:
 - No Login Required
 - No OAuth
 - No API
-- Zero Ban Risk
+- No-login method
+- Avoids direct account access
+- Reduced account-access risk
 - Privacy First
+
+Brand wording:
+- Write the product name exactly as "SafeUnfollow".
+- Use "safeunfollow.com" only when explicitly referring to the domain, never as the product name.
+- Never write "SafeUnfollow.com" or "Safe Unfollow" as the product name.
 
 Forbidden wording:
 ${CONFIG.validation.bannedPhrases.map(phrase => `- ${phrase}`).join('\n')}
 
-Do not invent features. Explain why the data-file method is safer than login-based tracker apps.
-Include at least two H2 sections, including an H2 FAQ section.
-Mention ${CONFIG.site.domain} naturally and finish with a clear markdown-link CTA to ${CONFIG.site.ctaUrl}.`;
+Do not invent features or make absolute safety claims. Explain that the data-file method reduces account-access risk because it avoids login-based access.
+Include at least two H2 sections, including an "## FAQ" section. Format every FAQ question as an H3 followed by a short paragraph answer.
+Refer to the website domain as ${CONFIG.site.domain} only when useful. Finish with a confident, action-oriented sentence and a descriptive markdown-link CTA to ${CONFIG.site.ctaUrl}.`;
 
 const BANNED_PHRASE_REPLACEMENTS: Record<string, string> = {
   'connect your Instagram account': 'grant SafeUnfollow access to your Instagram account',
@@ -184,6 +199,8 @@ const BANNED_PHRASE_REPLACEMENTS: Record<string, string> = {
   '30 scans/month': 'a fixed scan allowance',
   'engagement score': 'follower comparison',
   'inactive follower alerts': 'change history',
+  'zero ban risk': 'reduced account-access risk',
+  'absolutely no risk': 'reduced account-access risk',
 };
 
 function nowIso(): string {
@@ -287,7 +304,8 @@ function titleFromKeyword(input: string): string {
       if (lower === 'oauth') return 'OAuth';
       return lower.charAt(0).toUpperCase() + lower.slice(1);
     })
-    .join(' ');
+    .join(' ')
+    .replace(/\bSafe Unfollow\b/g, 'SafeUnfollow');
 }
 
 function escapeYaml(value: string): string {
@@ -346,6 +364,11 @@ function deduplicateInternalLinks(markdown: string): string {
 function repairGeneratedBody(body: string, keyword: string): string {
   let repaired = body.trim();
 
+  repaired = repaired
+    .replace(/SafeUnfollow\.com/g, 'SafeUnfollow')
+    .replace(/\bSafe Unfollow\b/g, 'SafeUnfollow')
+    .replace(/^\*\*(?:Q:\s*)?(.+\?)\*\*\s*$/gm, '### $1');
+
   for (const phrase of CONFIG.validation.bannedPhrases) {
     repaired = repaired.replace(
       new RegExp(escapeRegExp(phrase), 'gi'),
@@ -362,7 +385,7 @@ function repairGeneratedBody(body: string, keyword: string): string {
   }
 
   if (CONFIG.validation.requiredMessages.some(requirement => !requirement.pattern.test(repaired))) {
-    const positioning = 'SafeUnfollow uses a Privacy First, file-based workflow: complete an Instagram Data Download, keep the ZIP intact, and upload it to SafeUnfollow. No Login Required, No OAuth, and no Instagram API means SafeUnfollow never receives your credentials or direct account access.';
+    const positioning = 'SafeUnfollow uses a Privacy First, no-login workflow: complete an Instagram Data Download, keep the ZIP intact, and upload it to SafeUnfollow. No Login Required, No OAuth, and no Instagram API means SafeUnfollow avoids direct account access and reduces account-access risk.';
     const firstH2 = repaired.search(/^##(?!#)\s+/m);
     repaired = firstH2 === -1
       ? `${repaired}\n\n${positioning}`
@@ -430,6 +453,10 @@ function validatePost(
     errors.push(`Keyword is missing from the first ${CONFIG.validation.keywordWordWindow} words`);
   }
   if (!/\bSafeUnfollow(?:\.com)?\b/i.test(content)) errors.push('SafeUnfollow is not mentioned');
+  const proseWithoutLinkDestinations = content.replace(/\]\([^)]+\)/g, ']');
+  if (/\bSafeUnfollow\.com\b|\bSafe Unfollow\b/.test(proseWithoutLinkDestinations)) {
+    errors.push('Product name must be written as SafeUnfollow');
+  }
 
   for (const requirement of CONFIG.validation.requiredMessages) {
     if (!requirement.pattern.test(content)) errors.push(`Missing product message: ${requirement.label}`);
@@ -490,6 +517,9 @@ async function callGenerationApi(model: string, keyword: string): Promise<string
             `Primary keyword: "${keyword}"`,
             `Include that exact phrase naturally within the first ${CONFIG.validation.keywordWordWindow} words.`,
             'Include the exact phrase "Instagram Data Download".',
+            'Use H2 sections, H3 FAQ questions, a Markdown ordered list for the workflow, and short paragraphs.',
+            'Use the product name "SafeUnfollow"; reserve "safeunfollow.com" for the domain.',
+            'Describe reduced account-access risk without absolute safety or ban-risk claims.',
             'Follow every SafeUnfollow positioning and forbidden-wording rule from the system prompt.',
           ].join('\n'),
         },
@@ -645,6 +675,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
 
 export {
   CONFIG,
+  SYSTEM_PROMPT,
   buildPost,
   deduplicateInternalLinks,
   repairGeneratedBody,

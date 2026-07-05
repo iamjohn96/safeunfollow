@@ -114,7 +114,8 @@ test('applies deterministic metadata, FAQ, positioning, pillar, and related link
   assert.match(refreshed, /updated: ['"]2026-06-30['"]/);
   assert.match(refreshed, /AUTO:EVERGREEN_FAQ_START/);
   assert.match(refreshed, /No Account Connection/);
-  assert.match(refreshed, /Zero Ban Risk/);
+  assert.match(refreshed, /reduces account-access risk/);
+  assert.doesNotMatch(refreshed, /Zero Ban Risk/);
   assert.match(refreshed, /\/pillars\/safe-instagram-guide/);
   assert.match(refreshed, /\/blog\/data-download/);
   assert.match(refreshed, /\/blog\/privacy/);

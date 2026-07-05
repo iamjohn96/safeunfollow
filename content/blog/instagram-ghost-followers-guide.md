@@ -17,7 +17,7 @@ Instagram's algorithm measures engagement rate: likes + comments divided by foll
 
 ## How to Identify and Remove Ghost Followers Safely
 
-Use [SafeUnfollow.com](https://safeunfollow.com) with your Instagram data export:
+Use [SafeUnfollow](https://safeunfollow.com) with your Instagram data export:
 1. Download your data from Instagram Settings
 2. Upload the ZIP file — no login required
 3. Review accounts that don't follow you back
@@ -27,10 +27,12 @@ Never use apps that automate mass-unfollowing — Instagram detects this and res
 
 ## FAQ
 
-**How many ghost followers is normal?**
+### How many ghost followers is normal?
+
 For most accounts, 10–20% is typical. Focus on engagement rate improvement, not vanity metrics.
 
-**Will removing ghost followers increase my reach?**
+### Will removing ghost followers increase my reach?
+
 Yes. Fewer inactive followers means your engagement rate improves, which signals quality to the algorithm.
 
 <!-- AUTO:RELATED_START -->
