@@ -189,7 +189,8 @@ ${CONFIG.validation.bannedPhrases.map(phrase => `- ${phrase}`).join('\n')}
 
 Do not invent features or make absolute safety claims. Explain that the data-file method reduces account-access risk because it avoids login-based access.
 Include at least two H2 sections, including an "## FAQ" section. Format every FAQ question as an H3 followed by a short paragraph answer.
-Refer to the website domain as ${CONFIG.site.domain} only when useful. Finish with a confident, action-oriented sentence and a descriptive markdown-link CTA to ${CONFIG.site.ctaUrl}.`;
+Refer to the website domain as ${CONFIG.site.domain} only when useful.
+The final line must be this Markdown CTA link: [Upload your Instagram data with SafeUnfollow](${CONFIG.site.ctaUrl}).`;
 
 const BANNED_PHRASE_REPLACEMENTS: Record<string, string> = {
   'connect your Instagram account': 'grant SafeUnfollow access to your Instagram account',
@@ -385,6 +386,21 @@ function deduplicateInternalLinks(markdown: string): string {
   );
 }
 
+function hasValidCtaLink(markdown: string): boolean {
+  const configuredHost = new URL(CONFIG.site.ctaUrl).hostname.toLowerCase();
+  const ctaLinkPattern = /\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]+)\)/gi;
+  return [...markdown.matchAll(ctaLinkPattern)].some(match => {
+    const label = match[1];
+    const url = match[2];
+    return url.toLowerCase().includes(configuredHost) && CONFIG.validation.ctaLanguage.test(label);
+  });
+}
+
+function repairMissingCta(body: string): string {
+  if (hasValidCtaLink(body)) return body.trim();
+  return `${body.trimEnd()}\n\n[Upload your Instagram data with SafeUnfollow](${CONFIG.site.ctaUrl})`;
+}
+
 function repairGeneratedBody(body: string, keyword: string): string {
   let repaired = body.trim();
 
@@ -416,7 +432,7 @@ function repairGeneratedBody(body: string, keyword: string): string {
       : `${repaired.slice(0, firstH2).trimEnd()}\n\n${positioning}\n\n${repaired.slice(firstH2)}`;
   }
 
-  return deduplicateInternalLinks(repaired);
+  return repairMissingCta(deduplicateInternalLinks(repaired));
 }
 
 function validatePost(
@@ -486,14 +502,7 @@ function validatePost(
     if (!requirement.pattern.test(content)) errors.push(`Missing product message: ${requirement.label}`);
   }
 
-  const ctaLinkPattern = /\[([^\]]+)\]\((https?:\/\/[^)]+|\/[^)]+)\)/gi;
-  const hasCta = [...content.matchAll(ctaLinkPattern)].some(match => {
-    const label = match[1];
-    const url = match[2];
-    const configuredHost = new URL(CONFIG.site.ctaUrl).hostname.toLowerCase();
-    return url.toLowerCase().includes(configuredHost) && CONFIG.validation.ctaLanguage.test(label);
-  });
-  if (!hasCta) errors.push('Missing CTA link directing users to SafeUnfollow');
+  if (!hasValidCtaLink(content)) errors.push('Missing CTA link directing users to SafeUnfollow');
 
   if (!/^##\s+Related Articles/im.test(content)) errors.push('Missing Related Articles section');
   const internalLinkOccurrences = [...content.matchAll(/\[[^\]]+\]\(\/(?:blog|pillars)\/([a-z0-9-]+)(?:[?#][^)]*)?\)/gi)]
@@ -544,6 +553,7 @@ async function callGenerationApi(model: string, keyword: string): Promise<string
             'Use H2 sections, H3 FAQ questions, a Markdown ordered list for the workflow, and short paragraphs.',
             'Use the product name "SafeUnfollow"; reserve "safeunfollow.com" for the domain.',
             'Describe reduced account-access risk without absolute safety or ban-risk claims.',
+            `End with [Upload your Instagram data with SafeUnfollow](${CONFIG.site.ctaUrl}).`,
             'Follow every SafeUnfollow positioning and forbidden-wording rule from the system prompt.',
           ].join('\n'),
         },

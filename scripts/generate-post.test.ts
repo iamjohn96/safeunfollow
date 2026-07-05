@@ -93,8 +93,30 @@ Request your information and review it safely.`, entry.keyword);
   assert.match(repaired, /no Instagram API/i);
   assert.match(repaired, /upload[^.]*ZIP|ZIP[^.]*upload/i);
   assert.doesNotMatch(repaired, /connect your Instagram account/i);
-  assert.doesNotMatch(repaired, /SafeUnfollow\.com|zero ban risk/i);
+  assert.doesNotMatch(repaired, /SafeUnfollow\.com/);
+  assert.doesNotMatch(repaired, /zero ban risk/i);
   assert.match(repaired, /reduced account-access risk/i);
+  assert.match(repaired, /\[Upload your Instagram data with SafeUnfollow\]\(https:\/\/safeunfollow\.com\/upload\)$/);
+});
+
+test('repairs a missing CTA with the canonical final Markdown link', () => {
+  const bodyWithoutCta = validClusterBody.replace(
+    /\n\[Try SafeUnfollow\]\(https:\/\/safeunfollow\.com\/upload\) to check your file\./,
+    '',
+  );
+  const repaired = repairGeneratedBody(bodyWithoutCta, entry.keyword);
+  const result = validatePost(buildPost(entry, repaired, '2026-06-29'), entry);
+
+  assert.match(repaired, /\[Upload your Instagram data with SafeUnfollow\]\(https:\/\/safeunfollow\.com\/upload\)$/);
+  assert.equal((repaired.match(/https:\/\/safeunfollow\.com\/upload/g) || []).length, 1);
+  assert.equal(result.errors.some(error => error.includes('Missing CTA')), false);
+});
+
+test('preserves an existing valid CTA without adding a duplicate', () => {
+  const repaired = repairGeneratedBody(validClusterBody, entry.keyword);
+
+  assert.equal((repaired.match(/https:\/\/safeunfollow\.com\/upload/g) || []).length, 1);
+  assert.doesNotMatch(repaired, /Upload your Instagram data with SafeUnfollow/);
 });
 
 test('generation prompt requires readable Markdown and qualified product wording', () => {
