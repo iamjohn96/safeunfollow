@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import matter from 'gray-matter';
 import {
   buildPost,
   deduplicateInternalLinks,
   repairGeneratedBody,
+  repairMetaDescription,
   selectKeyword,
   SYSTEM_PROMPT,
   titleFromKeyword,
@@ -103,8 +105,42 @@ test('generation prompt requires readable Markdown and qualified product wording
   assert.match(SYSTEM_PROMPT, /Use bold text sparingly/);
   assert.match(SYSTEM_PROMPT, /natural, descriptive anchor text/);
   assert.match(SYSTEM_PROMPT, /reduced account-access risk/i);
+  assert.match(SYSTEM_PROMPT, /targets 140-150 characters/);
   assert.doesNotMatch(SYSTEM_PROMPT, /Required positioning:[\s\S]*Zero Ban Risk/);
   assert.equal(titleFromKeyword('safe unfollow'), 'SafeUnfollow');
+});
+
+test('repairs overlong meta descriptions at a word boundary near the target length', () => {
+  const description = 'Learn how to identify Instagram unfollowers from a very detailed data export without sharing credentials, granting direct account access, or relying on login-based tracker applications.';
+  const repaired = repairMetaDescription(description);
+
+  assert(repaired.length >= 145 && repaired.length <= 155);
+  assert.match(repaired, /…$/u);
+  assert.doesNotMatch(repaired, /\s…$/u);
+  assert.equal(description.startsWith(repaired.slice(0, -1)), true);
+});
+
+test('buildPost repairs long keyword descriptions before validation', () => {
+  const longEntry = {
+    ...entry,
+    keyword: 'how to find every Instagram unfollower using a downloaded account archive without sharing credentials',
+    slug: 'long-description-regression',
+  };
+  const post = buildPost(longEntry, validClusterBody, '2026-06-29');
+  const description = String(matter(post).data.description);
+  const validation = validatePost(post, longEntry);
+
+  assert(description.length >= 145 && description.length <= 155);
+  assert(description.length <= 160);
+  assert.match(description, /…$/u);
+  assert.equal(validation.errors.some(error => error.includes('Meta description exceeds')), false);
+});
+
+test('leaves valid meta descriptions unchanged apart from whitespace normalization', () => {
+  assert.equal(
+    repairMetaDescription('A concise  SafeUnfollow description.\nNo login required.'),
+    'A concise SafeUnfollow description. No login required.',
+  );
 });
 
 test('rejects inconsistent product names and absolute risk claims', () => {

@@ -88,6 +88,8 @@ const CONFIG = {
   },
   validation: {
     maxDescriptionLength: 160,
+    targetDescriptionLength: 150,
+    preferredDescriptionRange: { min: 145, max: 155 },
     keywordWordWindow: 100,
     minimumH2Count: 2,
     frontmatterFields: ['title', 'description', 'date', 'slug', 'keywords', 'cluster'],
@@ -135,7 +137,8 @@ const SYSTEM_PROMPT = `You are the official SEO content writer for ${CONFIG.site
 Write only the markdown body of a ${CONFIG.generation.wordRange} word SEO blog post.
 
 Do not include YAML frontmatter or an H1 heading. The application renders the H1 from frontmatter.
-Do not include title metadata, date metadata, slug metadata, or keywords metadata.
+Do not include title metadata, date metadata, slug metadata, keywords metadata, or a meta description.
+The publishing pipeline creates the meta description separately and targets 140-150 characters.
 Do not use code fences.
 Start with a short introduction paragraph, then use H2 sections.
 Use H2 headings for every major section. Do not use H3 headings except for individual FAQ questions.
@@ -312,9 +315,30 @@ function escapeYaml(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function repairMetaDescription(description: string): string {
+  const normalized = description.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= CONFIG.validation.maxDescriptionLength) return normalized;
+
+  const { min, max } = CONFIG.validation.preferredDescriptionRange;
+  const target = CONFIG.validation.targetDescriptionLength;
+  const sentenceEnds = [...normalized.matchAll(/[.!?](?=\s|$)/g)]
+    .map(match => (match.index ?? -1) + 1)
+    .filter(length => length >= min && length <= max);
+  if (sentenceEnds.length) return normalized.slice(0, sentenceEnds.at(-1));
+
+  let cutAt = normalized.lastIndexOf(' ', target - 1);
+  if (cutAt < min - 1) {
+    const nextBoundary = normalized.indexOf(' ', target - 1);
+    cutAt = nextBoundary !== -1 && nextBoundary < max ? nextBoundary : target - 1;
+  }
+
+  const shortened = normalized.slice(0, cutAt).replace(/[,:;.!?\s-]+$/u, '');
+  return `${shortened}…`;
+}
+
 function buildPost(entry: KeywordEntry, body: string, date: string): string {
   const title = titleFromKeyword(entry.keyword);
-  const description = CONFIG.frontmatter.descriptionTemplate(entry.keyword);
+  const description = repairMetaDescription(CONFIG.frontmatter.descriptionTemplate(entry.keyword));
   const keywords = [entry.keyword, ...CONFIG.frontmatter.secondaryKeywords];
   return [
     '---',
@@ -679,6 +703,7 @@ export {
   buildPost,
   deduplicateInternalLinks,
   repairGeneratedBody,
+  repairMetaDescription,
   selectKeyword,
   titleFromKeyword,
   validatePost,
