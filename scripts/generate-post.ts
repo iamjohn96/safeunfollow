@@ -136,6 +136,9 @@ Do not include YAML frontmatter or an H1 heading. The application renders the H1
 Do not include title metadata, date metadata, slug metadata, or keywords metadata.
 Do not use code fences.
 Start with a short introduction paragraph, then use H2 sections.
+Use the exact primary keyword naturally in the introduction and within the first 100 words.
+Use the exact product phrase "Instagram Data Download" at least once.
+Never link to the same internal /blog/ or /pillars/ destination more than once.
 
 SafeUnfollow product facts:
 - SafeUnfollow helps users check who unfollowed them on Instagram.
@@ -169,6 +172,19 @@ ${CONFIG.validation.bannedPhrases.map(phrase => `- ${phrase}`).join('\n')}
 Do not invent features. Explain why the data-file method is safer than login-based tracker apps.
 Include at least two H2 sections, including an H2 FAQ section.
 Mention ${CONFIG.site.domain} naturally and finish with a clear markdown-link CTA to ${CONFIG.site.ctaUrl}.`;
+
+const BANNED_PHRASE_REPLACEMENTS: Record<string, string> = {
+  'connect your Instagram account': 'grant SafeUnfollow access to your Instagram account',
+  'connect an Instagram account': 'grant SafeUnfollow access to an Instagram account',
+  'log in with Instagram': 'share Instagram credentials',
+  'login with Instagram': 'share Instagram credentials',
+  'sign in with Instagram': 'share Instagram credentials',
+  'account syncing': 'file analysis',
+  'account linking': 'file upload',
+  '30 scans/month': 'a fixed scan allowance',
+  'engagement score': 'follower comparison',
+  'inactive follower alerts': 'change history',
+};
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -310,6 +326,52 @@ function markdownWords(markdown: string): string[] {
     .filter(Boolean);
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function deduplicateInternalLinks(markdown: string): string {
+  const seen = new Set<string>();
+  return markdown.replace(
+    /\[([^\]]+)\]\(\/(blog|pillars)\/([a-z0-9-]+)(?:[?#][^)]*)?\)/gi,
+    (link, label: string, _section: string, slug: string) => {
+      const normalizedSlug = slug.toLowerCase();
+      if (seen.has(normalizedSlug)) return label;
+      seen.add(normalizedSlug);
+      return link;
+    },
+  );
+}
+
+function repairGeneratedBody(body: string, keyword: string): string {
+  let repaired = body.trim();
+
+  for (const phrase of CONFIG.validation.bannedPhrases) {
+    repaired = repaired.replace(
+      new RegExp(escapeRegExp(phrase), 'gi'),
+      BANNED_PHRASE_REPLACEMENTS[phrase],
+    );
+  }
+
+  const firstWords = markdownWords(repaired)
+    .slice(0, CONFIG.validation.keywordWordWindow)
+    .join(' ')
+    .toLowerCase();
+  if (!firstWords.includes(keyword.toLowerCase())) {
+    repaired = `Understanding **${keyword}** starts with a method that keeps account access under your control.\n\n${repaired}`;
+  }
+
+  if (CONFIG.validation.requiredMessages.some(requirement => !requirement.pattern.test(repaired))) {
+    const positioning = 'SafeUnfollow uses a Privacy First, file-based workflow: complete an Instagram Data Download, keep the ZIP intact, and upload it to SafeUnfollow. No Login Required, No OAuth, and no Instagram API means SafeUnfollow never receives your credentials or direct account access.';
+    const firstH2 = repaired.search(/^##(?!#)\s+/m);
+    repaired = firstH2 === -1
+      ? `${repaired}\n\n${positioning}`
+      : `${repaired.slice(0, firstH2).trimEnd()}\n\n${positioning}\n\n${repaired.slice(firstH2)}`;
+  }
+
+  return deduplicateInternalLinks(repaired);
+}
+
 function validatePost(
   source: string,
   entry: KeywordEntry,
@@ -422,7 +484,15 @@ async function callGenerationApi(model: string, keyword: string): Promise<string
       temperature: CONFIG.generation.temperature,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: keyword },
+        {
+          role: 'user',
+          content: [
+            `Primary keyword: "${keyword}"`,
+            `Include that exact phrase naturally within the first ${CONFIG.validation.keywordWordWindow} words.`,
+            'Include the exact phrase "Instagram Data Download".',
+            'Follow every SafeUnfollow positioning and forbidden-wording rule from the system prompt.',
+          ].join('\n'),
+        },
       ],
     }),
   });
@@ -501,8 +571,9 @@ async function main(): Promise<void> {
       entries,
       clusters,
     );
+    const repairedBody = repairGeneratedBody(generated.body, entry.keyword);
     const linkedBody = insertInternalLinks(
-      generated.body,
+      repairedBody,
       { slug: entry.slug, title: titleFromKeyword(entry.keyword), cluster: entry.cluster },
       existingArticles,
       definition.pillar,
@@ -519,7 +590,8 @@ async function main(): Promise<void> {
       isPillar: false,
     };
     const related = buildRelatedSection(draftArticle, [...existingArticles, draftArticle], definition.pillar);
-    const source = buildPost(entry, upsertMarkerBlock(linkedBody, related.markdown), publicationDate);
+    const finalBody = deduplicateInternalLinks(upsertMarkerBlock(linkedBody, related.markdown));
+    const source = buildPost(entry, finalBody, publicationDate);
     fs.mkdirSync(CONFIG.paths.blogDirectory, { recursive: true });
     fs.writeFileSync(articlePath, source, { encoding: 'utf8', flag: 'wx' });
     articleCreated = true;
@@ -571,4 +643,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
   void main();
 }
 
-export { CONFIG, buildPost, selectKeyword, titleFromKeyword, validatePost };
+export {
+  CONFIG,
+  buildPost,
+  deduplicateInternalLinks,
+  repairGeneratedBody,
+  selectKeyword,
+  titleFromKeyword,
+  validatePost,
+};

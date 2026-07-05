@@ -196,9 +196,10 @@ function buildRelatedSection(
 ): { markdown: string; count: number } {
   const related = rankRelated(article, articles).slice(0, 5);
   const lines = related.map(item => `- [${item.title}](/blog/${item.slug})`);
+  const existingDestinations = new Set(parseInternalSlugs(article.content));
   return {
     markdown: [
-      ...(pillarSlug && pillarSlug !== article.slug
+      ...(pillarSlug && pillarSlug !== article.slug && !existingDestinations.has(pillarSlug)
         ? [`Start with the [${labelFromSlug(article.cluster)} complete guide](/pillars/${pillarSlug}) for the full topic overview.`, '']
         : []),
       '## Related Articles',

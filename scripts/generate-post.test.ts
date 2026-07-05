@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildPost, selectKeyword, validatePost } from './generate-post';
+import {
+  buildPost,
+  deduplicateInternalLinks,
+  repairGeneratedBody,
+  selectKeyword,
+  validatePost,
+} from './generate-post';
 
 const entry = {
   keyword: 'instagram data download unfollowers',
@@ -66,4 +72,31 @@ test('selects the first unpublished keyword whose article does not exist', () =>
   ];
 
   assert.equal(selectKeyword(entries)?.keyword, 'eligible');
+});
+
+test('repairs model output to enforce keyword and SafeUnfollow positioning', () => {
+  const repaired = repairGeneratedBody(`A generic opening that says users connect your Instagram account.
+
+## Workflow
+
+Request your information and review it safely.`, entry.keyword);
+
+  const firstWords = repaired.split(/\s+/).slice(0, 100).join(' ').toLowerCase();
+  assert(firstWords.includes(entry.keyword));
+  assert.match(repaired, /Instagram Data Download/);
+  assert.match(repaired, /No Login Required/);
+  assert.match(repaired, /No OAuth/);
+  assert.match(repaired, /no Instagram API/i);
+  assert.match(repaired, /upload[^.]*ZIP|ZIP[^.]*upload/i);
+  assert.doesNotMatch(repaired, /connect your Instagram account/i);
+});
+
+test('deduplicates internal destinations while preserving readable link labels', () => {
+  const repaired = deduplicateInternalLinks(`Read the [pillar](/pillars/instagram-unfollow-guide).
+
+See the [same pillar again](/pillars/instagram-unfollow-guide) and [another guide](/blog/another-guide).`);
+
+  assert.equal((repaired.match(/\/pillars\/instagram-unfollow-guide/g) || []).length, 1);
+  assert.match(repaired, /same pillar again/);
+  assert.equal((repaired.match(/\/blog\/another-guide/g) || []).length, 1);
 });

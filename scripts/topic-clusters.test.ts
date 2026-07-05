@@ -75,6 +75,14 @@ test('related article ranking excludes self and prevents duplicate destinations'
   assert.equal(parseInternalSlugs(result.markdown).length, 2);
 });
 
+test('related section does not repeat an existing pillar destination', () => {
+  const current = article('current', 'Instagram Data Download');
+  current.content = 'Read the [complete guide](/pillars/instagram-unfollow-guide).';
+  const result = buildRelatedSection(current, [current], 'instagram-unfollow-guide');
+
+  assert.equal((result.markdown.match(/\/pillars\/instagram-unfollow-guide/g) || []).length, 0);
+});
+
 test('internal linking adds a pillar and related guides without duplicates', () => {
   const body = 'Intro.\n\n## FAQ\n\nAnswer.';
   const linked = insertInternalLinks(body, article('current', 'Instagram Data Download'), [
