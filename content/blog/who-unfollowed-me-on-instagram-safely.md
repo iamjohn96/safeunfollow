@@ -77,9 +77,8 @@ A: Instagram can take anywhere from a few minutes to several days to process you
 ---
 
 <!-- AUTO:RELATED_START -->
-Start with the [Instagram Unfollow Safety complete guide](/pillars/safe-instagram-unfollow-guide) for the full topic overview.
-
 ## Related Articles
 
+- [Safe Unfollow](/blog/safe-unfollow)
 - [The Safest Way to Check Who Unfollowed You on Instagram: No Login Required](/blog/instagram-unfollow-tracker-no-login)
 <!-- AUTO:RELATED_END -->

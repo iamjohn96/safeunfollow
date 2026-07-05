@@ -44,5 +44,5 @@ Use the supporting guides to distinguish tracking from automated unfollowing and
 <!-- AUTO:RELATED_START -->
 ## Supporting Articles
 
-- [Understanding the Instagram Unfollow Limit in 2026](/blog/instagram-unfollow-limit-2026)
+- [Instagram Unfollow Limit: How Many Can You Safely Unfollow?](/blog/instagram-unfollow-limit-2026)
 <!-- AUTO:RELATED_END -->

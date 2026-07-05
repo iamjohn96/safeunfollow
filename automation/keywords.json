@@ -15,9 +15,9 @@
   {
     "keyword": "safe unfollow",
     "slug": "safe-unfollow",
-    "published": false,
-    "published_at": null,
-    "last_attempt": null,
+    "published": true,
+    "published_at": "2026-07-05T09:40:37.054Z",
+    "last_attempt": "2026-07-05T09:40:27.728Z",
     "source": "search_console",
     "impressions": 49,
     "clicks": 4,

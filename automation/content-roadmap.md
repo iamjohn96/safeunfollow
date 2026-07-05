@@ -26,10 +26,10 @@ Priority score: ★★☆☆☆
 ✓ Instagram Unfollowing Limit
 ✓ Ig Unfollow Limit
 ✓ Instagram Unfollow Limit Per Day
-○ Instagram Unfollow Limits 2026 Safe Daily Amount
+✓ Instagram Unfollow Limits 2026 Safe Daily Amount
 ✓ Limit Of Unfollowing On Instagram
 ✓ Limit Unfollow Instagram
-✓ Maximum Number Of Unfollow Instagram
+○ Maximum Number Of Unfollow Instagram
 ✓ Instagram Unfollow Limit Guide
 ✓ Instagram Unfollow Limit Without Login
 ✓ Instagram Unfollow Limit Safely
@@ -46,16 +46,16 @@ Priority score: ★★★☆☆
 ✓ Safe Unfollow Guide
 ✓ Safe Unfollow Without Login
 ✓ Safe Unfollow Safely
-○ Safe Unfollow Step By Step
-○ Safe Unfollow Tips
+✓ Safe Unfollow Step By Step
+✓ Safe Unfollow Tips
 ✓ Is Who Unfollowed Me Safe Guide
 ✓ Is Who Unfollowed Me Safe Without Login
 ✓ Is Who Unfollowed Me Safe Safely
-○ Is Who Unfollowed Me Safe Step By Step
-○ Is Who Unfollowed Me Safe Tips
+✓ Is Who Unfollowed Me Safe Step By Step
+✓ Is Who Unfollowed Me Safe Tips
 ✓ Instagram Unfollow Tracker No Login
 
-Priority score: ★★★☆☆
+Priority score: ★☆☆☆☆
 
 ## Instagram Ghost Followers
 
