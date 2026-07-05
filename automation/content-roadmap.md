@@ -18,7 +18,7 @@ Priority score: ★★☆☆☆
 
 ✓ Pillar
 ✓ Instagram Unfollow Limit
-○ Does Follow Unfollow Still Work On Instagram 2026
+✓ Does Follow Unfollow Still Work On Instagram 2026
 ✓ How Many People Can I Unfollow On Instagram
 ✓ How Many People Can You Unfollow On Instagram
 ✓ Unfollow Limit Instagram
