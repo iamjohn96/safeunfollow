@@ -45,9 +45,9 @@
   {
     "keyword": "is who unfollowed me safe",
     "slug": "is-who-unfollowed-me-safe",
-    "published": false,
-    "published_at": null,
-    "last_attempt": null,
+    "published": true,
+    "published_at": "2026-07-05T10:38:41.413Z",
+    "last_attempt": "2026-07-05T10:38:33.664Z",
     "source": "search_console",
     "impressions": 5,
     "clicks": 0,
