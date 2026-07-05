@@ -39,13 +39,17 @@ function annotateRenderedHtml(rendered: string): string {
       .replace(/<p>/g, '<p class="markdown-related-copy">'),
   );
 
-  return annotated.replace(
-    /<p(?: class="([^"]*)")?>((?:(?!<\/p>)[\s\S])*?<a href="(?:https?:\/\/(?:www\.)?safeunfollow\.com)?\/upload(?:[/?#][^"]*)?"(?:(?!<\/p>)[\s\S])*?<\/a>(?:(?!<\/p>)[\s\S])*)<\/p>/gi,
-    (_paragraph, classes: string | undefined, content: string) => {
-      const className = [classes, 'markdown-inline-cta'].filter(Boolean).join(' ');
-      return `<p class="${className}">${content}</p>`;
-    },
-  );
+  const uploadCtaLink = '<a href="(?:https?:\\/\\/(?:www\\.)?safeunfollow\\.com)?\\/upload(?:[/?#][^\"]*)?">(?:Try|Upload|Start|Check|See|Discover)[\\s\\S]*?<\\/a>';
+  const paragraphOpen = '<p(?: class="[^"]*")?>';
+  return annotated
+    .replace(
+      new RegExp(`${paragraphOpen}[^<]*(?:ready|start)[^<]*<\\/p>\\s*${paragraphOpen}${uploadCtaLink}<\\/p>`, 'gi'),
+      '',
+    )
+    .replace(
+      new RegExp(`${paragraphOpen}(?:(?!<\\/p>)[\\s\\S])*?${uploadCtaLink}(?:(?!<\\/p>)[\\s\\S])*?<\\/p>`, 'gi'),
+      '',
+    );
 }
 
 export async function renderMarkdown(markdown: string): Promise<string> {

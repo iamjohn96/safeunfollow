@@ -33,8 +33,16 @@ No. It avoids direct account access.
   assert.match(rendered, /href="\/blog\/guide"/);
   assert.match(rendered, /class="markdown-faq-heading"/);
   assert.match(rendered, /class="markdown-faq-question"/);
-  assert.match(rendered, /class="markdown-faq-answer markdown-inline-cta"><a href="https:\/\/safeunfollow\.com\/upload"/);
   assert.match(rendered, /class="markdown-faq-answer">No\. It avoids direct account access\.<\/p>/);
+  assert.doesNotMatch(rendered, /Upload your Instagram data|markdown-inline-cta/);
   assert.match(rendered, /class="markdown-related-heading"/);
   assert.match(rendered, /class="markdown-related-list"/);
+});
+
+test('preserves instructional upload links that are not final CTA links', async () => {
+  const rendered = await renderMarkdown(
+    'Go to [SafeUnfollow](https://safeunfollow.com/upload) and upload your ZIP file.',
+  );
+
+  assert.match(rendered, /<a href="https:\/\/safeunfollow\.com\/upload">SafeUnfollow<\/a>/);
 });

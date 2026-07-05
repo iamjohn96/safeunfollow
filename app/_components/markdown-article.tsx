@@ -42,18 +42,19 @@ export default async function MarkdownArticle({
         dangerouslySetInnerHTML={{ __html: processedContent }}
       />
 
-      <section className="mt-16 bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 rounded-2xl p-8 text-center">
-        <h2 className="text-xl font-bold text-zinc-900 mb-2">
-          Ready to see who unfollowed you?
+      <section className={styles.ctaCard} aria-labelledby="article-cta-title">
+        <h2 id="article-cta-title" className={styles.ctaHeading}>
+          Ready to discover who unfollowed you on Instagram the safe and private way?
         </h2>
-        <p className="text-sm text-zinc-500 mb-6">
-          Use your Instagram data export. No login, OAuth, or direct account access.
+        <p className={styles.ctaCopy}>
+          <span>Upload your Instagram Data Download to SafeUnfollow.</span>
+          <span>No login. No OAuth. No Instagram API.</span>
         </p>
         <Link
           href="/upload"
-          className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold px-7 py-3.5 rounded-full text-sm transition-colors shadow-lg shadow-pink-200"
+          className={styles.ctaButton}
         >
-          Try SafeUnfollow Free →
+          Upload Instagram Data
         </Link>
       </section>
     </article>
