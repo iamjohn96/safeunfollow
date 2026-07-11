@@ -29,14 +29,14 @@ Priority score: ★★☆☆☆
 ✓ Instagram Unfollow Limits 2026 Safe Daily Amount
 ✓ Limit Of Unfollowing On Instagram
 ✓ Limit Unfollow Instagram
-○ Maximum Number Of Unfollow Instagram
+✓ Maximum Number Of Unfollow Instagram
 ✓ Instagram Unfollow Limit Guide
 ✓ Instagram Unfollow Limit Without Login
 ✓ Instagram Unfollow Limit Safely
 ✓ Instagram Unfollow Limit Step By Step
 ✓ Instagram Unfollow Limit Tips
 
-Priority score: ★★★☆☆
+Priority score: ★★☆☆☆
 
 ## Instagram Unfollow Safety
 
