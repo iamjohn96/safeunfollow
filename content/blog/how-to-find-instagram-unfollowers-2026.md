@@ -43,8 +43,6 @@ Only if they use your data export file — not your password. SafeUnfollow proce
 Once a month is enough. Download a fresh export each time for accurate results.
 
 <!-- AUTO:RELATED_START -->
-Start with the [Instagram Unfollow complete guide](/pillars/instagram-unfollow-guide) for the full topic overview.
-
 ## Related Articles
 
 - [Who Unfollowed Me Checker: Safe, No Login or OAuth](/blog/who-unfollowed-me-instagram-checker)

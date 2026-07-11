@@ -36,7 +36,7 @@ Priority score: ★★☆☆☆
 ✓ Instagram Unfollow Limit Step By Step
 ✓ Instagram Unfollow Limit Tips
 
-Priority score: ★★☆☆☆
+Priority score: ★☆☆☆☆
 
 ## Instagram Unfollow Safety
 
@@ -63,5 +63,14 @@ Priority score: ★☆☆☆☆
 ✓ Instagram Ghost Followers
 ✓ Remove Ghost Followers Instagram
 ○ Instagram Engagement Rate
+✓ Ghost Follower
+✓ Ghost Followers Instagram
+✓ Ghost Followers
+✓ Unfollow Ghost Followers On Instagram
+✓ Ghost Followers On Instagram
+○ Was Sind Ghost Follower
+✓ What Is A Ghost Follower Instagram
+✓ How To Get Ghost Followers Instagram
+○ How To Get Rid Of Ghost Followers
 
 Priority score: ★☆☆☆☆
