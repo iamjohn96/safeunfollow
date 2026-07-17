@@ -89,4 +89,5 @@ SafeUnfollow specifically analyzes the 'followers' and 'following' data containe
 - [Unfollow Limit Instagram](/blog/unfollow-limit-instagram)
 - [How Many People Can You Unfollow On Instagram](/blog/how-many-people-can-you-unfollow-on-instagram)
 - [How Many People Can I Unfollow On Instagram](/blog/how-many-people-can-i-unfollow-on-instagram)
+- [Instagram Unfollow Limit Per Day 2026](/blog/instagram-unfollow-limit-per-day-2026)
 <!-- AUTO:RELATED_END -->

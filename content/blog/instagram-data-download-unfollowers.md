@@ -60,8 +60,6 @@ No, SafeUnfollow processes your uploaded data file to identify unfollowers and d
 SafeUnfollow avoids direct account access. Since SafeUnfollow does not require your Instagram login, use the Instagram API, or connect to your account in any way, there is reduced account-access risk associated with using our service. You are simply using Instagram's own data download feature and then analyzing that data securely with us.
 
 <!-- AUTO:RELATED_START -->
-Start with the [Instagram Unfollow complete guide](/pillars/instagram-unfollow-guide) for the full topic overview.
-
 ## Related Articles
 
 - [How to Find Instagram Unfollowers in 2026 (Safe, No Login)](/blog/how-to-find-instagram-unfollowers-2026)

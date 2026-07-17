@@ -80,6 +80,7 @@ No, SafeUnfollow is a data analysis tool only. It helps you identify who has unf
 <!-- AUTO:RELATED_START -->
 ## Related Articles
 
+- [Instagram Unfollow Limit Per Day 2026](/blog/instagram-unfollow-limit-per-day-2026)
 - [How Many People Can You Unfollow On Instagram](/blog/how-many-people-can-you-unfollow-on-instagram)
 - [How Many People Can I Unfollow On Instagram](/blog/how-many-people-can-i-unfollow-on-instagram)
 - [Does Follow Unfollow Still Work On Instagram 2026](/blog/does-follow-unfollow-still-work-on-instagram-2026)

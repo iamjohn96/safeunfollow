@@ -39,13 +39,12 @@ Space out your unfollows over time. SafeUnfollow can help you track follower cha
 No. SafeUnfollow uses your downloaded Instagram data ZIP, with no login, OAuth, or direct account access.
 
 <!-- AUTO:RELATED_START -->
-Start with the [Instagram Unfollow Limits complete guide](/pillars/instagram-unfollow-limits-guide) for the full topic overview.
-
 ## Related Articles
 
 - [Unfollow Limit Instagram](/blog/unfollow-limit-instagram)
 - [How Many People Can You Unfollow On Instagram](/blog/how-many-people-can-you-unfollow-on-instagram)
 - [How Many People Can I Unfollow On Instagram](/blog/how-many-people-can-i-unfollow-on-instagram)
+- [Instagram Unfollow Limit Per Day 2026](/blog/instagram-unfollow-limit-per-day-2026)
 - [Does Follow Unfollow Still Work On Instagram 2026](/blog/does-follow-unfollow-still-work-on-instagram-2026)
 <!-- AUTO:RELATED_END -->
 
