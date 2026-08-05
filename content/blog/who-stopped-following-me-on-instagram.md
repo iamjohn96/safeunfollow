@@ -80,6 +80,7 @@ SafeUnfollow uses your Instagram data file to ensure **Privacy First** and to pr
 <!-- AUTO:RELATED_START -->
 ## Related Articles
 
+- [How To See Recently Unfollowed Accounts On Instagram 2026](/blog/how-to-see-recently-unfollowed-accounts-on-instagram-2026)
 - [How to Find Instagram Unfollowers in 2026 (Safe, No Login)](/blog/how-to-find-instagram-unfollowers-2026)
 - [Who Unfollowed Me Checker: Safe, No Login or OAuth](/blog/who-unfollowed-me-instagram-checker)
 <!-- AUTO:RELATED_END -->
