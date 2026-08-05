@@ -6,7 +6,7 @@
 
 ✓ Pillar
 ✓ Instagram Data Download Unfollowers
-○ Who Stopped Following Me On Instagram
+✓ Who Stopped Following Me On Instagram
 ✓ Who Unfollowed Me On Instagram
 ○ How To See Recently Unfollowed Accounts On Instagram 2026
 ✓ Instagram Unfollowers

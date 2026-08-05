@@ -30,6 +30,7 @@ Use the supporting guides to compare tracking methods, understand what an export
 <!-- AUTO:RELATED_START -->
 ## Supporting Articles
 
+- [Who Stopped Following Me On Instagram](/blog/who-stopped-following-me-on-instagram)
 - [How to Find Instagram Unfollowers in 2026 (Safe, No Login)](/blog/how-to-find-instagram-unfollowers-2026)
 - [Instagram Data Download Unfollowers](/blog/instagram-data-download-unfollowers)
 - [Who Unfollowed Me Checker: Safe, No Login or OAuth](/blog/who-unfollowed-me-instagram-checker)
