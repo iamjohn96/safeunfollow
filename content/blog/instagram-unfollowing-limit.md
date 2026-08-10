@@ -79,7 +79,7 @@ No. Since SafeUnfollow does not require your Instagram login, does not use the I
 
 - [Instagram Unfollow Limit Per Day 2026](/blog/instagram-unfollow-limit-per-day-2026)
 - [Instagram Unfollow Limit: How Many Can You Safely Unfollow?](/blog/instagram-unfollow-limit-2026)
+- [Ig Unfollow Limit](/blog/ig-unfollow-limit)
 - [How Many People Can You Unfollow On Instagram](/blog/how-many-people-can-you-unfollow-on-instagram)
 - [How Many People Can I Unfollow On Instagram](/blog/how-many-people-can-i-unfollow-on-instagram)
-- [Does Follow Unfollow Still Work On Instagram 2026](/blog/does-follow-unfollow-still-work-on-instagram-2026)
 <!-- AUTO:RELATED_END -->
