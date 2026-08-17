@@ -76,8 +76,8 @@ An Instagram Data Download is a feature provided by Instagram that allows you to
 ## Related Articles
 
 - [Unfollow Limit Instagram](/blog/unfollow-limit-instagram)
+- [Instagram Unfollow Limit Per Day](/blog/instagram-unfollow-limit-per-day)
 - [Instagram Unfollow Limit Per Day 2026](/blog/instagram-unfollow-limit-per-day-2026)
 - [Instagram Unfollow Limit: How Many Can You Safely Unfollow?](/blog/instagram-unfollow-limit-2026)
 - [How Many People Can You Unfollow On Instagram](/blog/how-many-people-can-you-unfollow-on-instagram)
-- [How Many People Can I Unfollow On Instagram](/blog/how-many-people-can-i-unfollow-on-instagram)
 <!-- AUTO:RELATED_END -->

@@ -80,6 +80,6 @@ The time it takes for Instagram to generate your data file depends on the amount
 - [Instagram Unfollow Limit: How Many Can You Safely Unfollow?](/blog/instagram-unfollow-limit-2026)
 - [Instagram Unfollowing Limit](/blog/instagram-unfollowing-limit)
 - [Unfollow Limit Instagram](/blog/unfollow-limit-instagram)
+- [Instagram Unfollow Limit Per Day](/blog/instagram-unfollow-limit-per-day)
 - [Instagram Unfollow Limit Per Day 2026](/blog/instagram-unfollow-limit-per-day-2026)
-- [Does Follow Unfollow Still Work On Instagram 2026](/blog/does-follow-unfollow-still-work-on-instagram-2026)
 <!-- AUTO:RELATED_END -->
