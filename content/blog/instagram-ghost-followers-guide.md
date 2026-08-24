@@ -36,8 +36,6 @@ For most accounts, 10–20% is typical. Focus on engagement rate improvement, no
 Yes. Fewer inactive followers means your engagement rate improves, which signals quality to the algorithm.
 
 <!-- AUTO:RELATED_START -->
-Start with the [Instagram Ghost Followers complete guide](/pillars/instagram-ghost-followers-guide-complete) for the full topic overview.
-
 ## Related Articles
 
 More supporting guides are coming soon.

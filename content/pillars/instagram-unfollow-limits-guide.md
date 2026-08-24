@@ -51,6 +51,7 @@ Use the supporting guides to distinguish tracking from automated unfollowing and
 - [Instagram Unfollow Limit Per Day](/blog/instagram-unfollow-limit-per-day)
 - [Instagram Unfollow Limit Per Day 2026](/blog/instagram-unfollow-limit-per-day-2026)
 - [Instagram Unfollow Limit: How Many Can You Safely Unfollow?](/blog/instagram-unfollow-limit-2026)
+- [Instagram Unfollow Limits 2026 Safe Daily Amount](/blog/instagram-unfollow-limits-2026-safe-daily-amount)
 - [Instagram Unfollowing Limit](/blog/instagram-unfollowing-limit)
 - [Unfollow Limit Instagram](/blog/unfollow-limit-instagram)
 <!-- AUTO:RELATED_END -->
