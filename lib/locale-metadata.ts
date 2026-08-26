@@ -4,6 +4,10 @@ import type { Lang } from '@/utils/i18n';
 export const PUBLIC_LOCALES = ['pt', 'ru', 'es'] as const;
 export type PublicLocale = typeof PUBLIC_LOCALES[number];
 
+export function isPublicLocale(value: string): value is PublicLocale {
+  return PUBLIC_LOCALES.includes(value as PublicLocale);
+}
+
 const seo = {
   en: { title: 'Private Instagram Data Analyzer', description: 'Analyze mutuals, one-way follows, and follower changes locally from your official Instagram Data ZIP.' },
   pt: { title: 'Analisador privado de dados do Instagram', description: 'Analise conexões mútuas, relações unilaterais e mudanças de seguidores localmente usando o ZIP oficial do Instagram.' },
@@ -30,12 +34,15 @@ export function localeAlternates(path = ''): Metadata['alternates'] {
 }
 
 export function localizedMetadata(lang: Lang, page?: keyof typeof pageNames): Metadata {
-  const base = seo[lang];
+  // Route params are untrusted at runtime. Invalid first path segments still run
+  // generateMetadata before the locale layout turns them into a normal 404.
+  const safeLang: Lang = lang in seo ? lang : 'en';
+  const base = seo[safeLang];
   const suffix = page ? `/${page}` : '';
-  const canonical = lang === 'en' ? (suffix || '/') : `/${lang}${suffix}`;
-  const title = page ? `${pageNames[page][lang]} | SafeUnfollow` : `SafeUnfollow – ${base.title}`;
+  const canonical = safeLang === 'en' ? (suffix || '/') : `/${safeLang}${suffix}`;
+  const title = page ? `${pageNames[page][safeLang]} | SafeUnfollow` : `SafeUnfollow – ${base.title}`;
   return {
     title, description: base.description, alternates: { ...localeAlternates(suffix), canonical },
-    openGraph: { title, description: base.description, url: canonical, siteName: 'SafeUnfollow', type: 'website', locale: lang },
+    openGraph: { title, description: base.description, url: canonical, siteName: 'SafeUnfollow', type: 'website', locale: safeLang },
   };
 }

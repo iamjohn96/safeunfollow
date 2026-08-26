@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "npm run test:automation",
     "blog:publish": "node --import tsx scripts/blog-publish.ts",
     "blog:reconcile": "node --import tsx scripts/reconcile-content.ts",
     "seo:report": "node --import tsx scripts/search-console-report.ts",
