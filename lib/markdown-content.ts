@@ -19,6 +19,11 @@ function contentDirectory(section: ContentSection): string {
   return path.join(process.cwd(), 'content', section);
 }
 
+function normalizeDate(value: unknown): string {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return String(value ?? '');
+}
+
 export function getMarkdownDocuments(section: ContentSection): MarkdownDocument[] {
   const directory = contentDirectory(section);
   if (!fs.existsSync(directory)) return [];
@@ -33,7 +38,7 @@ export function getMarkdownDocuments(section: ContentSection): MarkdownDocument[
         data: {
           title: data.title as string,
           description: data.description as string,
-          date: data.date as string,
+          date: normalizeDate(data.date),
           slug: data.slug as string,
           keywords: data.keywords as string[] | undefined,
         },

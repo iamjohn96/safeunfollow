@@ -5,8 +5,8 @@ import path from 'path';
 import matter from 'gray-matter';
 
 export const metadata: Metadata = {
-  title: 'Blog | SafeUnfollow',
-  description: 'Tips and guides for managing your Instagram followers safely. Learn how to find unfollowers, remove ghost followers, and protect your account.',
+  title: 'Instagram Data Analyzer Guide | SafeUnfollow',
+  description: 'Learn how to analyze an official Instagram data export for mutuals, one-way follows, and follower changes without sharing your login.',
 };
 
 interface PostMeta {
@@ -14,10 +14,7 @@ interface PostMeta {
   description: string;
   date: string;
   slug: string;
-  cluster: string;
 }
-
-interface TopicCluster { pillar: string; keywords: string[] }
 
 function getPosts(): PostMeta[] {
   const dir = path.join(process.cwd(), 'content/blog');
@@ -32,7 +29,6 @@ function getPosts(): PostMeta[] {
         description: data.description as string,
         date: data.date as string,
         slug: data.slug as string,
-        cluster: data.cluster as string,
       };
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -40,31 +36,16 @@ function getPosts(): PostMeta[] {
 
 export default function BlogPage() {
   const posts = getPosts();
-  const clusters = JSON.parse(
-    fs.readFileSync(path.join(process.cwd(), 'automation/topic-clusters.json'), 'utf8'),
-  ) as Record<string, TopicCluster>;
 
   return (
     <section className="max-w-2xl mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold text-zinc-900 mb-2">Blog</h1>
+      <h1 className="text-3xl font-bold text-zinc-900 mb-2">Instagram Data Analyzer Guide</h1>
       <p className="text-sm text-zinc-400 mb-10">
-        Tips and guides for Instagram privacy and account management.
+        Understand what your Instagram export can reveal—without connecting your account.
       </p>
 
-      <div className="space-y-12">
-        {Object.entries(clusters).map(([cluster, definition]) => {
-          const clusterPosts = posts.filter(post => post.cluster === cluster);
-          if (!clusterPosts.length) return null;
-          const label = cluster.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-          return <section key={cluster}>
-            <div className="mb-5 flex items-end justify-between gap-4">
-              <h2 className="text-xl font-bold text-zinc-900">{label}</h2>
-              <Link href={`/pillars/${definition.pillar}`} className="text-sm font-medium text-pink-600 hover:text-pink-700">
-                Complete guide →
-              </Link>
-            </div>
-            <div className="space-y-6">
-              {clusterPosts.map(post => (
+      <div className="space-y-6">
+        {posts.map(post => (
           <article
             key={post.slug}
             className="bg-white border border-zinc-100 rounded-2xl p-6 hover:border-pink-200 hover:shadow-sm transition-all"
@@ -92,10 +73,7 @@ export default function BlogPage() {
               Read more →
             </Link>
           </article>
-              ))}
-            </div>
-          </section>;
-        })}
+        ))}
       </div>
     </section>
   );

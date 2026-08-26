@@ -29,5 +29,5 @@ Use the supporting guides to identify inactive-looking accounts, interpret engag
 <!-- AUTO:RELATED_START -->
 ## Supporting Articles
 
-- [Instagram Ghost Followers: What They Are and How to Remove Them](/blog/instagram-ghost-followers-guide)
+- [How to Analyze Your Instagram Data Export Without Logging In](/blog/how-to-analyze-instagram-data-export)
 <!-- AUTO:RELATED_END -->

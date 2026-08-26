@@ -71,7 +71,7 @@ This article says connect your Instagram account.
 test('selects the first unpublished keyword whose article does not exist', () => {
   const entries = [
     { ...entry, published: true },
-    { ...entry, keyword: 'existing', slug: 'instagram-data-download-unfollowers' },
+    { ...entry, keyword: 'existing', slug: 'how-to-analyze-instagram-data-export' },
     { ...entry, keyword: 'eligible', slug: 'brand-new-safeunfollow-topic' },
   ];
 
