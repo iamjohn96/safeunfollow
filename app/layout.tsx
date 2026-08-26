@@ -12,6 +12,7 @@ import LocaleDocumentLanguage from '@/components/LocaleDocumentLanguage';
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
 
 export const metadata: Metadata = {
+  applicationName: 'SafeUnfollow',
   title: 'SafeUnfollow – Private Instagram Data Analyzer',
   description:
     'Analyze your official Instagram Data ZIP for non-followers, mutuals, followers-only accounts, and follower changes. No login, OAuth, API, or account connection.',
@@ -39,6 +40,12 @@ export const metadata: Metadata = {
     description: 'Analyze non-followers, mutuals, followers-only accounts, and changes from your Instagram Data ZIP.',
   },
   robots: { index: true, follow: true },
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'SafeUnfollow',
+    statusBarStyle: 'default',
+  },
   alternates: localeAlternates(),
 };
 
