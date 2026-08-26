@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { t, detectLang, type Lang } from '@/utils/i18n';
+import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
 import { Suspense } from 'react';
+import { trackFunnel } from '@/utils/analytics';
 
 const stepIcons = ['⚙️', '☑️', '📤', '📥'];
 
@@ -13,10 +14,10 @@ function GuideContent() {
   const [lang, setLang] = useState<Lang>('en');
 
   useEffect(() => {
+    // Language detection depends on browser locale after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLang(detectLang(searchParams));
   }, [searchParams]);
-
-  const langParam = lang !== 'en' ? `?lang=${lang}` : '';
 
   const steps = [
     { title: t('guide.step1.title', lang), desc: t('guide.step1.desc', lang) },
@@ -69,7 +70,8 @@ function GuideContent() {
       {/* CTA */}
       <div className="text-center">
         <Link
-          href={`/upload${langParam}`}
+          href={localizedPath('/upload', lang)}
+          onClick={() => trackFunnel('guide_upload_click', lang)}
           className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold px-7 py-3.5 rounded-full text-sm transition-colors shadow-lg shadow-pink-200"
         >
           {t('guide.cta', lang)}

@@ -137,6 +137,16 @@ export function computeNonFollowers(data: ParsedData): InstagramAccount[] {
   return data.following.filter(f => !followerSet.has(f.username));
 }
 
+export function computeFollowersOnly(data: ParsedData): InstagramAccount[] {
+  const followingSet = new Set(data.following.map(account => account.username));
+  return data.followers.filter(account => !followingSet.has(account.username));
+}
+
+export function computeMutuals(data: ParsedData): InstagramAccount[] {
+  const followerSet = new Set(data.followers.map(account => account.username));
+  return data.following.filter(account => followerSet.has(account.username));
+}
+
 export function computeChanges(
   prev: ParsedData,
   curr: ParsedData

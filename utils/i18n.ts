@@ -2,7 +2,7 @@
 
 import { translations, type Lang, type TranslationKey } from './translations';
 
-const SUPPORTED_LANGS: Lang[] = ['en', 'ko', 'ja', 'es'];
+const SUPPORTED_LANGS: Lang[] = ['en', 'pt', 'ru', 'es'];
 
 export function detectLang(searchParams?: URLSearchParams): Lang {
   if (typeof window === 'undefined') return 'en';
@@ -12,12 +12,20 @@ export function detectLang(searchParams?: URLSearchParams): Lang {
     return urlLang as Lang;
   }
 
+  const pathLang = window.location.pathname.split('/')[1];
+  if (SUPPORTED_LANGS.includes(pathLang as Lang)) return pathLang as Lang;
+
   const browserLang = navigator.language.slice(0, 2).toLowerCase();
   if (SUPPORTED_LANGS.includes(browserLang as Lang)) {
     return browserLang as Lang;
   }
 
   return 'en';
+}
+
+export function localizedPath(path: string, lang: Lang): string {
+  if (lang === 'en') return path;
+  return `/${lang}${path === '/' ? '' : path}`;
 }
 
 export function t(key: TranslationKey, lang: Lang, vars?: Record<string, string | number>): string {

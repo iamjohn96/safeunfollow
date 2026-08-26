@@ -7,9 +7,12 @@ import {
   type ParsedData,
   type InstagramAccount,
   computeNonFollowers,
+  computeFollowersOnly,
+  computeMutuals,
   computeChanges,
   exportToCsv,
 } from '@/utils/parser';
+import { trackFunnel } from '@/utils/analytics';
 
 interface Snapshot {
   id: string;
@@ -45,6 +48,45 @@ function AccountCard({ account }: { account: InstagramAccount }) {
   );
 }
 
+function AccountList({
+  accounts,
+  emptyMessage,
+  searchPlaceholder,
+  noResultsMessage,
+}: {
+  accounts: InstagramAccount[];
+  emptyMessage: string;
+  searchPlaceholder: string;
+  noResultsMessage: string;
+}) {
+  const [query, setQuery] = useState('');
+  const filtered = accounts.filter(account =>
+    account.username.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  if (accounts.length === 0) {
+    return <p className="text-sm text-zinc-400 text-center py-16">{emptyMessage}</p>;
+  }
+
+  return (
+    <div>
+      <input
+        type="search"
+        value={query}
+        onChange={event => setQuery(event.target.value)}
+        placeholder={searchPlaceholder}
+        className="w-full border border-zinc-200 rounded-lg px-3 py-2 mb-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+      />
+      <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
+        {filtered.map(account => <AccountCard key={account.username} account={account} />)}
+        {filtered.length === 0 && (
+          <p className="text-sm text-zinc-400 text-center py-8">{noResultsMessage}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function LockedOverlay({ lang, onUnlock }: { lang: Lang; onUnlock: () => void }) {
   return (
     <div className="relative">
@@ -76,7 +118,7 @@ function LockedOverlay({ lang, onUnlock }: { lang: Lang; onUnlock: () => void })
 }
 
 export function Dashboard({ data, lang, onReset }: DashboardProps) {
-  const [tab, setTab] = useState<'nonfollowers' | 'changes'>('nonfollowers');
+  const [tab, setTab] = useState<'nonfollowers' | 'followersOnly' | 'mutuals' | 'changes'>('nonfollowers');
   const [isPremium, setIsPremium] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
@@ -85,6 +127,39 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
   const [search, setSearch] = useState('');
 
   const nonFollowers = computeNonFollowers(data);
+  const followersOnly = computeFollowersOnly(data);
+  const mutuals = computeMutuals(data);
+  const relationshipCopy = {
+    en: {
+      heading: 'Your Instagram relationship analysis',
+      description: 'Based only on the followers and following lists in your official export, compared locally in this browser.',
+      following: 'Following', followers: 'Followers', oneWayOut: "You follow, they don't",
+      followersOnly: "They follow, you don't", mutuals: 'Mutuals', changes: 'Changes',
+      followersOnlyEmpty: 'You already follow back every follower.', mutualsEmpty: 'No mutual connections found yet.',
+      search: 'Search accounts…', noResults: 'No matching accounts',
+    },
+    pt: {
+      heading: 'Análise dos seus relacionamentos no Instagram',
+      description: 'Resultado da comparação local, neste navegador, apenas das listas de seguidores e seguidos da exportação oficial.',
+      following: 'Seguindo', followers: 'Seguidores', oneWayOut: 'Só você segue', followersOnly: 'Só seguem você',
+      mutuals: 'Mútuos', changes: 'Mudanças', followersOnlyEmpty: 'Você já segue todos os seus seguidores.',
+      mutualsEmpty: 'Nenhuma conexão mútua encontrada.', search: 'Buscar contas…', noResults: 'Nenhuma conta encontrada',
+    },
+    ru: {
+      heading: 'Анализ ваших связей в Instagram',
+      description: 'Результат локального сравнения списков подписчиков и подписок из официального экспорта.',
+      following: 'Подписки', followers: 'Подписчики', oneWayOut: 'Подписаны только вы', followersOnly: 'Подписаны только на вас',
+      mutuals: 'Взаимные', changes: 'Изменения', followersOnlyEmpty: 'Вы подписаны на всех своих подписчиков.',
+      mutualsEmpty: 'Взаимных подписок пока не найдено.', search: 'Поиск аккаунтов…', noResults: 'Совпадений нет',
+    },
+    es: {
+      heading: 'Análisis de tus relaciones en Instagram',
+      description: 'Resultado de comparar localmente en este navegador solo las listas de seguidores y seguidos de tu exportación oficial.',
+      following: 'Seguidos', followers: 'Seguidores', oneWayOut: 'Solo tú sigues', followersOnly: 'Solo te siguen',
+      mutuals: 'Mutuos', changes: 'Cambios', followersOnlyEmpty: 'Ya sigues a todos tus seguidores.',
+      mutualsEmpty: 'Aún no se encontraron relaciones mutuas.', search: 'Buscar cuentas…', noResults: 'No hay cuentas coincidentes',
+    },
+  }[lang];
 
   const loadSnapshots = useCallback(() => {
     try {
@@ -96,6 +171,8 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
   }, []);
 
   useEffect(() => {
+    // Premium status and snapshots are browser-local and available only after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsPremium(localStorage.getItem('isPremium') === 'true');
     loadSnapshots();
   }, [loadSnapshots]);
@@ -145,19 +222,27 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
       )}
 
       <div className="max-w-2xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-zinc-900 mb-2">{relationshipCopy.heading}</h1>
+          <p className="text-sm text-zinc-500 leading-relaxed">{relationshipCopy.description}</p>
+        </div>
         {/* Stats bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="bg-white border border-zinc-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-zinc-900">{data.following.length}</div>
-            <div className="text-xs text-zinc-400 mt-0.5">Following</div>
+            <div className="text-xs text-zinc-400 mt-0.5">{relationshipCopy.following}</div>
           </div>
           <div className="bg-white border border-zinc-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-zinc-900">{data.followers.length}</div>
-            <div className="text-xs text-zinc-400 mt-0.5">Followers</div>
+            <div className="text-xs text-zinc-400 mt-0.5">{relationshipCopy.followers}</div>
           </div>
-          <div className="bg-pink-50 border border-pink-100 rounded-xl p-4 col-span-2 sm:col-span-1">
+          <div className="bg-pink-50 border border-pink-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-pink-600">{nonFollowers.length}</div>
-            <div className="text-xs text-pink-400 mt-0.5">Don't follow back</div>
+            <div className="text-xs text-pink-500 mt-0.5">{relationshipCopy.oneWayOut}</div>
+          </div>
+          <div className="bg-white border border-zinc-100 rounded-xl p-4">
+            <div className="text-2xl font-bold text-zinc-900">{mutuals.length}</div>
+            <div className="text-xs text-zinc-400 mt-0.5">{relationshipCopy.mutuals}</div>
           </div>
         </div>
 
@@ -181,7 +266,7 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
 
           {!isPremium && (
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => { trackFunnel('premium_opened', lang, { source: 'dashboard' }); setShowModal(true); }}
               className="text-sm font-medium border border-pink-200 text-pink-600 hover:bg-pink-50 px-4 py-2 rounded-full transition-colors"
             >
               {t('nav.premium', lang)} ✦
@@ -210,14 +295,16 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
         )}
 
         {/* Tabs */}
-        <div className="flex border-b border-zinc-200 mb-4">
-          {(['nonfollowers', 'changes'] as const).map(tabKey => (
+        <div className="flex overflow-x-auto border-b border-zinc-200 mb-4">
+          {(['nonfollowers', 'followersOnly', 'mutuals', 'changes'] as const).map(tabKey => (
             <button
               key={tabKey}
               onClick={() => setTab(tabKey)}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${tab === tabKey ? 'border-pink-600 text-pink-600' : 'border-transparent text-zinc-500 hover:text-zinc-800'}`}
+              className={`whitespace-nowrap px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${tab === tabKey ? 'border-pink-600 text-pink-600' : 'border-transparent text-zinc-500 hover:text-zinc-800'}`}
             >
-              {t(`dashboard.tab.${tabKey}`, lang)}
+              {tabKey === 'nonfollowers' ? relationshipCopy.oneWayOut :
+                tabKey === 'followersOnly' ? relationshipCopy.followersOnly :
+                tabKey === 'mutuals' ? relationshipCopy.mutuals : relationshipCopy.changes}
               {tabKey === 'nonfollowers' && nonFollowers.length > 0 && (
                 <span className="ml-1.5 bg-pink-100 text-pink-600 text-xs font-semibold px-1.5 py-0.5 rounded-full">
                   {nonFollowers.length}
@@ -227,6 +314,12 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
                 <span className="ml-1.5 bg-zinc-100 text-zinc-600 text-xs font-semibold px-1.5 py-0.5 rounded-full">
                   {changes.newUnfollowers.length + changes.newFollowers.length}
                 </span>
+              )}
+              {tabKey === 'followersOnly' && followersOnly.length > 0 && (
+                <span className="ml-1.5 bg-zinc-100 text-zinc-600 text-xs font-semibold px-1.5 py-0.5 rounded-full">{followersOnly.length}</span>
+              )}
+              {tabKey === 'mutuals' && mutuals.length > 0 && (
+                <span className="ml-1.5 bg-zinc-100 text-zinc-600 text-xs font-semibold px-1.5 py-0.5 rounded-full">{mutuals.length}</span>
               )}
             </button>
           ))}
@@ -247,7 +340,7 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
                     type="search"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder="Search accounts…"
+                    placeholder={relationshipCopy.search}
                     className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   />
                 </div>
@@ -259,12 +352,30 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
                     <AccountCard key={account.username} account={account} />
                   ))}
                   {filteredNonFollowers.length === 0 && (
-                    <p className="text-sm text-zinc-400 text-center py-8">No results for "{search}"</p>
+                    <p className="text-sm text-zinc-400 text-center py-8">{relationshipCopy.noResults}</p>
                   )}
                 </div>
               </>
             )}
           </div>
+        )}
+
+        {tab === 'followersOnly' && (
+          <AccountList
+            accounts={followersOnly}
+            emptyMessage={relationshipCopy.followersOnlyEmpty}
+            searchPlaceholder={relationshipCopy.search}
+            noResultsMessage={relationshipCopy.noResults}
+          />
+        )}
+
+        {tab === 'mutuals' && (
+          <AccountList
+            accounts={mutuals}
+            emptyMessage={relationshipCopy.mutualsEmpty}
+            searchPlaceholder={relationshipCopy.search}
+            noResultsMessage={relationshipCopy.noResults}
+          />
         )}
 
         {/* Tab: Changes */}

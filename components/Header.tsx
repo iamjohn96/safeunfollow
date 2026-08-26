@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { t, detectLang, type Lang } from '@/utils/i18n';
+import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
 import { useState, useEffect } from 'react';
 
 export function Header() {
@@ -12,21 +12,21 @@ export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
+    // Language detection depends on browser locale after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLang(detectLang(searchParams));
   }, [searchParams]);
 
-  const langParam = lang !== 'en' ? `?lang=${lang}` : '';
-
   const navLinks = [
-    { href: `/guide${langParam}`, label: t('nav.guide', lang) },
-    { href: `/snapshots${langParam}`, label: t('nav.snapshots', lang) },
+    { href: localizedPath('/guide', lang), label: t('nav.guide', lang) },
+    { href: localizedPath('/snapshots', lang), label: t('nav.snapshots', lang) },
     { href: '/blog', label: 'Blog' },
   ];
 
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-zinc-100">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href={`/${langParam}`} className="font-bold text-zinc-900 text-base tracking-tight hover:text-pink-600 transition-colors">
+        <Link href={localizedPath('/', lang)} className="font-bold text-zinc-900 text-base tracking-tight hover:text-pink-600 transition-colors">
           Safe<span className="text-pink-600">Unfollow</span>
         </Link>
 
@@ -42,7 +42,7 @@ export function Header() {
             </Link>
           ))}
           <Link
-            href={`/upload${langParam}`}
+            href={localizedPath('/upload', lang)}
             className="text-sm font-semibold bg-pink-600 hover:bg-pink-700 text-white px-4 py-1.5 rounded-full transition-colors"
           >
             {t('nav.upload', lang)}
@@ -78,7 +78,7 @@ export function Header() {
             </Link>
           ))}
           <Link
-            href={`/upload${langParam}`}
+            href={localizedPath('/upload', lang)}
             className="text-sm font-semibold bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-full text-center transition-colors"
             onClick={() => setMenuOpen(false)}
           >

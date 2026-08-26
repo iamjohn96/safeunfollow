@@ -72,6 +72,8 @@ function SnapshotsContent() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
+    // Language and saved analysis depend on browser-only state after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLang(detectLang(searchParams));
     setIsPremium(localStorage.getItem('isPremium') === 'true');
     try {

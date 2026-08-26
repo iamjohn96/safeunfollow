@@ -3,7 +3,7 @@
 import { Suspense, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { t, detectLang, type Lang } from '@/utils/i18n';
+import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
 
 type Step = 'form' | 'token' | 'confirm' | 'success' | 'error';
 
@@ -17,6 +17,8 @@ function CancelPageContent() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Language detection depends on browser locale after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLang(detectLang(searchParams));
   }, [searchParams]);
 
@@ -134,7 +136,7 @@ function CancelPageContent() {
 
             <p className="mt-4 text-center text-xs text-zinc-400">
               {t('cancel.changed_mind', lang)}{' '}
-              <Link href="/" className="text-pink-600 hover:underline">
+              <Link href={localizedPath('/', lang)} className="text-pink-600 hover:underline">
                 {t('cancel.go_home', lang)}
               </Link>
             </p>
@@ -269,7 +271,7 @@ function CancelPageContent() {
               {t('cancel.success_msg', lang)}
             </p>
             <Link
-              href="/"
+              href={localizedPath('/', lang)}
               className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold px-6 py-3 rounded-full text-sm transition-colors"
             >
               {t('cancel.back_btn', lang)}
@@ -302,7 +304,7 @@ function CancelPageContent() {
                 {t('cancel.try_again', lang)}
               </button>
               <Link
-                href="/"
+                href={localizedPath('/', lang)}
                 className="w-full text-center bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold py-3 rounded-full text-sm transition-colors"
               >
                 {t('cancel.go_home_btn', lang)}

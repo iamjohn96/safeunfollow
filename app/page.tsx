@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { t, detectLang, type Lang } from '@/utils/i18n';
+import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
 import { PremiumModal } from '@/components/PremiumModal';
 import { Suspense } from 'react';
+import { trackFunnel } from '@/utils/analytics';
 
 const conversionCopy = {
   en: {
@@ -40,39 +41,128 @@ const conversionCopy = {
     premiumEyebrow: 'Start free. Upgrade when you need history.',
     premiumSecondary: 'Run a free ZIP check first',
     premiumNote: 'Premium adds history—not account access. The same no-login, local ZIP workflow stays in place.',
-  },
-  ko: {
-    heroTrust: ['로그인 없음', '비밀번호 입력 없음', 'Instagram 데이터 ZIP만 사용'],
-    trustHeading: 'Instagram 계정은 연결되지 않습니다',
-    trust: [
-      { icon: '🔐', title: '로그인 필요 없음', desc: 'Instagram 로그인 정보를 요청하지 않습니다.' },
-      { icon: '🔑', title: 'OAuth 없음', desc: '계정 접근 권한을 요구하지 않습니다.' },
-      { icon: '🚫', title: 'API 접근 없음', desc: 'Instagram API를 호출하지 않습니다.' },
-      { icon: '🔌', title: '계정 연결 없음', desc: 'Instagram 계정과 연결하지 않습니다.' },
-      { icon: '📦', title: 'Instagram 데이터 ZIP 기반', desc: '공식 내보내기 파일을 직접 선택합니다.' },
-      { icon: '🛡️', title: '개인정보 보호 중심', desc: '브라우저에서 로컬로 처리합니다.' },
+    valueHeading: 'One ZIP. A clearer picture of your Instagram relationships.',
+    valueSubtitle: 'SafeUnfollow reads only the followers and following lists needed for these insights.',
+    values: [
+      { icon: '🤝', title: 'Mutual connections', desc: 'See the accounts where you follow each other.' },
+      { icon: '↗️', title: "You follow, they don't", desc: 'Find accounts you follow that do not follow you back.' },
+      { icon: '↙️', title: 'They follow, you don’t', desc: 'See followers you are not currently following back.' },
+      { icon: '📈', title: 'Changes over time', desc: 'Save snapshots to identify new followers and unfollowers later.' },
     ],
-    comparisonSubtitle: '결과뿐 아니라 이용 방식, 계정 노출, 반복 작업 부담까지 비교하세요.',
+    valueScope: 'Available now from Followers and following data. No messages, posts, photos, or contacts are analyzed.',
+  },
+  pt: {
+    heroTrust: ['Sem login', 'Sem senha', 'Somente o ZIP de dados do Instagram'],
+    trustHeading: 'Sua conta permanece desconectada',
+    trust: [
+      { icon: '🔐', title: 'Sem login', desc: 'Não solicitamos credenciais do Instagram.' },
+      { icon: '🔑', title: 'Sem OAuth', desc: 'Nenhum fluxo de permissão de acesso.' },
+      { icon: '🚫', title: 'Sem acesso à API', desc: 'Nenhuma chamada à API do Instagram.' },
+      { icon: '🔌', title: 'Sem conexão de conta', desc: 'Sua conta permanece desconectada.' },
+      { icon: '📦', title: 'Baseado no ZIP oficial', desc: 'Você escolhe o arquivo de exportação.' },
+      { icon: '🛡️', title: 'Privacidade primeiro', desc: 'O processamento fica no navegador.' },
+    ],
+    comparisonSubtitle: 'Compare o processo, a exposição da conta e o esforço — não apenas o resultado.',
     safeColumn: 'SafeUnfollow',
-    loginColumn: '로그인 기반 앱',
-    manualColumn: '수동 스프레드시트',
+    loginColumn: 'Apps com login',
+    manualColumn: 'Planilha manual',
     comparisonRows: [
-      ['로그인 필요', '없음', '필요', '없음'],
-      ['계정 연결', '없음', '필요', '없음'],
-      ['계정 정지 위험', '없음 — 계정 접근 없음', '계정 접근에 따른 위험', '없음'],
-      ['개인정보 보호', '브라우저 로컬 처리', '앱에 계정 데이터 제공', '로컬 파일 관리'],
-      ['반복 스냅샷', '프리미엄에서 무제한', '앱마다 다름', '매번 직접 복사'],
-      ['CSV / 변경 이력', '프리미엄에 포함', '앱마다 다름', '직접 구성'],
+      ['Login necessário', 'Não', 'Sim', 'Não'],
+      ['Conexão de conta', 'Nenhuma', 'Obrigatória', 'Nenhuma'],
+      ['Risco da conta', 'Sem acesso à conta', 'Risco de acesso', 'Nenhum'],
+      ['Privacidade', 'Processamento local', 'Dados compartilhados', 'Arquivo local'],
+      ['Capturas repetidas', 'Ilimitadas no Premium', 'Varia', 'Cópias manuais'],
+      ['CSV / histórico', 'Incluído no Premium', 'Varia', 'Configuração manual'],
     ],
     faqExtras: [
-      { q: '내 데이터는 비공개로 처리되나요?', a: '네. Instagram 데이터는 브라우저에서 로컬로 처리되며 SafeUnfollow 서버로 업로드되지 않습니다.' },
-      { q: '프리미엄에서는 무엇을 이용할 수 있나요?', a: '무제한 스냅샷, 변경 이력, CSV 내보내기를 이용할 수 있습니다. Instagram 로그인이나 계정 연결 없는 개인정보 보호 중심 방식은 그대로 유지됩니다.' },
+      { q: 'Meus dados são privados?', a: 'Sim. Seus dados do Instagram são processados localmente e não são enviados aos servidores do SafeUnfollow.' },
+      { q: 'O que recebo com o Premium?', a: 'Capturas ilimitadas, histórico de mudanças e exportação CSV, mantendo o fluxo sem login ou conexão da conta.' },
     ],
-    howCta: 'Instagram 데이터 ZIP 업로드',
-    howCtaNote: '로그인이나 비밀번호 입력이 필요 없습니다',
-    premiumEyebrow: '무료로 시작하고, 기록이 필요할 때 업그레이드하세요.',
-    premiumSecondary: '먼저 무료로 ZIP 확인하기',
-    premiumNote: '프리미엄은 계정 접근이 아니라 기록 기능을 추가합니다. 로그인 없는 로컬 ZIP 방식은 그대로 유지됩니다.',
+    howCta: 'Enviar ZIP de dados do Instagram',
+    howCtaNote: 'Sem login ou senha',
+    premiumEyebrow: 'Comece grátis. Faça upgrade quando precisar de histórico.',
+    premiumSecondary: 'Analisar um ZIP grátis primeiro',
+    premiumNote: 'O Premium adiciona histórico, não acesso à conta. O fluxo local e sem login permanece igual.',
+    valueHeading: 'Um ZIP. Uma visão mais clara dos seus relacionamentos.',
+    valueSubtitle: 'O SafeUnfollow lê apenas as listas de seguidores e seguidos necessárias para estas análises.',
+    values: [
+      { icon: '🤝', title: 'Conexões mútuas', desc: 'Veja as contas que seguem você de volta.' },
+      { icon: '↗️', title: 'Só você segue', desc: 'Encontre contas que não seguem você de volta.' },
+      { icon: '↙️', title: 'Só seguem você', desc: 'Veja seguidores que você ainda não segue.' },
+      { icon: '📈', title: 'Mudanças ao longo do tempo', desc: 'Salve capturas para identificar novos seguidores e unfollows.' },
+    ],
+    valueScope: 'Disponível a partir dos dados de seguidores e seguidos. Mensagens, posts, fotos e contatos não são analisados.',
+  },
+  ru: {
+    heroTrust: ['Без входа', 'Без пароля', 'Только ZIP с данными Instagram'],
+    trustHeading: 'Ваш аккаунт остаётся неподключённым',
+    trust: [
+      { icon: '🔐', title: 'Без входа', desc: 'Мы не запрашиваем данные для входа в Instagram.' },
+      { icon: '🔑', title: 'Без OAuth', desc: 'Нет запроса разрешений на доступ.' },
+      { icon: '🚫', title: 'Без API', desc: 'Нет обращений к API Instagram.' },
+      { icon: '🔌', title: 'Без подключения', desc: 'Аккаунт остаётся неподключённым.' },
+      { icon: '📦', title: 'Официальный ZIP', desc: 'Вы сами выбираете файл экспорта.' },
+      { icon: '🛡️', title: 'Конфиденциальность', desc: 'Обработка выполняется в браузере.' },
+    ],
+    comparisonSubtitle: 'Сравните процесс, доступ к аккаунту и трудозатраты, а не только результат.',
+    safeColumn: 'SafeUnfollow', loginColumn: 'Приложения со входом', manualColumn: 'Ручная таблица',
+    comparisonRows: [
+      ['Вход в аккаунт', 'Нет', 'Да', 'Нет'], ['Подключение аккаунта', 'Нет', 'Обязательно', 'Нет'],
+      ['Риск для аккаунта', 'Нет доступа', 'Риск доступа', 'Нет'], ['Конфиденциальность', 'Локальная обработка', 'Данные передаются приложению', 'Локальный файл'],
+      ['Повторные снимки', 'Без ограничений в Премиум', 'Зависит от приложения', 'Ручные копии'], ['CSV / история', 'Включено в Премиум', 'Зависит', 'Ручная настройка'],
+    ],
+    faqExtras: [
+      { q: 'Мои данные конфиденциальны?', a: 'Да. Данные Instagram обрабатываются локально и не отправляются на серверы SafeUnfollow.' },
+      { q: 'Что даёт Премиум?', a: 'Неограниченные снимки, история изменений и CSV без входа или подключения аккаунта Instagram.' },
+    ],
+    howCta: 'Загрузить ZIP с данными Instagram', howCtaNote: 'Без входа и пароля',
+    premiumEyebrow: 'Начните бесплатно. Переходите на Премиум, когда понадобится история.',
+    premiumSecondary: 'Сначала бесплатно проверить ZIP',
+    premiumNote: 'Премиум добавляет историю, а не доступ к аккаунту. Локальная работа без входа сохраняется.',
+    valueHeading: 'Один ZIP. Более ясная картина ваших связей в Instagram.',
+    valueSubtitle: 'SafeUnfollow читает только списки подписчиков и подписок, необходимые для анализа.',
+    values: [
+      { icon: '🤝', title: 'Взаимные подписки', desc: 'Посмотрите аккаунты, с которыми вы подписаны друг на друга.' },
+      { icon: '↗️', title: 'Подписаны только вы', desc: 'Найдите аккаунты, не подписанные на вас.' },
+      { icon: '↙️', title: 'Подписаны только на вас', desc: 'Посмотрите подписчиков, на которых вы не подписаны.' },
+      { icon: '📈', title: 'Изменения со временем', desc: 'Сохраняйте снимки, чтобы видеть новых подписчиков и отписки.' },
+    ],
+    valueScope: 'Используются только данные подписчиков и подписок. Сообщения, публикации, фотографии и контакты не анализируются.',
+  },
+  es: {
+    heroTrust: ['Sin login', 'Sin contraseña', 'Solo el ZIP de datos de Instagram'],
+    trustHeading: 'Tu cuenta permanece desconectada',
+    trust: [
+      { icon: '🔐', title: 'Sin login', desc: 'No solicitamos credenciales de Instagram.' },
+      { icon: '🔑', title: 'Sin OAuth', desc: 'Sin flujo de permisos de acceso.' },
+      { icon: '🚫', title: 'Sin API', desc: 'Sin llamadas a la API de Instagram.' },
+      { icon: '🔌', title: 'Sin conexión', desc: 'Tu cuenta permanece desconectada.' },
+      { icon: '📦', title: 'ZIP oficial', desc: 'Tú eliges el archivo de exportación.' },
+      { icon: '🛡️', title: 'Privacidad primero', desc: 'El procesamiento queda en tu navegador.' },
+    ],
+    comparisonSubtitle: 'Compara el proceso, la exposición de la cuenta y el esfuerzo, no solo el resultado.',
+    safeColumn: 'SafeUnfollow', loginColumn: 'Apps con login', manualColumn: 'Hoja manual',
+    comparisonRows: [
+      ['Login necesario', 'No', 'Sí', 'No'], ['Conexión de cuenta', 'Ninguna', 'Obligatoria', 'Ninguna'],
+      ['Riesgo de cuenta', 'Sin acceso', 'Riesgo de acceso', 'Ninguno'], ['Privacidad', 'Procesamiento local', 'Datos compartidos', 'Archivo local'],
+      ['Instantáneas', 'Ilimitadas con Premium', 'Varía', 'Copias manuales'], ['CSV / historial', 'Incluido con Premium', 'Varía', 'Configuración manual'],
+    ],
+    faqExtras: [
+      { q: '¿Mis datos son privados?', a: 'Sí. Tus datos se procesan localmente y no se envían a los servidores de SafeUnfollow.' },
+      { q: '¿Qué incluye Premium?', a: 'Instantáneas ilimitadas, historial de cambios y CSV, sin login ni conexión de cuenta.' },
+    ],
+    howCta: 'Subir ZIP de datos de Instagram', howCtaNote: 'Sin login ni contraseña',
+    premiumEyebrow: 'Empieza gratis. Mejora cuando necesites historial.', premiumSecondary: 'Analizar un ZIP gratis primero',
+    premiumNote: 'Premium añade historial, no acceso a la cuenta. El flujo local sin login se mantiene.',
+    valueHeading: 'Un ZIP. Una visión más clara de tus relaciones.',
+    valueSubtitle: 'SafeUnfollow solo lee las listas de seguidores y seguidos necesarias para estos análisis.',
+    values: [
+      { icon: '🤝', title: 'Conexiones mutuas', desc: 'Ve las cuentas que se siguen mutuamente contigo.' },
+      { icon: '↗️', title: 'Solo tú sigues', desc: 'Encuentra cuentas que no te siguen de vuelta.' },
+      { icon: '↙️', title: 'Solo te siguen', desc: 'Ve seguidores a los que aún no sigues.' },
+      { icon: '📈', title: 'Cambios en el tiempo', desc: 'Guarda instantáneas para detectar seguidores y unfollows.' },
+    ],
+    valueScope: 'Solo se usan datos de seguidores y seguidos. No se analizan mensajes, publicaciones, fotos ni contactos.',
   },
 } as const;
 
@@ -88,8 +178,7 @@ function LandingContent() {
     setLang(detectLang(searchParams));
   }, [searchParams]);
 
-  const langParam = lang !== 'en' ? `?lang=${lang}` : '';
-  const localizedConversionCopy = lang === 'en' || lang === 'ko' ? conversionCopy[lang] : null;
+  const localizedConversionCopy = conversionCopy[lang];
 
   const baseFaqs = [
     { q: t('faq.q1', lang), a: t('faq.a1', lang) },
@@ -125,7 +214,7 @@ function LandingContent() {
       icon: '✅',
     },
   ];
-  const visibleHowSteps = lang === 'en' || lang === 'ko' ? howSteps : howSteps.slice(0, 3);
+  const visibleHowSteps = howSteps;
 
   const features = [
     {
@@ -169,7 +258,8 @@ function LandingContent() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
-              href={`${localizedConversionCopy ? '/upload' : '/guide'}${langParam}`}
+              href={localizedPath(localizedConversionCopy ? '/upload' : '/guide', lang)}
+              onClick={() => trackFunnel('home_upload_click', lang)}
               data-cta={localizedConversionCopy ? 'upload-zip' : 'request-data-guide'}
               data-cta-location="hero"
               className="inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700 text-white font-semibold px-7 py-3.5 rounded-full text-sm transition-colors shadow-lg shadow-pink-200"
@@ -180,7 +270,7 @@ function LandingContent() {
               </svg>
             </Link>
             <Link
-              href={`${localizedConversionCopy ? '/guide' : '/upload'}${langParam}`}
+              href={localizedPath(localizedConversionCopy ? '/guide' : '/upload', lang)}
               data-cta={localizedConversionCopy ? 'request-data-guide' : 'upload-zip'}
               data-cta-location="hero"
               className="inline-flex items-center justify-center border border-zinc-200 bg-white hover:border-pink-200 hover:text-pink-600 text-zinc-700 font-semibold px-7 py-3.5 rounded-full text-sm transition-colors"
@@ -207,6 +297,29 @@ function LandingContent() {
           )}
         </div>
       </section>
+
+      {localizedConversionCopy && (
+        <section id="analysis-value" data-section="analysis-value" className="py-16 bg-white border-b border-zinc-100" aria-labelledby="analysis-value-heading">
+          <div className="max-w-5xl mx-auto px-4">
+            <h2 id="analysis-value-heading" className="text-2xl font-bold text-zinc-900 text-center mb-3">
+              {localizedConversionCopy.valueHeading}
+            </h2>
+            <p className="text-sm text-zinc-500 text-center max-w-2xl mx-auto mb-9 leading-relaxed">
+              {localizedConversionCopy.valueSubtitle}
+            </p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {localizedConversionCopy.values.map((value) => (
+                <article key={value.title} className="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
+                  <div className="text-2xl mb-3" aria-hidden="true">{value.icon}</div>
+                  <h3 className="text-sm font-bold text-zinc-900 mb-2">{value.title}</h3>
+                  <p className="text-xs leading-relaxed text-zinc-500">{value.desc}</p>
+                </article>
+              ))}
+            </div>
+            <p className="mt-6 text-center text-xs text-zinc-400">{localizedConversionCopy.valueScope}</p>
+          </div>
+        </section>
+      )}
 
       {localizedConversionCopy && (
         <section id="trust" data-section="trust-badges" className="border-b border-zinc-100 bg-zinc-50 py-10" aria-labelledby="trust-heading">
@@ -247,7 +360,7 @@ function LandingContent() {
         {localizedConversionCopy && (
           <div className="mt-10 text-center">
             <Link
-              href={`/upload${langParam}`}
+              href={localizedPath('/upload', lang)}
               data-cta="upload-zip"
               data-cta-location="how-it-works"
               className="inline-flex items-center gap-2 bg-zinc-900 hover:bg-zinc-700 text-white font-semibold px-7 py-3.5 rounded-full text-sm transition-colors"
@@ -374,7 +487,7 @@ function LandingContent() {
           </ul>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => { trackFunnel('premium_opened', lang, { source: 'home' }); setShowModal(true); }}
               data-cta="premium-upgrade"
               data-cta-location="premium-section"
               className="bg-white text-pink-600 font-bold px-7 py-3.5 rounded-full text-sm hover:bg-pink-50 transition-colors shadow-lg"
@@ -384,7 +497,7 @@ function LandingContent() {
             </button>
             {localizedConversionCopy && (
               <Link
-                href={`/upload${langParam}`}
+                href={localizedPath('/upload', lang)}
                 data-cta="free-zip-check"
                 data-cta-location="premium-section"
                 className="text-sm font-semibold text-white/80 hover:text-white underline underline-offset-4 transition-colors"

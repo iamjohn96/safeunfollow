@@ -7,6 +7,7 @@ import { t, detectLang, type Lang } from '@/utils/i18n';
 import { parseFile, type ParsedData } from '@/utils/parser';
 import { Dashboard } from '@/components/Dashboard';
 import { Suspense } from 'react';
+import { trackFunnel } from '@/utils/analytics';
 
 function UploadContent() {
   const searchParams = useSearchParams();
@@ -16,8 +17,37 @@ function UploadContent() {
   const [errorKey, setErrorKey] = useState<'upload.error.invalid' | 'upload.error.missing'>('upload.error.invalid');
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const uploadValues: Record<Lang, { eyebrow: string; heading: string; items: string[]; scope: string }> = {
+    en: {
+      eyebrow: 'Instagram Data Analyzer',
+      heading: 'Get four relationship insights from one ZIP',
+      items: ['Mutuals', "You follow, they don't", "They follow, you don't", 'Snapshot changes'],
+      scope: 'Only follower and following JSON files are read. Messages and photos are not analyzed.',
+    },
+    pt: {
+      eyebrow: 'Instagram Data Analyzer',
+      heading: 'Quatro análises de relacionamento em um ZIP',
+      items: ['Conexões mútuas', 'Só você segue', 'Só seguem você', 'Mudanças entre capturas'],
+      scope: 'Apenas os JSON de seguidores e seguidos são lidos. Mensagens e fotos não são analisadas.',
+    },
+    ru: {
+      eyebrow: 'Instagram Data Analyzer',
+      heading: 'Четыре вида анализа связей из одного ZIP',
+      items: ['Взаимные подписки', 'Подписаны только вы', 'Подписаны только на вас', 'Изменения снимков'],
+      scope: 'Читаются только JSON подписчиков и подписок. Сообщения и фотографии не анализируются.',
+    },
+    es: {
+      eyebrow: 'Instagram Data Analyzer',
+      heading: 'Obtén cuatro análisis de relaciones desde un ZIP',
+      items: ['Seguimiento mutuo', 'Solo tú sigues', 'Solo te siguen', 'Cambios entre instantáneas'],
+      scope: 'Solo se leen los JSON de seguidores y seguidos. No se analizan mensajes ni fotos.',
+    },
+  };
+  const uploadValue = uploadValues[lang];
 
   useEffect(() => {
+    // Locale and saved analysis depend on browser-only state after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLang(detectLang(searchParams));
     // Restore from localStorage if available
     try {
@@ -29,6 +59,7 @@ function UploadContent() {
   }, [searchParams]);
 
   const processFile = useCallback(async (file: File) => {
+    trackFunnel('upload_started', lang, { file_type: file.name.toLowerCase().endsWith('.zip') ? 'zip' : 'json' });
     const name = file.name.toLowerCase();
     if (!name.endsWith('.zip') && !name.endsWith('.json')) {
       setErrorKey('upload.error.invalid');
@@ -45,13 +76,14 @@ function UploadContent() {
         return;
       }
       localStorage.setItem('lastParsedData', JSON.stringify(data));
+      trackFunnel('analysis_completed', lang, { followers: data.followers.length, following: data.following.length });
       setParsedData(data);
       setStatus('idle');
     } catch {
       setErrorKey('upload.error.missing');
       setStatus('error');
     }
-  }, []);
+  }, [lang]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -82,7 +114,7 @@ function UploadContent() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            {t('common.back', lang)} / Upload new file
+            {t('common.back', lang)} / {t('upload.new_file', lang)}
           </button>
         </div>
         <Dashboard data={parsedData} lang={lang} onReset={() => setParsedData(null)} />
@@ -95,10 +127,21 @@ function UploadContent() {
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-pink-600 mb-2">{uploadValue.eyebrow}</p>
           <h1 id="upload-heading" className="text-2xl font-bold text-zinc-900 mb-2">
             {t('upload.title', lang)}
           </h1>
           <p className="text-sm text-zinc-500">{t('upload.subtitle', lang)}</p>
+        </div>
+
+        <div className="mb-6 rounded-2xl border border-pink-100 bg-pink-50/60 p-5">
+          <h2 className="text-sm font-bold text-zinc-900 mb-3">{uploadValue.heading}</h2>
+          <ul className="grid grid-cols-2 gap-2 text-xs text-zinc-600">
+            {uploadValue.items.map(item => (
+              <li key={item} className="flex items-center gap-1.5"><span className="text-green-600">✓</span>{item}</li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs leading-relaxed text-zinc-400">{uploadValue.scope}</p>
         </div>
 
         {/* Drop zone */}

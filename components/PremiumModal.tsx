@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { t, type Lang } from '@/utils/i18n';
+import { trackFunnel } from '@/utils/analytics';
 
 interface PremiumModalProps {
   lang: Lang;
@@ -88,6 +89,7 @@ export function PremiumModal({ lang, onClose, onVerified }: PremiumModalProps) {
           {/* CTA button */}
           <a
             href={tab === 'yearly' ? yearlyUrl : monthlyUrl}
+            onClick={() => trackFunnel('premium_checkout_click', lang, { plan: tab })}
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full text-center bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm"

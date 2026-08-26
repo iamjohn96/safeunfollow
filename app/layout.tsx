@@ -6,24 +6,28 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { Suspense } from 'react';
 import { Analytics } from '@vercel/analytics/next';
+import { localeAlternates } from '@/lib/locale-metadata';
+import LocaleDocumentLanguage from '@/components/LocaleDocumentLanguage';
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
 
 export const metadata: Metadata = {
-  title: 'SafeUnfollow – See Who Unfollowed You on Instagram | Free & Safe',
+  title: 'SafeUnfollow – Private Instagram Data Analyzer',
   description:
-    'Track who unfollowed you on Instagram safely. No login required, no ban risk. 100% client-side processing.',
+    'Analyze your official Instagram Data ZIP for non-followers, mutuals, followers-only accounts, and follower changes. No login, OAuth, API, or account connection.',
   keywords: [
     'instagram unfollower tracker',
     'who unfollowed me instagram',
     'instagram unfollow checker',
     'instagram followers tracker',
     'see who unfollowed me instagram',
+    'instagram data analyzer',
+    'instagram data export analyzer',
   ],
   metadataBase: new URL('https://safeunfollow.com'),
   openGraph: {
-    title: 'SafeUnfollow – See Who Unfollowed You on Instagram',
-    description: 'Track who unfollowed you on Instagram. No login required. 100% private.',
+    title: 'SafeUnfollow – Private Instagram Data Analyzer',
+    description: 'Turn your official Instagram Data ZIP into useful relationship insights. No login or account connection.',
     url: 'https://safeunfollow.com',
     siteName: 'SafeUnfollow',
     type: 'website',
@@ -31,15 +35,16 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SafeUnfollow – Instagram Unfollow Tracker',
-    description: 'Track who unfollowed you on Instagram. No login required. 100% private.',
+    title: 'SafeUnfollow – Private Instagram Data Analyzer',
+    description: 'Analyze non-followers, mutuals, followers-only accounts, and changes from your Instagram Data ZIP.',
   },
   robots: { index: true, follow: true },
+  alternates: localeAlternates(),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geist.variable} h-full`}>
+    <html lang="en" className={`${geist.variable} h-full`} data-scroll-behavior="smooth">
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-8QW7KP3MZ7"
@@ -55,6 +60,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Script>
       </head>
       <body className="min-h-full flex flex-col bg-zinc-50">
+        <LocaleDocumentLanguage />
         <Suspense>
           <Header />
         </Suspense>
