@@ -6,6 +6,10 @@ export interface InstagramAccount {
 export interface ParsedData {
   followers: InstagramAccount[];
   following: InstagramAccount[];
+  fingerprint?: string;
+  profileId?: string;
+  observedAt?: number;
+  schemaVersion?: 2;
 }
 
 interface StringListEntry {
@@ -27,8 +31,8 @@ function parseAccountList(data: unknown): InstagramAccount[] {
   for (const item of data as InstagramExportItem[]) {
     if (!item.string_list_data || !Array.isArray(item.string_list_data)) continue;
     for (const entry of item.string_list_data) {
-      if (entry.value) {
-        accounts.push({ username: entry.value, timestamp: entry.timestamp ?? 0 });
+      if (typeof entry.value === 'string' && /^[a-zA-Z0-9._]{1,30}$/.test(entry.value.trim())) {
+        accounts.push({ username: entry.value.trim().toLowerCase(), timestamp: Number.isFinite(entry.timestamp) && entry.timestamp > 0 ? entry.timestamp : 0 });
       }
     }
   }
@@ -71,27 +75,47 @@ function parseFollowersJson(data: unknown): InstagramAccount[] {
 export async function parseJsonFiles(files: { name: string; content: string }[]): Promise<ParsedData> {
   let followers: InstagramAccount[] = [];
   let following: InstagramAccount[] = [];
+  const seen = new Set<string>();
+  const parts: Record<string, number[]> = { followers: [], following: [] };
 
   for (const file of files) {
-    const name = file.name.toLowerCase();
+    const name = file.name.toLowerCase().split('/').pop() ?? '';
+    const kind = /^followers(?:_\d+)?\.json$/.test(name) ? 'followers' : /^following(?:_\d+)?\.json$/.test(name) ? 'following' : null;
+    if (!kind) continue;
+    const part = name.match(/_(\d+)\.json$/);
+    if (part) parts[kind].push(Number(part[1]));
     let parsed: unknown;
 
     try {
       parsed = JSON.parse(file.content);
     } catch {
-      continue;
+      throw new Error('invalid-relationship-file');
     }
 
-    if (name.includes('followers_1') || (name.includes('followers') && !name.includes('following'))) {
+    const list = Array.isArray(parsed) ? parsed : parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>)[`relationships_${kind}`] : undefined;
+    if (!Array.isArray(list)) throw new Error('invalid-relationship-file');
+    for (const item of list) {
+      if (!item || !Array.isArray(item.string_list_data) || !item.string_list_data.length || item.string_list_data.some((entry: StringListEntry) => !entry || typeof entry.value !== 'string' || !/^[a-zA-Z0-9._]{1,30}$/.test(entry.value.trim()))) throw new Error('invalid-relationship-file');
+    }
+    seen.add(kind);
+    if (kind === 'followers') {
       const result = parseFollowersJson(parsed);
-      if (result.length > 0) followers = result;
-    } else if (name.includes('following')) {
+      followers.push(...result);
+    } else {
       const result = parseFollowingJson(parsed);
-      if (result.length > 0) following = result;
+      following.push(...result);
     }
   }
 
-  return { followers, following };
+  if (seen.size !== 2) throw new Error('missing-relationship-files');
+  for (const values of Object.values(parts)) {
+    const sorted = [...new Set(values)].sort((a, b) => a - b);
+    if (sorted.some((value, i) => value !== i + 1)) throw new Error('missing-relationship-part');
+  }
+  const unique = (accounts: InstagramAccount[]) => [...new Map(accounts.map(a => [a.username, a])).values()].sort((a, b) => a.username.localeCompare(b.username));
+  followers = unique(followers);
+  following = unique(following);
+  return { followers, following, schemaVersion: 2 };
 }
 
 export async function parseZip(file: File): Promise<ParsedData> {
@@ -121,7 +145,9 @@ export async function parseFile(file: File): Promise<ParsedData> {
   const name = file.name.toLowerCase();
 
   if (name.endsWith('.zip')) {
-    return parseZip(file);
+    const data = await parseZip(file);
+    const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
+    return { ...data, fingerprint: Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('') };
   }
 
   if (name.endsWith('.json')) {

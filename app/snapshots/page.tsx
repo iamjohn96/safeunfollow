@@ -4,7 +4,10 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { t, detectLang, type Lang } from '@/utils/i18n';
-import { computeChanges, type ParsedData } from '@/utils/parser';
+import { type ParsedData } from '@/utils/parser';
+import { compareAudience, decodeSnapshots } from '@/utils/audience';
+import { audienceCopy } from '@/utils/audience-copy';
+import { ChangeSummary } from '@/components/AudienceInsights';
 import { PremiumModal } from '@/components/PremiumModal';
 import { Suspense } from 'react';
 
@@ -70,25 +73,30 @@ function SnapshotsContent() {
   const [selected, setSelected] = useState<string[]>([]);
   const [isPremium, setIsPremium] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [storageError, setStorageError] = useState(false);
 
   useEffect(() => {
     // Language and saved analysis depend on browser-only state after hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLang(detectLang(searchParams));
-    setIsPremium(localStorage.getItem('isPremium') === 'true');
     try {
+      setIsPremium(localStorage.getItem('isPremium') === 'true');
       const raw = localStorage.getItem('snapshots');
-      if (raw) setSnapshots(JSON.parse(raw));
+      setSnapshots(decodeSnapshots(raw));
     } catch {
       setSnapshots([]);
+      setStorageError(true);
     }
   }, [searchParams]);
 
   function deleteSnapshot(id: string) {
     const updated = snapshots.filter(s => s.id !== id);
-    setSnapshots(updated);
-    setSelected(prev => prev.filter(s => s !== id));
-    localStorage.setItem('snapshots', JSON.stringify(updated));
+    try {
+      localStorage.setItem('snapshots', JSON.stringify(updated));
+      setSnapshots(updated);
+      setSelected(prev => prev.filter(s => s !== id));
+      setStorageError(false);
+    } catch { setStorageError(true); }
   }
 
   function toggleSelect(id: string) {
@@ -102,9 +110,10 @@ function SnapshotsContent() {
   const langParam = lang !== 'en' ? `?lang=${lang}` : '';
 
   // Comparison results
-  const compareA = selected[0] ? snapshots.find(s => s.id === selected[0]) : null;
-  const compareB = selected[1] ? snapshots.find(s => s.id === selected[1]) : null;
-  const changes = compareA && compareB ? computeChanges(compareA.data, compareB.data) : null;
+  const ordered = snapshots.filter(s => selected.includes(s.id)).sort((a, b) => (a.data.observedAt ?? a.timestamp) - (b.data.observedAt ?? b.timestamp));
+  const compareA = ordered[0];
+  const compareB = ordered[1];
+  const changes = compareA && compareB ? compareAudience(compareA.data, compareB.data) : null;
 
   return (
     <>
@@ -117,6 +126,7 @@ function SnapshotsContent() {
       )}
 
       <section className="max-w-2xl mx-auto px-4 py-10" aria-labelledby="snapshots-heading">
+        {storageError && <p role="alert">{audienceCopy[lang].storage}</p>}
         <div className="mb-8">
           <h1 id="snapshots-heading" className="text-2xl font-bold text-zinc-900 mb-1">
             {t('snapshots.title', lang)}
@@ -192,6 +202,7 @@ function SnapshotsContent() {
                   Comparing: {compareA?.label} → {compareB?.label}
                 </h2>
 
+                <ChangeSummary a={compareA.data} b={compareB.data} lang={lang} />
                 <section>
                   <h3 className="text-sm font-semibold text-zinc-700 mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-red-400 inline-block" />
@@ -248,7 +259,7 @@ function SnapshotsContent() {
                   )}
                 </section>
               </div>
-            ) : null}
+            ) : <p role="status" className="text-sm text-amber-700">{audienceCopy[lang].legacy}</p>}
           </div>
         )}
 

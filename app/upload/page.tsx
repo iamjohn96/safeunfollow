@@ -52,7 +52,10 @@ function UploadContent() {
     // Restore from localStorage if available
     try {
       const raw = localStorage.getItem('lastParsedData');
-      if (raw) setParsedData(JSON.parse(raw));
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved.schemaVersion === 2 && Array.isArray(saved.followers) && Array.isArray(saved.following)) setParsedData(saved);
+      }
     } catch {
       // ignore
     }
@@ -61,7 +64,7 @@ function UploadContent() {
   const processFile = useCallback(async (file: File) => {
     trackFunnel('upload_started', lang, { file_type: file.name.toLowerCase().endsWith('.zip') ? 'zip' : 'json' });
     const name = file.name.toLowerCase();
-    if (!name.endsWith('.zip') && !name.endsWith('.json')) {
+    if (!name.endsWith('.zip')) {
       setErrorKey('upload.error.invalid');
       setStatus('error');
       return;
@@ -70,11 +73,6 @@ function UploadContent() {
     setStatus('processing');
     try {
       const data = await parseFile(file);
-      if (data.followers.length === 0 && data.following.length === 0) {
-        setErrorKey('upload.error.missing');
-        setStatus('error');
-        return;
-      }
       localStorage.setItem('lastParsedData', JSON.stringify(data));
       trackFunnel('analysis_completed', lang, { followers: data.followers.length, following: data.following.length });
       setParsedData(data);
@@ -166,7 +164,7 @@ function UploadContent() {
           <input
             ref={inputRef}
             type="file"
-            accept=".zip,.json"
+            accept=".zip"
             onChange={handleChange}
             className="sr-only"
             aria-hidden="true"

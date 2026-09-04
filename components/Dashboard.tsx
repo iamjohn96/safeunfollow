@@ -9,10 +9,12 @@ import {
   computeNonFollowers,
   computeFollowersOnly,
   computeMutuals,
-  computeChanges,
   exportToCsv,
 } from '@/utils/parser';
 import { trackFunnel } from '@/utils/analytics';
+import { qualified, previousSnapshot, compareAudience, decodeSnapshots } from '@/utils/audience';
+import { audienceCopy } from '@/utils/audience-copy';
+import { AudienceInsights } from './AudienceInsights';
 
 interface Snapshot {
   id: string;
@@ -117,13 +119,19 @@ function LockedOverlay({ lang, onUnlock }: { lang: Lang; onUnlock: () => void })
   );
 }
 
-export function Dashboard({ data, lang, onReset }: DashboardProps) {
+export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
+  const [today] = useState(() => new Date().toISOString().slice(0, 10));
+  const [profile, setProfile] = useState(inputData.profileId ?? '');
+  const [date, setDate] = useState(inputData.observedAt ? new Date(inputData.observedAt).toISOString().slice(0, 10) : '');
+  const data: ParsedData = { ...inputData, profileId: profile.trim().replace(/^@/, '').toLowerCase(), observedAt: date && date <= today ? Date.parse(`${date}T00:00:00Z`) : undefined };
+  const copy = audienceCopy[lang];
   const [tab, setTab] = useState<'nonfollowers' | 'followersOnly' | 'mutuals' | 'changes'>('nonfollowers');
   const [isPremium, setIsPremium] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [snapshotMsg, setSnapshotMsg] = useState('');
   const [snapshotSaved, setSnapshotSaved] = useState(false);
+  const [storageReady, setStorageReady] = useState(false);
   const [search, setSearch] = useState('');
 
   const nonFollowers = computeNonFollowers(data);
@@ -164,9 +172,11 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
   const loadSnapshots = useCallback(() => {
     try {
       const raw = localStorage.getItem('snapshots');
-      if (raw) setSnapshots(JSON.parse(raw));
+      setSnapshots(decodeSnapshots(raw));
+      setStorageReady(true);
     } catch {
       setSnapshots([]);
+      setStorageReady(false);
     }
   }, []);
 
@@ -178,29 +188,36 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
   }, [loadSnapshots]);
 
   function saveSnapshot() {
+    if (!storageReady) { setSnapshotMsg(copy.storage); return; }
+    if (!qualified(data)) { setSnapshotMsg(copy.invalid); return; }
+    if (snapshots.some(s => (data.fingerprint && s.data.fingerprint === data.fingerprint) || (s.data.profileId === data.profileId && s.data.observedAt === data.observedAt))) { setSnapshotMsg(copy.duplicate); return; }
     // Gate: free users can only have 1 snapshot
     if (!isPremium && snapshots.length >= 1) {
       setShowModal(true);
       return;
     }
 
+    // This timestamp is created only by the save button event, never during render.
+    // eslint-disable-next-line react-hooks/purity
+    const savedAt = Date.now();
     const newSnap: Snapshot = {
-      id: Date.now().toString(),
-      timestamp: Date.now(),
-      label: new Date().toLocaleDateString(),
+      id: savedAt.toString(),
+      timestamp: savedAt,
+      label: `${data.profileId} · ${date}`,
       data,
     };
 
     const updated = [...snapshots, newSnap];
-    localStorage.setItem('snapshots', JSON.stringify(updated));
+    try { localStorage.setItem('snapshots', JSON.stringify(updated)); }
+    catch { setSnapshotMsg(copy.storage); return; }
     setSnapshots(updated);
     setSnapshotMsg(t('snapshots.saved', lang));
     setSnapshotSaved(true);
     setTimeout(() => setSnapshotMsg(''), 3000);
   }
 
-  const prevSnapshot = snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
-  const changes = prevSnapshot ? computeChanges(prevSnapshot.data, data) : null;
+  const prevSnapshot = previousSnapshot(snapshots, data);
+  const changes = prevSnapshot ? compareAudience(prevSnapshot.data, data) : null;
 
   const filteredNonFollowers = nonFollowers.filter(a =>
     a.username.toLowerCase().includes(search.toLowerCase())
@@ -227,6 +244,12 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
           <p className="text-sm text-zinc-500 leading-relaxed">{relationshipCopy.description}</p>
         </div>
         {/* Stats bar */}
+        <div className="mb-6 rounded-xl border p-4 space-y-3">
+          <p className="text-xs text-zinc-500">{copy.setup}</p>
+          <label className="block text-sm">{copy.profile}<input className="block border rounded p-2 w-full" value={profile} onChange={e => { setProfile(e.target.value); setSnapshotSaved(false); }} maxLength={31} autoComplete="off" /></label>
+          <label className="block text-sm">{copy.date}<input type="date" className="block border rounded p-2 w-full" max={today} value={date} onChange={e => { setDate(e.target.value); setSnapshotSaved(false); }} /></label>
+        </div>
+        {qualified(data) && <AudienceInsights key={data.profileId} data={data} snapshots={snapshots} lang={lang} isPremium={isPremium} />}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="bg-white border border-zinc-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-zinc-900">{data.following.length}</div>
@@ -274,7 +297,7 @@ export function Dashboard({ data, lang, onReset }: DashboardProps) {
           )}
 
           {snapshotMsg && (
-            <span className="text-sm text-green-600 font-medium">{snapshotMsg}</span>
+            <span role="status" className="text-sm text-zinc-700 font-medium">{snapshotMsg}</span>
           )}
         </div>
 
