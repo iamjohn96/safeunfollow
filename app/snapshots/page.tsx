@@ -10,6 +10,7 @@ import { audienceCopy } from '@/utils/audience-copy';
 import { ChangeSummary } from '@/components/AudienceInsights';
 import { PremiumModal } from '@/components/PremiumModal';
 import { Suspense } from 'react';
+import { usePremium } from '@/utils/use-premium';
 
 interface Snapshot {
   id: string;
@@ -71,7 +72,7 @@ function SnapshotsContent() {
   const [lang, setLang] = useState<Lang>('en');
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [isPremium, setIsPremium] = useState(false);
+  const [isPremium, setIsPremium] = usePremium();
   const [showModal, setShowModal] = useState(false);
   const [storageError, setStorageError] = useState(false);
 
@@ -80,7 +81,6 @@ function SnapshotsContent() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLang(detectLang(searchParams));
     try {
-      setIsPremium(localStorage.getItem('isPremium') === 'true');
       const raw = localStorage.getItem('snapshots');
       setSnapshots(decodeSnapshots(raw));
     } catch {

@@ -15,6 +15,8 @@ import { trackFunnel } from '@/utils/analytics';
 import { qualified, previousSnapshot, compareAudience, decodeSnapshots } from '@/utils/audience';
 import { audienceCopy } from '@/utils/audience-copy';
 import { AudienceInsights } from './AudienceInsights';
+import { exportTimestamp, persistAnalysisDraft } from '@/utils/analysis-draft';
+import { usePremium } from '@/utils/use-premium';
 
 interface Snapshot {
   id: string;
@@ -123,10 +125,10 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
   const [today] = useState(() => new Date().toISOString().slice(0, 10));
   const [profile, setProfile] = useState(inputData.profileId ?? '');
   const [date, setDate] = useState(inputData.observedAt ? new Date(inputData.observedAt).toISOString().slice(0, 10) : '');
-  const data: ParsedData = { ...inputData, profileId: profile.trim().replace(/^@/, '').toLowerCase(), observedAt: date && date <= today ? Date.parse(`${date}T00:00:00Z`) : undefined };
+  const data: ParsedData = { ...inputData, profileId: profile.trim().replace(/^@/, '').toLowerCase(), observedAt: exportTimestamp(date, today) };
   const copy = audienceCopy[lang];
   const [tab, setTab] = useState<'nonfollowers' | 'followersOnly' | 'mutuals' | 'changes'>('nonfollowers');
-  const [isPremium, setIsPremium] = useState(false);
+  const [isPremium, setIsPremium] = usePremium();
   const [showModal, setShowModal] = useState(false);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [snapshotMsg, setSnapshotMsg] = useState('');
@@ -183,7 +185,6 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
   useEffect(() => {
     // Premium status and snapshots are browser-local and available only after hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setIsPremium(localStorage.getItem('isPremium') === 'true');
     loadSnapshots();
   }, [loadSnapshots]);
 
@@ -246,8 +247,8 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
         {/* Stats bar */}
         <div className="mb-6 rounded-xl border p-4 space-y-3">
           <p className="text-xs text-zinc-500">{copy.setup}</p>
-          <label className="block text-sm">{copy.profile}<input className="block border rounded p-2 w-full" value={profile} onChange={e => { setProfile(e.target.value); setSnapshotSaved(false); }} maxLength={31} autoComplete="off" /></label>
-          <label className="block text-sm">{copy.date}<input type="date" className="block border rounded p-2 w-full" max={today} value={date} onChange={e => { setDate(e.target.value); setSnapshotSaved(false); }} /></label>
+          <label className="block text-sm">{copy.profile}<input className="block border rounded p-2 w-full" value={profile} onChange={e => { setProfile(e.target.value); persistAnalysisDraft(localStorage, inputData, e.target.value, date, today); setSnapshotSaved(false); }} maxLength={31} autoComplete="off" /></label>
+          <label className="block text-sm">{copy.date}<input type="date" className="block border rounded p-2 w-full" max={today} defaultValue={date} onChange={e => { setDate(e.target.value); persistAnalysisDraft(localStorage, inputData, profile, e.target.value, today); setSnapshotSaved(false); }} /></label>
         </div>
         {qualified(data) && <AudienceInsights key={data.profileId} data={data} snapshots={snapshots} lang={lang} isPremium={isPremium} />}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
