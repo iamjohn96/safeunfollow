@@ -7,7 +7,7 @@ import { t, detectLang, type Lang } from '@/utils/i18n';
 import { parseFile, type ParsedData } from '@/utils/parser';
 import { Dashboard } from '@/components/Dashboard';
 import { Suspense } from 'react';
-import { trackFunnel } from '@/utils/analytics';
+import { trackFunnel, uploadFailureReason } from '@/utils/analytics';
 
 function UploadContent() {
   const searchParams = useSearchParams();
@@ -62,22 +62,26 @@ function UploadContent() {
   }, [searchParams]);
 
   const processFile = useCallback(async (file: File) => {
-    trackFunnel('upload_started', lang, { file_type: file.name.toLowerCase().endsWith('.zip') ? 'zip' : 'json' });
+    trackFunnel('upload_started', lang, { file_type: file.name.toLowerCase().endsWith('.zip') ? 'zip' : 'other' });
     const name = file.name.toLowerCase();
     if (!name.endsWith('.zip')) {
+      trackFunnel('upload_failed', lang, { failure_reason: 'unsupported_format' });
       setErrorKey('upload.error.invalid');
       setStatus('error');
       return;
     }
 
     setStatus('processing');
+    let stage: 'parse' | 'storage' = 'parse';
     try {
       const data = await parseFile(file);
+      stage = 'storage';
       localStorage.setItem('lastParsedData', JSON.stringify(data));
       trackFunnel('analysis_completed', lang, { followers: data.followers.length, following: data.following.length });
       setParsedData(data);
       setStatus('idle');
-    } catch {
+    } catch (error) {
+      trackFunnel('upload_failed', lang, { failure_reason: stage === 'storage' ? 'browser_storage_failed' : uploadFailureReason(error) });
       setErrorKey('upload.error.missing');
       setStatus('error');
     }

@@ -189,11 +189,13 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
   }, [loadSnapshots]);
 
   function saveSnapshot() {
-    if (!storageReady) { setSnapshotMsg(copy.storage); return; }
-    if (!qualified(data)) { setSnapshotMsg(copy.invalid); return; }
-    if (snapshots.some(s => (data.fingerprint && s.data.fingerprint === data.fingerprint) || (s.data.profileId === data.profileId && s.data.observedAt === data.observedAt))) { setSnapshotMsg(copy.duplicate); return; }
+    trackFunnel('snapshot_save_started', lang);
+    if (!storageReady) { trackFunnel('snapshot_save_failed', lang, { failure_reason: 'browser_storage_failed' }); setSnapshotMsg(copy.storage); return; }
+    if (!qualified(data)) { trackFunnel('snapshot_save_failed', lang, { failure_reason: 'invalid_metadata' }); setSnapshotMsg(copy.invalid); return; }
+    if (snapshots.some(s => (data.fingerprint && s.data.fingerprint === data.fingerprint) || (s.data.profileId === data.profileId && s.data.observedAt === data.observedAt))) { trackFunnel('snapshot_save_failed', lang, { failure_reason: 'duplicate_snapshot' }); setSnapshotMsg(copy.duplicate); return; }
     // Gate: free users can only have 1 snapshot
     if (!isPremium && snapshots.length >= 1) {
+      trackFunnel('snapshot_save_failed', lang, { failure_reason: 'premium_required' });
       setShowModal(true);
       return;
     }
@@ -210,7 +212,8 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
 
     const updated = [...snapshots, newSnap];
     try { localStorage.setItem('snapshots', JSON.stringify(updated)); }
-    catch { setSnapshotMsg(copy.storage); return; }
+    catch { trackFunnel('snapshot_save_failed', lang, { failure_reason: 'browser_storage_failed' }); setSnapshotMsg(copy.storage); return; }
+    trackFunnel('snapshot_saved', lang);
     setSnapshots(updated);
     setSnapshotMsg(t('snapshots.saved', lang));
     setSnapshotSaved(true);
