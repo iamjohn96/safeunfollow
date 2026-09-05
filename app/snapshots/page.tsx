@@ -104,6 +104,12 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
   }
 
   const langParam = lang !== 'en' ? `?lang=${lang}` : '';
+  const localHistory = {
+    en: 'This history stays only in this browser and device. Clearing site data, private browsing, or switching devices can remove or hide it.',
+    pt: 'Este histórico fica somente neste navegador e dispositivo. Limpar dados do site, usar navegação privada ou trocar de dispositivo pode removê-lo.',
+    ru: 'История хранится только в этом браузере и на этом устройстве. Очистка данных сайта, приватный режим или смена устройства могут удалить её.',
+    es: 'Este historial queda solo en este navegador y dispositivo. Borrar los datos del sitio, usar navegación privada o cambiar de dispositivo puede eliminarlo.',
+  }[lang];
 
   // Comparison results
   const ordered = snapshots.filter(s => selected.includes(s.id)).sort((a, b) => (a.data.observedAt ?? a.timestamp) - (b.data.observedAt ?? b.timestamp));
@@ -128,6 +134,7 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
             {t('snapshots.title', lang)}
           </h1>
           <p className="text-sm text-zinc-500">{t('snapshots.subtitle', lang)}</p>
+          <p className="mt-2 text-xs leading-relaxed text-zinc-400">{localHistory}</p>
         </div>
 
         {!isPremium && snapshots.length >= 1 && (

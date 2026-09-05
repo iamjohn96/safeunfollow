@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis';
+import { createHash } from 'crypto';
 
 export const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
@@ -9,6 +10,8 @@ const premiumKey = (email: string): string => `premium:${email.toLowerCase().tri
 const subscriptionKey = (email: string): string => `subscription_id:${email.toLowerCase().trim()}`;
 const renewalKey = (email: string): string => `renewal_date:${email.toLowerCase().trim()}`;
 const cancelTokenKey = (email: string): string => `cancel_token:${email.toLowerCase().trim()}`;
+const restoreTokenKey = (email: string): string => `restore_token:${email.toLowerCase().trim()}`;
+const premiumSessionKey = (token: string): string => `premium_session:${createHash('sha256').update(token).digest('hex')}`;
 
 // ---------------------------------------------------------------------------
 // Premium email helpers
@@ -137,6 +140,8 @@ export async function getPremiumEmailsDueForReminder(): Promise<string[]> {
 // ---------------------------------------------------------------------------
 
 const CANCEL_TOKEN_TTL_SECONDS = 15 * 60;
+const RESTORE_TOKEN_TTL_SECONDS = 15 * 60;
+const PREMIUM_SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 export async function setCancelToken(email: string, token: string): Promise<void> {
   await redis.set(cancelTokenKey(email), token, { ex: CANCEL_TOKEN_TTL_SECONDS });
@@ -150,6 +155,28 @@ export async function getCancelToken(email: string): Promise<string | null> {
 
 export async function deleteCancelToken(email: string): Promise<void> {
   await redis.del(cancelTokenKey(email));
+}
+
+export async function setRestoreToken(email: string, token: string): Promise<void> {
+  await redis.set(restoreTokenKey(email), token, { ex: RESTORE_TOKEN_TTL_SECONDS });
+}
+
+export async function getRestoreToken(email: string): Promise<string | null> {
+  const val = await redis.get(restoreTokenKey(email));
+  return val === null || val === undefined ? null : String(val);
+}
+
+export async function deleteRestoreToken(email: string): Promise<void> {
+  await redis.del(restoreTokenKey(email));
+}
+
+export async function setPremiumSession(token: string, email: string): Promise<void> {
+  await redis.set(premiumSessionKey(token), email.toLowerCase().trim(), { ex: PREMIUM_SESSION_TTL_SECONDS });
+}
+
+export async function getPremiumSessionEmail(token: string): Promise<string | null> {
+  const val = await redis.get(premiumSessionKey(token));
+  return typeof val === 'string' ? val : null;
 }
 
 const OTP_FAIL_LIMIT = 5;

@@ -27,7 +27,7 @@ const conversionCopy = {
     comparisonRows: [
       ['Login required', 'No', 'Yes', 'No'],
       ['Account connection', 'None', 'Required', 'None'],
-      ['Ban risk', 'Zero — no account access', 'Account-access risk', 'None'],
+      ['Account access', 'None', 'Required', 'None'],
       ['Privacy', 'Local browser processing', 'Account data shared with app', 'Local file handling'],
       ['Repeat snapshots', 'Unlimited with Premium', 'Varies by app', 'Manual copies'],
       ['CSV / history export', 'Included with Premium', 'Varies by app', 'Manual setup'],

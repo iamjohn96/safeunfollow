@@ -147,6 +147,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
       followersOnly: "They follow, you don't", mutuals: 'Mutuals', changes: 'Changes',
       followersOnlyEmpty: 'You already follow back every follower.', mutualsEmpty: 'No mutual connections found yet.',
       search: 'Search accounts…', noResults: 'No matching accounts',
+      localHistory: 'Snapshots stay only in this browser and device. Clearing site data, private browsing, or switching devices can remove or hide the history.',
     },
     pt: {
       heading: 'Análise dos seus relacionamentos no Instagram',
@@ -154,6 +155,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
       following: 'Seguindo', followers: 'Seguidores', oneWayOut: 'Só você segue', followersOnly: 'Só seguem você',
       mutuals: 'Mútuos', changes: 'Mudanças', followersOnlyEmpty: 'Você já segue todos os seus seguidores.',
       mutualsEmpty: 'Nenhuma conexão mútua encontrada.', search: 'Buscar contas…', noResults: 'Nenhuma conta encontrada',
+      localHistory: 'As capturas ficam somente neste navegador e dispositivo. Limpar dados do site, usar navegação privada ou trocar de dispositivo pode remover o histórico.',
     },
     ru: {
       heading: 'Анализ ваших связей в Instagram',
@@ -161,6 +163,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
       following: 'Подписки', followers: 'Подписчики', oneWayOut: 'Подписаны только вы', followersOnly: 'Подписаны только на вас',
       mutuals: 'Взаимные', changes: 'Изменения', followersOnlyEmpty: 'Вы подписаны на всех своих подписчиков.',
       mutualsEmpty: 'Взаимных подписок пока не найдено.', search: 'Поиск аккаунтов…', noResults: 'Совпадений нет',
+      localHistory: 'Снимки хранятся только в этом браузере и на этом устройстве. Очистка данных сайта, приватный режим или смена устройства могут удалить историю.',
     },
     es: {
       heading: 'Análisis de tus relaciones en Instagram',
@@ -168,6 +171,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
       following: 'Seguidos', followers: 'Seguidores', oneWayOut: 'Solo tú sigues', followersOnly: 'Solo te siguen',
       mutuals: 'Mutuos', changes: 'Cambios', followersOnlyEmpty: 'Ya sigues a todos tus seguidores.',
       mutualsEmpty: 'Aún no se encontraron relaciones mutuas.', search: 'Buscar cuentas…', noResults: 'No hay cuentas coincidentes',
+      localHistory: 'Las instantáneas quedan solo en este navegador y dispositivo. Borrar los datos del sitio, usar navegación privada o cambiar de dispositivo puede eliminar el historial.',
     },
   }[lang];
 
@@ -304,6 +308,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
             <span role="status" className="text-sm text-zinc-700 font-medium">{snapshotMsg}</span>
           )}
         </div>
+        <p className="mb-5 text-xs leading-relaxed text-zinc-500">{relationshipCopy.localHistory}</p>
 
         {/* Snapshot saved prompt */}
         {snapshotSaved && onReset && (

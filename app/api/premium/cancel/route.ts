@@ -12,14 +12,13 @@ import {
 
 const DODO_API_BASE = 'https://api.dodopayments.com';
 
-async function cancelDodoSubscription(subscriptionId: string): Promise<boolean> {
-  const apiKey = process.env.DODO_API_KEY;
+export async function cancelDodoSubscription(subscriptionId: string, apiKey = process.env.DODO_API_KEY, fetchImpl: typeof fetch = fetch): Promise<boolean> {
   if (!apiKey) {
-    console.warn('[cancel] DODO_API_KEY not set; skipping remote cancellation');
-    return true;
+    console.error('[cancel] DODO_API_KEY not set; refusing to remove local entitlement');
+    return false;
   }
 
-  const response = await fetch(`${DODO_API_BASE}/subscriptions/${subscriptionId}`, {
+  const response = await fetchImpl(`${DODO_API_BASE}/subscriptions/${subscriptionId}`, {
     method: 'PATCH',
     headers: {
       Authorization: `Bearer ${apiKey}`,

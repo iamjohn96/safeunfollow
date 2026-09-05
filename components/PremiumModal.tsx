@@ -12,21 +12,38 @@ interface PremiumModalProps {
 
 export function PremiumModal({ lang, onClose, onVerified }: PremiumModalProps) {
   const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
+  const [restoreStep, setRestoreStep] = useState<'email' | 'code'>('email');
   const [verifyState, setVerifyState] = useState<'idle' | 'loading' | 'success' | 'fail'>('idle');
   const [tab, setTab] = useState<'yearly' | 'monthly'>('yearly');
 
   const monthlyUrl = process.env.NEXT_PUBLIC_DODO_MONTHLY_URL ?? '#';
   const yearlyUrl = process.env.NEXT_PUBLIC_DODO_YEARLY_URL ?? '#';
 
+  const restoreCopy = {
+    en: { send: 'Send code', code: '6-digit code', sent: 'If this purchase is eligible, a code was sent to your email.', verify: 'Activate', fail: 'The code is invalid, expired, or access could not be verified.' },
+    pt: { send: 'Enviar código', code: 'Código de 6 dígitos', sent: 'Se a compra for elegível, um código foi enviado ao seu e-mail.', verify: 'Ativar', fail: 'O código é inválido, expirou ou o acesso não pôde ser verificado.' },
+    ru: { send: 'Отправить код', code: '6-значный код', sent: 'Если покупка подходит, код отправлен на вашу почту.', verify: 'Активировать', fail: 'Код неверен, истёк или доступ не удалось подтвердить.' },
+    es: { send: 'Enviar código', code: 'Código de 6 dígitos', sent: 'Si la compra es válida, enviamos un código a tu correo.', verify: 'Activar', fail: 'El código no es válido, venció o no se pudo verificar el acceso.' },
+  }[lang];
+
   async function handleVerify() {
     if (!email.includes('@')) return;
     setVerifyState('loading');
     try {
-      const res = await fetch(`/api/premium/check?email=${encodeURIComponent(email)}`);
+      const endpoint = restoreStep === 'email' ? '/api/premium/restore/verify' : '/api/premium/restore';
+      const res = await fetch(endpoint, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(restoreStep === 'email' ? { email } : { email, token }),
+      });
       const data = await res.json();
-      if (data.isPremium) {
+      if (restoreStep === 'email' && res.ok) {
+        setRestoreStep('code');
+        setVerifyState('idle');
+      } else if (res.ok && data.isPremium && typeof data.session === 'string') {
         localStorage.setItem('isPremium', 'true');
-        localStorage.setItem('premiumEmail', email);
+        localStorage.setItem('premiumEmail', email.toLowerCase().trim());
+        localStorage.setItem('premiumSession', data.session);
         setVerifyState('success');
         setTimeout(onVerified, 1200);
       } else {
@@ -107,27 +124,37 @@ export function PremiumModal({ lang, onClose, onVerified }: PremiumModalProps) {
           {/* Email verify */}
           <div className="flex gap-2">
             <input
-              type="email"
-              value={email}
-              onChange={e => { setEmail(e.target.value); setVerifyState('idle'); }}
-              placeholder={t('modal.verify_placeholder', lang)}
+              type={restoreStep === 'email' ? 'email' : 'text'}
+              inputMode={restoreStep === 'code' ? 'numeric' : undefined}
+              maxLength={restoreStep === 'code' ? 6 : undefined}
+              value={restoreStep === 'email' ? email : token}
+              onChange={e => {
+                if (restoreStep === 'email') setEmail(e.target.value);
+                else setToken(e.target.value.replace(/\D/g, ''));
+                setVerifyState('idle');
+              }}
+              placeholder={restoreStep === 'email' ? t('modal.verify_placeholder', lang) : restoreCopy.code}
               className="flex-1 border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
               onKeyDown={e => { if (e.key === 'Enter') handleVerify(); }}
             />
             <button
               onClick={handleVerify}
-              disabled={verifyState === 'loading' || !email.includes('@')}
+              disabled={verifyState === 'loading' || !email.includes('@') || (restoreStep === 'code' && token.length !== 6)}
               className="bg-zinc-900 hover:bg-zinc-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
-              {verifyState === 'loading' ? '…' : t('modal.verify_btn', lang)}
+              {verifyState === 'loading' ? '…' : restoreStep === 'email' ? restoreCopy.send : restoreCopy.verify}
             </button>
           </div>
+
+          {restoreStep === 'code' && verifyState !== 'success' && (
+            <p className="text-xs text-zinc-500 text-center">{restoreCopy.sent}</p>
+          )}
 
           {verifyState === 'success' && (
             <p className="text-sm text-green-600 font-medium text-center">{t('modal.verify_success', lang)}</p>
           )}
           {verifyState === 'fail' && (
-            <p className="text-sm text-red-500 text-center">{t('modal.verify_fail', lang)}</p>
+            <p className="text-sm text-red-500 text-center">{restoreCopy.fail}</p>
           )}
         </div>
       </div>

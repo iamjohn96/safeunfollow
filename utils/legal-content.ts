@@ -15,12 +15,12 @@ interface LegalDocument {
 
 export const privacyContent: Record<Lang, LegalDocument> = {
   en: {
-    title: 'Privacy Policy', updated: 'Last updated: August 2026', back: 'Back to home',
+    title: 'Privacy Policy', updated: 'Last updated: September 2026', back: 'Back to home',
     sections: [
       { title: '1. No Data Collection', paragraphs: ['SafeUnfollow processes your Instagram data entirely in your browser. Uploaded files, follower data, and following data never leave your device.', 'The analyzer reads only the follower and following relationship files required for mutual connections, one-way follows, and snapshot changes. It does not analyze messages, posts, photos, videos, contacts, or other export files.'] },
-      { title: '2. Local Storage', paragraphs: ['Snapshots and parsed data are stored only in your browser localStorage. You can remove them at any time by clearing your browser data.'] },
-      { title: '3. Premium Accounts and Payments', paragraphs: ['If you buy Premium, we store your email address solely to verify access and support subscription operations. Dodo Payments processes payments; SafeUnfollow does not store card information. We do not sell your email address.'] },
-      { title: '4. Analytics', paragraphs: ['We may collect anonymous, aggregated usage metrics such as page views, language, and funnel events. Instagram export contents, usernames, and uploaded files are not included in analytics events.'] },
+      { title: '2. Local Storage', paragraphs: ['Snapshots and parsed data are stored only in your browser localStorage. They do not move between browsers or devices and may be lost if you clear site data or use private browsing.'] },
+      { title: '3. Premium Accounts and Payments', paragraphs: ['If you buy Premium, we store your email address, subscription status and identifier, renewal information, short-lived verification codes, and browser verification sessions solely to verify access and operate the subscription. Dodo Payments processes payments and Resend sends verification email; SafeUnfollow does not store card information. We do not sell your email address.'] },
+      { title: '4. Analytics', paragraphs: ['We may collect usage metadata such as page views, language, funnel events, result counts, and categorized failure reasons through Google Analytics and Vercel Analytics. Instagram export contents, usernames, email addresses, and uploaded files are not included in analytics events.'] },
       { title: '5. Cookies', paragraphs: ['We do not use advertising tracking cookies. Strictly necessary storage may be used for Premium verification and service operation.'] },
       { title: '6. Third-Party Services', paragraphs: ['Dodo Payments and analytics providers apply their own privacy policies. External links, including instagram.com, are provided for convenience and are outside our control.'] },
       { title: '7. Children', paragraphs: ['SafeUnfollow is not directed to children under 13, and we do not knowingly collect their data.'] },
@@ -29,12 +29,12 @@ export const privacyContent: Record<Lang, LegalDocument> = {
     ],
   },
   pt: {
-    title: 'Política de Privacidade', updated: 'Última atualização: agosto de 2026', back: 'Voltar ao início',
+    title: 'Política de Privacidade', updated: 'Última atualização: setembro de 2026', back: 'Voltar ao início',
     sections: [
       { title: '1. Nenhuma coleta do arquivo', paragraphs: ['O SafeUnfollow processa seus dados do Instagram inteiramente no navegador. Arquivos enviados e listas de seguidores e seguidos nunca saem do dispositivo.', 'O analisador lê somente os arquivos de relacionamentos necessários para conexões mútuas, relações unilaterais e mudanças entre capturas. Mensagens, publicações, fotos, vídeos, contatos e outros arquivos não são analisados.'] },
-      { title: '2. Armazenamento local', paragraphs: ['Capturas e dados processados ficam apenas no localStorage do navegador. Você pode removê-los a qualquer momento limpando os dados do navegador.'] },
-      { title: '3. Premium e pagamentos', paragraphs: ['Ao comprar o Premium, armazenamos seu e-mail somente para verificar o acesso e operar a assinatura. Os pagamentos são processados pela Dodo Payments; o SafeUnfollow não armazena dados do cartão nem vende seu e-mail.'] },
-      { title: '4. Analytics', paragraphs: ['Podemos coletar métricas anônimas e agregadas, como visualizações, idioma e etapas do funil. Conteúdo do ZIP, nomes de usuário e arquivos enviados nunca fazem parte desses eventos.'] },
+      { title: '2. Armazenamento local', paragraphs: ['Capturas e dados processados ficam apenas no localStorage deste navegador. Eles não migram entre dispositivos e podem ser perdidos ao limpar os dados do site ou usar navegação privada.'] },
+      { title: '3. Premium e pagamentos', paragraphs: ['Ao comprar o Premium, armazenamos e-mail, status e identificador da assinatura, renovação, códigos temporários e sessões de verificação para operar o acesso. A Dodo Payments processa pagamentos e a Resend envia e-mails de verificação; o SafeUnfollow não armazena cartões nem vende seu e-mail.'] },
+      { title: '4. Analytics', paragraphs: ['Podemos coletar metadados de uso, como visualizações, idioma, eventos do funil, contagens de resultados e categorias de falha pelo Google Analytics e Vercel Analytics. Conteúdo do ZIP, nomes de usuário, e-mails e arquivos não entram nesses eventos.'] },
       { title: '5. Cookies', paragraphs: ['Não usamos cookies de publicidade. Armazenamento estritamente necessário pode ser usado para verificar o Premium e operar o serviço.'] },
       { title: '6. Serviços de terceiros', paragraphs: ['Dodo Payments e provedores de analytics possuem políticas próprias. Links externos, como instagram.com, estão fora do nosso controle.'] },
       { title: '7. Crianças', paragraphs: ['O SafeUnfollow não é direcionado a menores de 13 anos e não coleta conscientemente seus dados.'] },
@@ -43,12 +43,12 @@ export const privacyContent: Record<Lang, LegalDocument> = {
     ],
   },
   ru: {
-    title: 'Политика конфиденциальности', updated: 'Обновлено: август 2026 г.', back: 'На главную',
+    title: 'Политика конфиденциальности', updated: 'Обновлено: сентябрь 2026 г.', back: 'На главную',
     sections: [
       { title: '1. Файлы не собираются', paragraphs: ['SafeUnfollow обрабатывает данные Instagram полностью в браузере. Загруженные файлы и списки подписчиков и подписок не покидают устройство.', 'Анализатор читает только файлы связей, необходимые для взаимных и односторонних подписок и изменений снимков. Сообщения, публикации, фото, видео, контакты и другие файлы не анализируются.'] },
-      { title: '2. Локальное хранение', paragraphs: ['Снимки и обработанные данные хранятся только в localStorage браузера. Их можно удалить, очистив данные браузера.'] },
-      { title: '3. Премиум и платежи', paragraphs: ['При покупке Премиум мы храним e-mail только для проверки доступа и операций с подпиской. Платежи обрабатывает Dodo Payments; SafeUnfollow не хранит данные карты и не продаёт ваш e-mail.'] },
-      { title: '4. Аналитика', paragraphs: ['Мы можем собирать анонимные агрегированные метрики: просмотры, язык и этапы воронки. Содержимое ZIP, имена пользователей и файлы не включаются в события аналитики.'] },
+      { title: '2. Локальное хранение', paragraphs: ['Снимки и обработанные данные хранятся только в localStorage этого браузера. Они не переносятся между устройствами и могут исчезнуть после очистки данных сайта или в приватном режиме.'] },
+      { title: '3. Премиум и платежи', paragraphs: ['Для Премиум мы храним e-mail, статус и идентификатор подписки, данные продления, временные коды и сессии проверки. Dodo Payments обрабатывает платежи, Resend отправляет письма проверки; SafeUnfollow не хранит карты и не продаёт e-mail.'] },
+      { title: '4. Аналитика', paragraphs: ['Через Google Analytics и Vercel Analytics могут собираться метаданные использования: просмотры, язык, этапы воронки, числовые итоги и категории ошибок. Содержимое ZIP, имена пользователей, e-mail и файлы в события не включаются.'] },
       { title: '5. Cookies', paragraphs: ['Мы не используем рекламные cookies. Для проверки Премиум и работы сервиса может применяться только строго необходимое хранилище.'] },
       { title: '6. Сторонние сервисы', paragraphs: ['Dodo Payments и поставщики аналитики применяют собственные политики. Внешние ссылки, включая instagram.com, находятся вне нашего контроля.'] },
       { title: '7. Дети', paragraphs: ['SafeUnfollow не предназначен для детей младше 13 лет, и мы сознательно не собираем их данные.'] },
@@ -57,12 +57,12 @@ export const privacyContent: Record<Lang, LegalDocument> = {
     ],
   },
   es: {
-    title: 'Política de Privacidad', updated: 'Última actualización: agosto de 2026', back: 'Volver al inicio',
+    title: 'Política de Privacidad', updated: 'Última actualización: septiembre de 2026', back: 'Volver al inicio',
     sections: [
       { title: '1. No recopilamos el archivo', paragraphs: ['SafeUnfollow procesa tus datos de Instagram completamente en el navegador. Los archivos y las listas de seguidores y seguidos nunca salen de tu dispositivo.', 'El analizador solo lee los archivos necesarios para relaciones mutuas, unidireccionales y cambios entre instantáneas. No analiza mensajes, publicaciones, fotos, videos, contactos ni otros archivos.'] },
-      { title: '2. Almacenamiento local', paragraphs: ['Las instantáneas y los datos procesados se guardan únicamente en localStorage. Puedes eliminarlos borrando los datos del navegador.'] },
-      { title: '3. Premium y pagos', paragraphs: ['Si compras Premium, guardamos tu correo solo para verificar el acceso y operar la suscripción. Dodo Payments procesa los pagos; SafeUnfollow no almacena tarjetas ni vende tu correo.'] },
-      { title: '4. Analítica', paragraphs: ['Podemos recopilar métricas anónimas y agregadas, como visitas, idioma y eventos del embudo. El contenido del ZIP, usuarios y archivos no se incluyen en esos eventos.'] },
+      { title: '2. Almacenamiento local', paragraphs: ['Las instantáneas y los datos procesados se guardan solo en el localStorage de este navegador. No se mueven entre dispositivos y pueden perderse al borrar datos del sitio o usar navegación privada.'] },
+      { title: '3. Premium y pagos', paragraphs: ['Para Premium guardamos correo, estado e identificador de suscripción, renovación, códigos temporales y sesiones de verificación. Dodo Payments procesa pagos y Resend envía correos de verificación; SafeUnfollow no guarda tarjetas ni vende tu correo.'] },
+      { title: '4. Analítica', paragraphs: ['Podemos recopilar metadatos de uso como visitas, idioma, eventos del embudo, conteos de resultados y categorías de error mediante Google Analytics y Vercel Analytics. El contenido del ZIP, usuarios, correos y archivos no se incluyen.'] },
       { title: '5. Cookies', paragraphs: ['No usamos cookies publicitarias. Puede utilizarse almacenamiento estrictamente necesario para verificar Premium y operar el servicio.'] },
       { title: '6. Servicios de terceros', paragraphs: ['Dodo Payments y los proveedores de analítica tienen sus propias políticas. Los enlaces externos, incluido instagram.com, quedan fuera de nuestro control.'] },
       { title: '7. Menores', paragraphs: ['SafeUnfollow no está dirigido a menores de 13 años y no recopilamos conscientemente sus datos.'] },

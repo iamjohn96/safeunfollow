@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isPremiumEmail, checkRateLimit } from '@/lib/redis';
+import { isPremiumEmail, checkRateLimit, getPremiumSessionEmail } from '@/lib/redis';
 import { withRedisFallback } from '@/lib/redis-resilience';
 
 function getClientIp(request: NextRequest): string {
@@ -10,7 +10,7 @@ function getClientIp(request: NextRequest): string {
   );
 }
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   const ip = getClientIp(request);
 
   // Rate limit: max 10 requests per IP per 60-second window
@@ -38,14 +38,28 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const email = request.nextUrl.searchParams.get('email');
+  let body: { email?: unknown; session?: unknown };
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ isPremium: false }, { status: 400 });
+  }
+  const { email, session } = body;
 
-  if (!email || !email.includes('@')) {
-    return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
+  if (typeof email !== 'string' || !email.includes('@') || typeof session !== 'string' || session.length < 32) {
+    return NextResponse.json({ isPremium: false });
   }
 
+  const normalised = email.toLowerCase().trim();
+  const sessionEmail = await withRedisFallback(
+    () => getPremiumSessionEmail(session),
+    null,
+    'Premium session lookup unavailable',
+  );
+  if (sessionEmail !== normalised) return NextResponse.json({ isPremium: false });
+
   const premium = await withRedisFallback(
-    () => isPremiumEmail(email),
+    () => isPremiumEmail(normalised),
     false,
     'Premium status lookup unavailable',
   );

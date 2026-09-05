@@ -6,37 +6,38 @@ import { t, type Lang } from '@/utils/i18n';
 import { parseFile, type ParsedData } from '@/utils/parser';
 import { Dashboard } from '@/components/Dashboard';
 import { trackFunnel, uploadFailureReason } from '@/utils/analytics';
+import { audienceCopy } from '@/utils/audience-copy';
 
 function UploadContent({ initialLang }: { initialLang: Lang }) {
   const lang = initialLang;
   const [isDragging, setIsDragging] = useState(false);
   const [status, setStatus] = useState<'idle' | 'processing' | 'error'>('idle');
-  const [errorKey, setErrorKey] = useState<'upload.error.invalid' | 'upload.error.missing'>('upload.error.invalid');
+  const [errorKey, setErrorKey] = useState<'upload.error.invalid' | 'upload.error.missing' | 'storage'>('upload.error.invalid');
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const uploadValues: Record<Lang, { eyebrow: string; heading: string; items: string[]; scope: string }> = {
     en: {
       eyebrow: 'Instagram Data Analyzer',
       heading: 'Get four relationship insights from one ZIP',
-      items: ['Mutuals', "You follow, they don't", "They follow, you don't", 'Snapshot changes'],
+      items: ['Mutuals', "You follow, they don't", "They follow, you don't", 'Compare saved snapshots later'],
       scope: 'Only follower and following JSON files are read. Messages and photos are not analyzed.',
     },
     pt: {
       eyebrow: 'Instagram Data Analyzer',
       heading: 'Quatro análises de relacionamento em um ZIP',
-      items: ['Conexões mútuas', 'Só você segue', 'Só seguem você', 'Mudanças entre capturas'],
+      items: ['Conexões mútuas', 'Só você segue', 'Só seguem você', 'Compare capturas salvas depois'],
       scope: 'Apenas os JSON de seguidores e seguidos são lidos. Mensagens e fotos não são analisadas.',
     },
     ru: {
       eyebrow: 'Instagram Data Analyzer',
       heading: 'Четыре вида анализа связей из одного ZIP',
-      items: ['Взаимные подписки', 'Подписаны только вы', 'Подписаны только на вас', 'Изменения снимков'],
+      items: ['Взаимные подписки', 'Подписаны только вы', 'Подписаны только на вас', 'Позже сравните снимки'],
       scope: 'Читаются только JSON подписчиков и подписок. Сообщения и фотографии не анализируются.',
     },
     es: {
       eyebrow: 'Instagram Data Analyzer',
       heading: 'Obtén cuatro análisis de relaciones desde un ZIP',
-      items: ['Seguimiento mutuo', 'Solo tú sigues', 'Solo te siguen', 'Cambios entre instantáneas'],
+      items: ['Seguimiento mutuo', 'Solo tú sigues', 'Solo te siguen', 'Compara instantáneas después'],
       scope: 'Solo se leen los JSON de seguidores y seguidos. No se analizan mensajes ni fotos.',
     },
   };
@@ -78,7 +79,7 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
       setStatus('idle');
     } catch (error) {
       trackFunnel('upload_failed', lang, { failure_reason: stage === 'storage' ? 'browser_storage_failed' : uploadFailureReason(error) });
-      setErrorKey('upload.error.missing');
+      setErrorKey(stage === 'storage' ? 'storage' : 'upload.error.missing');
       setStatus('error');
     }
   }, [lang]);
@@ -197,7 +198,7 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
         {/* Error */}
         {status === 'error' && (
           <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600 text-center">
-            {t(errorKey, lang)}
+            {errorKey === 'storage' ? audienceCopy[lang].storage : t(errorKey, lang)}
           </div>
         )}
 
