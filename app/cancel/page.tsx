@@ -1,26 +1,18 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
+import { t, localizedPath, type Lang } from '@/utils/i18n';
 
 type Step = 'form' | 'token' | 'confirm' | 'success' | 'error';
 
-function CancelPageContent() {
-  const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>('en');
+function CancelPageContent({ initialLang }: { initialLang: Lang }) {
+  const lang = initialLang;
   const [step, setStep] = useState<Step>('form');
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // Language detection depends on browser locale after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(detectLang(searchParams));
-  }, [searchParams]);
 
   // Step 1 — request the OTP
   async function handleRequestCode() {
@@ -318,10 +310,10 @@ function CancelPageContent() {
   );
 }
 
-export default function CancelPage() {
+export default function CancelPage({ initialLang = 'en' }: { initialLang?: Lang }) {
   return (
     <Suspense fallback={<div />}>
-      <CancelPageContent />
+      <CancelPageContent initialLang={initialLang} />
     </Suspense>
   );
 }

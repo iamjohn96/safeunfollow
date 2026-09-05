@@ -1,21 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
-import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { t, langFromPathname, localizedPath } from '@/utils/i18n';
+import { useState } from 'react';
 
 export function Header() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>('en');
+  const lang = langFromPathname(pathname);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    // Language detection depends on browser locale after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(detectLang(searchParams));
-  }, [searchParams]);
 
   const navLinks = [
     { href: localizedPath('/guide', lang), label: t('nav.guide', lang) },

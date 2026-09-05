@@ -15,6 +15,10 @@ const seo = {
   es: { title: 'Analizador privado de datos de Instagram', description: 'Analiza relaciones mutuas, unidireccionales y cambios de seguidores localmente desde el ZIP oficial de Instagram.' },
 } satisfies Record<Lang, { title: string; description: string }>;
 
+const openGraphLocales: Record<Lang, string> = {
+  en: 'en_US', pt: 'pt_BR', ru: 'ru_RU', es: 'es_ES',
+};
+
 const pageNames: Record<string, Record<Lang, string>> = {
   upload: { en: 'Upload Instagram Data ZIP', pt: 'Enviar ZIP de dados do Instagram', ru: 'Загрузить ZIP с данными Instagram', es: 'Subir ZIP de datos de Instagram' },
   guide: { en: 'Instagram Data Download Guide', pt: 'Guia para baixar dados do Instagram', ru: 'Как скачать данные Instagram', es: 'Guía para descargar datos de Instagram' },
@@ -43,6 +47,6 @@ export function localizedMetadata(lang: Lang, page?: keyof typeof pageNames): Me
   const title = page ? `${pageNames[page][safeLang]} | SafeUnfollow` : `SafeUnfollow – ${base.title}`;
   return {
     title, description: base.description, alternates: { ...localeAlternates(suffix), canonical },
-    openGraph: { title, description: base.description, url: canonical, siteName: 'SafeUnfollow', type: 'website', locale: safeLang },
+    openGraph: { title, description: base.description, url: canonical, siteName: 'SafeUnfollow', type: 'website', locale: openGraphLocales[safeLang] },
   };
 }

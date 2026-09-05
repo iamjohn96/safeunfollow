@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import MarkdownArticle from '@/app/_components/markdown-article';
 import { getMarkdownDocument, getMarkdownDocuments } from '@/lib/markdown-content';
+import { JsonLd } from '@/components/JsonLd';
+import { articleStructuredData } from '@/lib/structured-data';
 
 const BASE_URL = 'https://safeunfollow.com';
 
@@ -43,5 +45,10 @@ export default async function BlogPostPage({ params }: PageProps<'/blog/[slug]'>
 
   if (!post) notFound();
 
-  return <MarkdownArticle document={post} backHref="/blog" backLabel="Back to Blog" />;
+  return (
+    <>
+      <JsonLd data={articleStructuredData(post.data)} />
+      <MarkdownArticle document={post} backHref="/blog" backLabel="Back to Blog" />
+    </>
+  );
 }

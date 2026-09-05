@@ -1,22 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { t, langFromPathname, localizedPath } from '@/utils/i18n';
+import { usePathname } from 'next/navigation';
 
 const LANGS = ['en', 'pt', 'ru', 'es'] as const;
 const LANG_LABELS: Record<string, string> = { en: 'EN', pt: 'PT', ru: 'RU', es: 'ES' };
 
 export function Footer() {
-  const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>('en');
-
-  useEffect(() => {
-    // Language detection depends on browser locale after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(detectLang(searchParams));
-  }, [searchParams]);
+  const pathname = usePathname();
+  const lang = langFromPathname(pathname);
 
   return (
     <footer className="border-t border-zinc-100 bg-white mt-auto">

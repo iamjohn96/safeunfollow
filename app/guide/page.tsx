@@ -1,23 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
+import { t, localizedPath, type Lang } from '@/utils/i18n';
 import { Suspense } from 'react';
 import { trackFunnel } from '@/utils/analytics';
 
 const stepIcons = ['⚙️', '☑️', '📤', '📥'];
 
-function GuideContent() {
-  const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>('en');
-
-  useEffect(() => {
-    // Language detection depends on browser locale after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(detectLang(searchParams));
-  }, [searchParams]);
+function GuideContent({ initialLang }: { initialLang: Lang }) {
+  const lang = initialLang;
 
   const steps = [
     { title: t('guide.step1.title', lang), desc: t('guide.step1.desc', lang) },
@@ -85,10 +76,10 @@ function GuideContent() {
   );
 }
 
-export default function GuidePage() {
+export default function GuidePage({ initialLang = 'en' }: { initialLang?: Lang }) {
   return (
     <Suspense>
-      <GuideContent />
+      <GuideContent initialLang={initialLang} />
     </Suspense>
   );
 }

@@ -1,4 +1,4 @@
 import Page from '../../terms/page';
 import { localizedMetadata, type PublicLocale } from '@/lib/locale-metadata';
 export async function generateMetadata({ params }: { params: Promise<{ lang: PublicLocale }> }) { return localizedMetadata((await params).lang, 'terms'); }
-export default Page;
+export default async function LocalizedTermsPage({ params }: { params: Promise<{ lang: PublicLocale }> }) { return <Page initialLang={(await params).lang} />; }

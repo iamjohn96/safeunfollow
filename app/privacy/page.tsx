@@ -1,18 +1,9 @@
-'use client';
 import Link from 'next/link';
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { detectLang, type Lang } from '@/utils/i18n';
+import type { Lang } from '@/utils/i18n';
 import { privacyContent } from '@/utils/legal-content';
 
-function PrivacyContent() {
-  const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>('en');
-  useEffect(() => {
-    // Locale depends on browser state after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(detectLang(searchParams));
-  }, [searchParams]);
+function PrivacyContent({ initialLang }: { initialLang: Lang }) {
+  const lang = initialLang;
   const content = privacyContent[lang];
   return <section className="max-w-2xl mx-auto px-4 py-16" aria-labelledby="privacy-heading">
     <h1 id="privacy-heading" className="text-3xl font-bold text-zinc-900 mb-2">{content.title}</h1>
@@ -26,4 +17,4 @@ function PrivacyContent() {
     <div className="mt-12 pt-8 border-t border-zinc-100"><Link href={lang === 'en' ? '/' : `/${lang}`} className="text-sm text-zinc-400 hover:text-zinc-700 transition-colors">← {content.back}</Link></div>
   </section>;
 }
-export default function PrivacyPage() { return <Suspense><PrivacyContent /></Suspense>; }
+export default function PrivacyPage({ initialLang = 'en' }: { initialLang?: Lang }) { return <PrivacyContent initialLang={initialLang} />; }

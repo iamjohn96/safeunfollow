@@ -1,17 +1,15 @@
 'use client';
 
 import { useState, useRef, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
-import { t, detectLang, type Lang } from '@/utils/i18n';
+import { t, type Lang } from '@/utils/i18n';
 import { parseFile, type ParsedData } from '@/utils/parser';
 import { Dashboard } from '@/components/Dashboard';
 import { Suspense } from 'react';
 import { trackFunnel, uploadFailureReason } from '@/utils/analytics';
 
-function UploadContent() {
-  const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>('en');
+function UploadContent({ initialLang }: { initialLang: Lang }) {
+  const lang = initialLang;
   const [isDragging, setIsDragging] = useState(false);
   const [status, setStatus] = useState<'idle' | 'processing' | 'error'>('idle');
   const [errorKey, setErrorKey] = useState<'upload.error.invalid' | 'upload.error.missing'>('upload.error.invalid');
@@ -46,20 +44,19 @@ function UploadContent() {
   const uploadValue = uploadValues[lang];
 
   useEffect(() => {
-    // Locale and saved analysis depend on browser-only state after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(detectLang(searchParams));
     // Restore from localStorage if available
     try {
       const raw = localStorage.getItem('lastParsedData');
       if (raw) {
         const saved = JSON.parse(raw);
+        // Restore browser-only analysis after hydration.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         if (saved.schemaVersion === 2 && Array.isArray(saved.followers) && Array.isArray(saved.following)) setParsedData(saved);
       }
     } catch {
       // ignore
     }
-  }, [searchParams]);
+  }, []);
 
   const processFile = useCallback(async (file: File) => {
     trackFunnel('upload_started', lang, { file_type: file.name.toLowerCase().endsWith('.zip') ? 'zip' : 'other' });
@@ -222,10 +219,10 @@ function UploadContent() {
   );
 }
 
-export default function UploadPage() {
+export default function UploadPage({ initialLang = 'en' }: { initialLang?: Lang }) {
   return (
     <Suspense>
-      <UploadContent />
+      <UploadContent initialLang={initialLang} />
     </Suspense>
   );
 }

@@ -4,6 +4,11 @@ import { translations, type Lang, type TranslationKey } from './translations';
 
 const SUPPORTED_LANGS: Lang[] = ['en', 'pt', 'ru', 'es'];
 
+export function langFromPathname(pathname: string): Lang {
+  const pathLang = pathname.split('/').filter(Boolean)[0];
+  return SUPPORTED_LANGS.includes(pathLang as Lang) ? pathLang as Lang : 'en';
+}
+
 export function detectLang(searchParams?: URLSearchParams): Lang {
   if (typeof window === 'undefined') return 'en';
 
@@ -12,8 +17,8 @@ export function detectLang(searchParams?: URLSearchParams): Lang {
     return urlLang as Lang;
   }
 
-  const pathLang = window.location.pathname.split('/')[1];
-  if (SUPPORTED_LANGS.includes(pathLang as Lang)) return pathLang as Lang;
+  const pathLang = langFromPathname(window.location.pathname);
+  if (pathLang !== 'en' || window.location.pathname.split('/').filter(Boolean)[0] === 'en') return pathLang;
 
   const browserLang = navigator.language.slice(0, 2).toLowerCase();
   if (SUPPORTED_LANGS.includes(browserLang as Lang)) {

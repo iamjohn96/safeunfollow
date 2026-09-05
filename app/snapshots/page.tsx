@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { t, detectLang, type Lang } from '@/utils/i18n';
+import { t, type Lang } from '@/utils/i18n';
 import { type ParsedData } from '@/utils/parser';
 import { compareAudience, decodeSnapshots } from '@/utils/audience';
 import { audienceCopy } from '@/utils/audience-copy';
@@ -67,9 +66,8 @@ function SnapshotCard({
   );
 }
 
-function SnapshotsContent() {
-  const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>('en');
+function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
+  const lang = initialLang;
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [isPremium, setIsPremium] = usePremium();
@@ -77,17 +75,16 @@ function SnapshotsContent() {
   const [storageError, setStorageError] = useState(false);
 
   useEffect(() => {
-    // Language and saved analysis depend on browser-only state after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(detectLang(searchParams));
     try {
       const raw = localStorage.getItem('snapshots');
+      // Restore browser-only snapshot history after hydration.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSnapshots(decodeSnapshots(raw));
     } catch {
       setSnapshots([]);
       setStorageError(true);
     }
-  }, [searchParams]);
+  }, []);
 
   function deleteSnapshot(id: string) {
     const updated = snapshots.filter(s => s.id !== id);
@@ -271,10 +268,10 @@ function SnapshotsContent() {
   );
 }
 
-export default function SnapshotsPage() {
+export default function SnapshotsPage({ initialLang = 'en' }: { initialLang?: Lang }) {
   return (
     <Suspense>
-      <SnapshotsContent />
+      <SnapshotsContent initialLang={initialLang} />
     </Suspense>
   );
 }

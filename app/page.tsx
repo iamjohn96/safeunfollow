@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { t, detectLang, localizedPath, type Lang } from '@/utils/i18n';
+import { useState } from 'react';
+import { t, localizedPath, type Lang } from '@/utils/i18n';
 import { PremiumModal } from '@/components/PremiumModal';
 import { Suspense } from 'react';
 import { trackFunnel } from '@/utils/analytics';
+import { JsonLd } from '@/components/JsonLd';
+import { homeStructuredData } from '@/lib/structured-data';
 
 const conversionCopy = {
   en: {
@@ -166,17 +167,10 @@ const conversionCopy = {
   },
 } as const;
 
-function LandingContent() {
-  const searchParams = useSearchParams();
-  const [lang, setLang] = useState<Lang>('en');
+function LandingContent({ initialLang }: { initialLang: Lang }) {
+  const lang = initialLang;
   const [showModal, setShowModal] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
-
-  useEffect(() => {
-    // Locale detection depends on browser APIs and must run after hydration.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLang(detectLang(searchParams));
-  }, [searchParams]);
 
   const localizedConversionCopy = conversionCopy[lang];
 
@@ -236,6 +230,7 @@ function LandingContent() {
 
   return (
     <>
+      <JsonLd data={homeStructuredData(lang)} />
       {showModal && (
         <PremiumModal lang={lang} onClose={() => setShowModal(false)} onVerified={() => setShowModal(false)} />
       )}
@@ -518,10 +513,10 @@ function LandingContent() {
   );
 }
 
-export default function HomePage() {
+export default function HomePage({ initialLang = 'en' }: { initialLang?: Lang }) {
   return (
     <Suspense>
-      <LandingContent />
+      <LandingContent initialLang={initialLang} />
     </Suspense>
   );
 }
