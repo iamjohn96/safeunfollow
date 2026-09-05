@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { t, localizedPath, type Lang } from '@/utils/i18n';
-import { Suspense } from 'react';
 import { trackFunnel } from '@/utils/analytics';
 
 const stepIcons = ['⚙️', '☑️', '📤', '📥'];
@@ -77,9 +76,5 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
 }
 
 export default function GuidePage({ initialLang = 'en' }: { initialLang?: Lang }) {
-  return (
-    <Suspense>
-      <GuideContent initialLang={initialLang} />
-    </Suspense>
-  );
+  return <GuideContent initialLang={initialLang} />;
 }

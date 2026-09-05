@@ -8,7 +8,6 @@ import { compareAudience, decodeSnapshots } from '@/utils/audience';
 import { audienceCopy } from '@/utils/audience-copy';
 import { ChangeSummary } from '@/components/AudienceInsights';
 import { PremiumModal } from '@/components/PremiumModal';
-import { Suspense } from 'react';
 import { usePremium } from '@/utils/use-premium';
 
 interface Snapshot {
@@ -269,9 +268,5 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
 }
 
 export default function SnapshotsPage({ initialLang = 'en' }: { initialLang?: Lang }) {
-  return (
-    <Suspense>
-      <SnapshotsContent initialLang={initialLang} />
-    </Suspense>
-  );
+  return <SnapshotsContent initialLang={initialLang} />;
 }

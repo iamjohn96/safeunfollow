@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { t, localizedPath, type Lang } from '@/utils/i18n';
 import { PremiumModal } from '@/components/PremiumModal';
-import { Suspense } from 'react';
 import { trackFunnel } from '@/utils/analytics';
 import { JsonLd } from '@/components/JsonLd';
 import { homeStructuredData } from '@/lib/structured-data';
@@ -514,9 +513,5 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
 }
 
 export default function HomePage({ initialLang = 'en' }: { initialLang?: Lang }) {
-  return (
-    <Suspense>
-      <LandingContent initialLang={initialLang} />
-    </Suspense>
-  );
+  return <LandingContent initialLang={initialLang} />;
 }

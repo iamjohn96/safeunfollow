@@ -14,5 +14,5 @@ test('recognizes only public localized route segments', () => {
 test('invalid runtime locale metadata falls back safely before the route becomes a 404', () => {
   const metadata = localizedMetadata('.env' as Lang);
   assert.equal(metadata.title, 'SafeUnfollow – Private Instagram Data Analyzer');
-  assert.equal(metadata.openGraph && 'locale' in metadata.openGraph ? metadata.openGraph.locale : undefined, 'en');
+  assert.equal(metadata.openGraph && 'locale' in metadata.openGraph ? metadata.openGraph.locale : undefined, 'en_US');
 });

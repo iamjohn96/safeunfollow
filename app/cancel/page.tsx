@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { t, localizedPath, type Lang } from '@/utils/i18n';
 
@@ -311,9 +311,5 @@ function CancelPageContent({ initialLang }: { initialLang: Lang }) {
 }
 
 export default function CancelPage({ initialLang = 'en' }: { initialLang?: Lang }) {
-  return (
-    <Suspense fallback={<div />}>
-      <CancelPageContent initialLang={initialLang} />
-    </Suspense>
-  );
+  return <CancelPageContent initialLang={initialLang} />;
 }

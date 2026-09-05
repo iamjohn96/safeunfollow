@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 import { t, type Lang } from '@/utils/i18n';
 import { parseFile, type ParsedData } from '@/utils/parser';
 import { Dashboard } from '@/components/Dashboard';
-import { Suspense } from 'react';
 import { trackFunnel, uploadFailureReason } from '@/utils/analytics';
 
 function UploadContent({ initialLang }: { initialLang: Lang }) {
@@ -220,9 +219,5 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
 }
 
 export default function UploadPage({ initialLang = 'en' }: { initialLang?: Lang }) {
-  return (
-    <Suspense>
-      <UploadContent initialLang={initialLang} />
-    </Suspense>
-  );
+  return <UploadContent initialLang={initialLang} />;
 }
