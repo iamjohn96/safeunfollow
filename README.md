@@ -93,6 +93,8 @@ Redis remains the operational source for Premium entitlement, Dodo subscription 
 | `subscription_id:<email>` | Dodo subscription ID used for cancellation; no TTL |
 | `renewal_date:<email>` | Renewal date used by reminder processing; no TTL |
 | `cancel_token:<email>` | Six-digit cancellation OTP; 15-minute TTL |
+| `restore_token:<email>` | Six-digit Premium restore OTP; 15-minute TTL |
+| `premium_session:<sha256(token)>` | Verified browser session mapped to an email; 30-day TTL |
 | `otp_fail:<email>` | Failed OTP counter; 15-minute window |
 | `otp_send:<identifier>` | Per-IP and per-email send counter; 60-second window |
 | `ratelimit:<ip>` | Premium-check counter; 60-second window |
@@ -308,7 +310,7 @@ Apply an approved candidate:
 npm run refresh:apply -- --limit=1
 ```
 
-Apply defaults to one article. It uses the same atomic lock as `blog:publish`, rejects a dirty worktree, prints semantic and before/after line summaries, and rolls article writes back if a write fails. The deterministic update writes the proposed title and description to frontmatter, adds an `updated` date, inserts current privacy positioning, enriches an existing FAQ without duplicating generated questions, canonicalizes pillar links to `/pillars/<slug>`, and rebuilds Related Articles from same-cluster posts plus reviewed fallback recommendations. Known stale instructions are replaced with Accounts Center, variable export-preparation time, and intact Instagram Data ZIP wording. Validation rejects banned phrases, missing No Login/No OAuth/no Instagram API/No Account Connection/Instagram Data ZIP/Zero Ban Risk/Privacy First positioning, overlong descriptions, non-canonical or missing pillar links, missing FAQ or related sections, and broken internal links.
+Apply defaults to one article. It uses the same atomic lock as `blog:publish`, rejects a dirty worktree, prints semantic and before/after line summaries, and rolls article writes back if a write fails. The deterministic update writes the proposed title and description to frontmatter, adds an `updated` date, inserts current privacy positioning, enriches an existing FAQ without duplicating generated questions, canonicalizes pillar links to `/pillars/<slug>`, and rebuilds Related Articles from same-cluster posts plus reviewed fallback recommendations. Known stale instructions are replaced with Accounts Center, variable export-preparation time, and intact Instagram Data ZIP wording. Validation rejects banned phrases, missing No Login/No OAuth/no Instagram API/No Account Connection/Instagram Data ZIP/Privacy First positioning, absolute risk guarantees, overlong descriptions, non-canonical or missing pillar links, missing FAQ or related sections, and broken internal links.
 
 Dry-run reports each candidate as `CHANGED` with field/section details or `NO-OP` with the reason. A no-op can be expected when the generated SEO proposal is already present but Search Console performance signals still keep the article in the candidate list. Non-dry-run apply skips no-op files.
 
