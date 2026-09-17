@@ -2,7 +2,7 @@ import { verifyDodoPayload, premiumEvent, type PremiumEvent } from './dodo-webho
 export interface DodoDependencies {
   secret?: string;
   persist: (event: PremiumEvent, id: string) => Promise<string>;
-  notify: (email: string, id: string) => Promise<void>;
+  notify: (email: string, id: string, plan: 'subscription' | 'lifetime') => Promise<void>;
 }
 export async function handleDodoWebhook(request: Request, deps: DodoDependencies): Promise<Response> {
   if (!deps.secret) return Response.json({ error: 'Webhook secret not configured' }, { status: 503 });
@@ -16,8 +16,10 @@ export async function handleDodoWebhook(request: Request, deps: DodoDependencies
   const id = request.headers.get('webhook-id')!;
   try {
     const result = await deps.persist(event, id);
-    if (result === 'applied' && event.type === 'subscription.active') {
-      try { await deps.notify(event.email, id); }
+    const welcomePlan = event.kind === 'lifetime-grant' ? 'lifetime'
+      : event.kind === 'subscription' && event.type === 'subscription.active' ? 'subscription' : null;
+    if (result === 'applied' && welcomePlan && 'email' in event) {
+      try { await deps.notify(event.email, id, welcomePlan); }
       catch { console.error('[webhook/dodo] Welcome email unavailable'); }
     }
     return Response.json({ received: true, result });

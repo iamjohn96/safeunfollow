@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { t, type Lang } from '@/utils/i18n';
 import { parseFile, type ParsedData } from '@/utils/parser';
 import { Dashboard } from '@/components/Dashboard';
+import { PremiumModal } from '@/components/PremiumModal';
 import { trackFunnel, uploadFailureReason } from '@/utils/analytics';
 import { audienceCopy } from '@/utils/audience-copy';
 
@@ -14,6 +15,7 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
   const [status, setStatus] = useState<'idle' | 'processing' | 'error'>('idle');
   const [errorKey, setErrorKey] = useState<'upload.error.invalid' | 'upload.error.missing' | 'storage'>('upload.error.invalid');
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
+  const [purchaseReturn, setPurchaseReturn] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const uploadValues: Record<Lang, { eyebrow: string; heading: string; items: string[]; scope: string }> = {
     en: {
@@ -56,6 +58,17 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
     } catch {
       // ignore
     }
+    // Returning from the hosted one-time checkout: prompt the buyer to unlock this browser.
+    if (new URLSearchParams(window.location.search).get('premium') === 'purchased') setPurchaseReturn(true);
+  }, []);
+
+  const finishPurchaseReturn = useCallback(() => {
+    setPurchaseReturn(false);
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('premium');
+      window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+    } catch { /* URL cleanup is cosmetic. */ }
   }, []);
 
   const processFile = useCallback(async (file: File) => {
@@ -116,12 +129,16 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
             {t('common.back', lang)} / {t('upload.new_file', lang)}
           </button>
         </div>
-        <Dashboard data={parsedData} lang={lang} onReset={() => setParsedData(null)} />
+        <Dashboard data={parsedData} lang={lang} onReset={() => setParsedData(null)} purchaseReturn={purchaseReturn} onPurchaseReturnHandled={finishPurchaseReturn} />
       </div>
     );
   }
 
   return (
+    <>
+    {purchaseReturn && (
+      <PremiumModal lang={lang} purchased onClose={finishPurchaseReturn} onVerified={finishPurchaseReturn} />
+    )}
     <section className="flex-1 flex flex-col items-center justify-center py-16 px-4" aria-labelledby="upload-heading">
       <div className="w-full max-w-lg">
         {/* Header */}
@@ -216,6 +233,7 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 

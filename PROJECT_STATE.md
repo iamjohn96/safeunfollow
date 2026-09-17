@@ -22,7 +22,7 @@ The current product:
 - lets the user label the profile and date represented by an export;
 - saves local snapshots and compares two qualified snapshots for newly observed, no-longer-observed, net-change, loss-rate, and mutual-ratio metrics;
 - gives deterministic, conservative cleanup review categories without performing account actions;
-- offers Premium for unlimited snapshots, complete change history, and CSV export;
+- shows every total and the first 20 accounts per list for free, and sells one-time Lifetime Access (US$3.99) for full lists, search, CSV export, unlimited snapshots, and change history;
 - publishes crawlable, localized product/guide/legal pages and one canonical blog article.
 
 The governing privacy promise is factual: no Instagram login, no OAuth, no Instagram API, no account connection, and no upload of Instagram export contents to SafeUnfollow servers. Premium payment and access records are necessarily server-side and are described separately in the privacy copy.
@@ -44,14 +44,14 @@ The current phase is observation, not feature expansion. Traffic, successful ana
 - Profile/date persistence that survives page restoration without allowing stale analysis tabs to overwrite a newer ZIP.
 - Qualified same-profile snapshot comparisons and deterministic audience metrics.
 - Conservative cleanup categories: protected/keep, insufficient evidence, recently observed, persistent non-mutual, and previously mutual.
-- Free limit of one saved snapshot; Premium unlocks unlimited snapshots, history details, and CSV export.
+- Free preview of 20 accounts per relationship and cleanup list plus one saved snapshot; Lifetime Access (or a legacy subscription) unlocks full lists, search, unlimited snapshots, history details, and CSV export.
 - Clear local-storage limitations in product and legal copy.
 
 ### Premium and integrations
 
-- Dodo Payments checkout links for monthly (`$3.99`) and annual (`$19.99`) subscriptions.
+- One-time Dodo product `SafeUnfollow Lifetime Access` (US$3.99, tax-inclusive, PPP enabled) is the only checkout shown. Legacy monthly/annual subscription products still exist in Dodo and remain supported by the webhook and cancellation flow, but their checkout links are hidden.
 - Signed Dodo webhook processing using raw-body Standard Webhooks verification, an exact event/status allowlist, atomic Redis persistence, duplicate suppression, stale-event ordering protection, and fail-for-retry behavior.
-- Premium grants for eligible subscription-linked `payment.succeeded`, `subscription.active`, and `subscription.renewed`; revocation for `subscription.cancelled`, `subscription.expired`, `subscription.failed`, and `subscription.on_hold`.
+- Premium grants for eligible subscription-linked `payment.succeeded`, `subscription.active`, and `subscription.renewed`; revocation for `subscription.cancelled`, `subscription.expired`, `subscription.failed`, and `subscription.on_hold`. Lifetime Access grants only for a subscription-less `payment.succeeded` whose cart contains the configured product, and is revoked by payment ID on a full `refund.succeeded`, `dispute.lost`, or `dispute.accepted`. Subscription revocations and the cancellation flow never remove lifetime access. Lua persistence was verified against a disposable Redis (33 assertions).
 - Email OTP for Premium restore and cancellation; 15-minute OTP lifetime and 30-day hashed browser verification session.
 - Provider-confirmed cancellation that fails closed when Dodo cannot be reached or configured.
 - Resend verification, cancellation, welcome, and renewal-reminder email paths. Welcome delivery is best effort.
@@ -88,6 +88,8 @@ Read-only evidence for 2026-08-18 to 2026-09-16 (GA4): 315 users, 95 `upload_sta
 Decision: stop growth investment for now and run a 60-day validation in this order: (1) reproduce and fix the export-parsing failures with the owner's own current export and sanitized synthetic fixtures; (2) evaluate a one-time purchase instead of subscription-only Premium, because repeat use requires a new Instagram export and no snapshot saves were observed; (3) after 60 days, keep investing or move to maintenance mode based on successful analyses and verified Dodo purchases. The download guide now follows the current Accounts Center export flow (Export to device, Followers and following only, All time, JSON) in all active locales.
 
 Parser root cause confirmed on 2026-09-17 with the owner's own export (not committed): the current `following.json` entries store the username in the item `title` and keep only `href` (`https://www.instagram.com/_u/<username>`) and `timestamp` in `string_list_data`, with no `value`. The previous parser rejected the whole file, which matches the dominant `invalid_relationship_data` failure. The parser now derives the username from `value`, then `title`, then an instagram.com profile href, and still rejects entries where none is valid. The owner's export parsed successfully after the fix in a local production build. A second owner export requested the same day with All time and only Followers and following confirmed that the date range matters: the shorter-range export omitted the two oldest followers (9 followers with All time versus 7), while the following list was identical. A shorter range can therefore understate followers and misclassify mutual accounts as not following back, so the guide requires All time. Both owner exports parsed successfully on production after deployment e9c371e.
+
+Monetization change approved by the owner on 2026-09-17: replace subscription-only Premium with one-time Lifetime Access at US$3.99 (PPP enabled), free preview of 20 accounts per list, subscription checkout hidden. Rationale: single-session usage and zero observed snapshot saves meant the only purchase moment is right after the first result. Measure `premium_opened` by `source` (`result_gate`, `cleanup_gate`, `changes_gate`, `dashboard`, `home`), `premium_checkout_click` with `plan=lifetime`, and verified Dodo purchases. Decision checkpoint around 2026-11-16: continue small improvements at 5+ external purchases with at least 70% analysis success, hold at 2–4, maintenance mode at 0–1.
 
 Operational facts verified on 2026-09-17: production Redis is the Vercel Marketplace store `safeunfollow-redis` (Upstash, Pay As You Go, available); the older free store is uninstalled. Stripe cannot be opened for a South Korea–based business, so Dodo Payments remains the billing provider.
 
@@ -129,7 +131,7 @@ Dodo Payments is the billing source of truth. Resend sends transactional email. 
 - Redis is a single operational dependency for Premium verification. Redis failures fail closed. Free-plan inactivity previously archived databases after an inactive period; the current production plan and anti-inactivity reliability must be verified rather than assumed.
 - There is no read-only billing event ledger for weekly purchase, renewal, cancellation, refund, or dispute reporting. Current Redis entitlement keys are not historical billing records.
 - Refund/dispute reconciliation, durable welcome-email retries, and multiple simultaneous subscriptions per email are not modeled.
-- Production webhook event filters were last documented as incomplete on 2026-09-04. The implementation supports seven lifecycle events, but the current Dodo dashboard subscription list still needs read-only verification.
+- On 2026-09-17 the production endpoint was set to 10 events: the subscription lifecycle events plus `payment.succeeded`, `refund.succeeded`, `dispute.lost`, and `dispute.accepted`. A real end-to-end lifetime purchase has not been exercised; verify with a refunded owner purchase or Dodo test mode before claiming it works.
 - Annual checkout was previously verified; monthly checkout destination was not conclusively verified in the live browser. Re-check both in a no-charge flow before making end-to-end claims.
 - A 2026-09-05 local production build passed browser checks with synthetic ZIPs and a 390×844 viewport, but this is not current real-device Safari/Android evidence.
 - Korean and Japanese dictionaries remain in `utils/translations.ts` but are not active public locales. Some product copy is maintained in component-local locale maps, which increases localization drift risk.
@@ -143,7 +145,7 @@ Dodo Payments is the billing source of truth. Resend sends transactional email. 
 - No generic creator CRM or broad social-media-management pivot.
 - No large UI rewrite, native app, additional export categories, or server-side snapshot sync until usage evidence justifies the cost and privacy trade-off.
 - Do not expand the blog cluster until Search Console shows a distinct query with sufficient demand.
-- Do not remove or restructure Premium, add ads, change pricing, or migrate Redis based on anecdote or a small sample.
+- Do not add ads, change pricing again, or migrate Redis based on anecdote or a small sample. The 2026-09-17 move to one-time Lifetime Access was an explicit owner decision for the 60-day validation.
 
 ## 8. Undecided questions
 
@@ -174,7 +176,7 @@ Required or feature-specific services are Vercel, Upstash Redis, Dodo Payments, 
 Secret/configuration names are documented in `.env.local.example`. Important groups include:
 
 - Redis: `KV_REST_API_URL`, `KV_REST_API_TOKEN`
-- Dodo: `DODO_WEBHOOK_SECRET`, `DODO_API_KEY`, `NEXT_PUBLIC_DODO_MONTHLY_URL`, `NEXT_PUBLIC_DODO_YEARLY_URL`
+- Dodo: `DODO_WEBHOOK_SECRET`, `DODO_API_KEY`; optional `NEXT_PUBLIC_DODO_LIFETIME_PRODUCT_ID` (test mode only). Legacy `NEXT_PUBLIC_DODO_MONTHLY_URL` / `NEXT_PUBLIC_DODO_YEARLY_URL` are no longer read.
 - Email/cron: `RESEND_API_KEY`, `EMAIL_FROM`, `CRON_SECRET`
 - Public app: `NEXT_PUBLIC_APP_URL`
 - Content/research: `OPENROUTER_API_KEY`, `SERPER_API_KEY`, optional `CRAWL4AI_API_KEY`

@@ -1,12 +1,42 @@
 import { NextRequest } from 'next/server';
 import { handleDodoWebhook } from '@/lib/dodo-handler';
-import { premiumEventCommand, APPLY_PREMIUM_EVENT } from '@/lib/dodo-webhook';
+import {
+  premiumEventCommand, APPLY_PREMIUM_EVENT,
+  lifetimeGrantCommand, APPLY_LIFETIME_GRANT,
+  lifetimeRevokeCommand, APPLY_LIFETIME_REVOKE, paymentEmailKey,
+} from '@/lib/dodo-webhook';
 import { redis } from '@/lib/redis';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://safeunfollow.com';
 const EMAIL_FROM = process.env.EMAIL_FROM ?? 'noreply@safeunfollow.com';
 
-async function sendWelcomeEmail(email: string, eventId: string): Promise<void> {
+function lifetimeWelcomeHtml(): string {
+  const unlockUrl = `${APP_URL}/upload`;
+  return `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#18181b">
+      <h2 style="color:#db2777">Your SafeUnfollow Lifetime Access is ready</h2>
+      <p>Thank you for your one-time purchase. There is no subscription and nothing will renew.</p>
+      <p>To unlock a browser, open SafeUnfollow, choose <strong>Premium ✦</strong>, and enter this purchase email under “Already purchased?”. We will email you a 6-digit code.</p>
+      <ul style="padding-left:20px;line-height:1.8">
+        <li>Full relationship lists and search</li>
+        <li>CSV export</li>
+        <li>Unlimited snapshots and change history</li>
+      </ul>
+      <p>
+        <a href="${unlockUrl}"
+           style="display:inline-block;background:#db2777;color:#fff;padding:10px 22px;
+                  border-radius:9999px;text-decoration:none;font-weight:600;font-size:14px">
+          Open SafeUnfollow
+        </a>
+      </p>
+      <p style="font-size:12px;color:#71717a;margin-top:32px">
+        SafeUnfollow &mdash; no Instagram login. Your export stays in your browser.
+      </p>
+    </div>
+  `;
+}
+
+async function sendWelcomeEmail(email: string, eventId: string, plan: 'subscription' | 'lifetime'): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn('[webhook/dodo] Welcome email not configured');
@@ -54,8 +84,8 @@ async function sendWelcomeEmail(email: string, eventId: string): Promise<void> {
     body: JSON.stringify({
       from: EMAIL_FROM,
       to: email,
-      subject: 'SafeUnfollow Premium 구독이 시작되었습니다',
-      html,
+      subject: plan === 'lifetime' ? 'Your SafeUnfollow Lifetime Access is ready' : 'SafeUnfollow Premium 구독이 시작되었습니다',
+      html: plan === 'lifetime' ? lifetimeWelcomeHtml() : html,
     }),
   });
 
@@ -68,6 +98,15 @@ export async function POST(request: NextRequest): Promise<Response> {
   return handleDodoWebhook(request, {
     secret: process.env.DODO_WEBHOOK_SECRET,
     persist: async (event, id) => {
+      if (event.kind === 'lifetime-grant') {
+        const command = lifetimeGrantCommand(event, id);
+        return redis.eval<string[], string>(APPLY_LIFETIME_GRANT, command.keys, command.args);
+      }
+      if (event.kind === 'lifetime-revoke') {
+        const owner = await redis.get<string>(paymentEmailKey(event.paymentId));
+        const command = lifetimeRevokeCommand(event, id, typeof owner === 'string' ? owner : null);
+        return redis.eval<string[], string>(APPLY_LIFETIME_REVOKE, command.keys, command.args);
+      }
       const command = premiumEventCommand(event, id);
       return redis.eval<string[], string>(APPLY_PREMIUM_EVENT, command.keys, command.args);
     },

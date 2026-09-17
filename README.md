@@ -83,13 +83,26 @@ Copy the relevant values from `.env.local.example` into `.env.local` on the auto
 
 Git credentials must already permit a non-interactive push to the configured remote. Vercel should remain connected to the GitHub branch; no direct Vercel credential is needed.
 
+### Lifetime Access (one-time payment)
+
+- Dodo product: `SafeUnfollow Lifetime Access` (`pdt_0NnnAFSCBOcQrM32OLj5p`), one-time US$3.99, tax-inclusive, purchasing power parity enabled. The ID and hosted checkout link are public identifiers and live in `utils/premium-offer.ts`; `NEXT_PUBLIC_DODO_LIFETIME_PRODUCT_ID` overrides the ID only for Dodo test mode.
+- Checkout returns to `/<locale>/upload?premium=purchased`, which prompts the buyer to unlock the browser with the purchase email (email OTP restore). Access is granted only by the signed webhook, never by the redirect.
+- Webhook: a subscription-less `payment.succeeded` grants lifetime access only when `product_cart` contains the configured product; a full `refund.succeeded` or `dispute.lost` / `dispute.accepted` revokes it by payment ID. Partial refunds and other dispute states do not change access.
+- The production endpoint must subscribe to `payment.succeeded`, `refund.succeeded`, `dispute.lost`, and `dispute.accepted` in addition to the subscription lifecycle events (configured 2026-09-17).
+- Free users see every total and the first 20 accounts per relationship list and cleanup list; search, CSV, extra snapshots, and change details require access. The gate is a presentation limit because export data never leaves the browser.
+- Verify persistence changes against a disposable Redis: `DODO_TEST_REDIS_PORT=6390 node --import tsx scripts/dodo-webhook.integration.ts` (or `DODO_TEST_CONTAINER=...`).
+
 ### Redis operations
 
-Redis remains the operational source for Premium entitlement, Dodo subscription ID, renewal date, cancellation OTP state, OTP throttling, the Premium-check rate limit, and renewal-reminder deduplication. Browser-side uploads, parsing, snapshots, history comparison, and CSV generation use local storage and do not send Instagram export data to Redis.
+Redis remains the operational source for Premium entitlement (legacy subscriptions and one-time Lifetime Access), Dodo subscription ID, lifetime payment references, renewal date, cancellation OTP state, OTP throttling, the Premium-check rate limit, and renewal-reminder deduplication. Browser-side uploads, parsing, snapshots, history comparison, and CSV generation use local storage and do not send Instagram export data to Redis.
 
 | Key pattern | Data and lifecycle |
 | --- | --- |
-| `premium:<email>` | Premium entitlement; no TTL |
+| `premium:<email>` | Premium entitlement (subscription or Lifetime Access); no TTL |
+| `premium_plan:<email>` | `lifetime` for one-time Lifetime Access; subscription revocation and the cancellation flow never remove lifetime access; no TTL |
+| `lifetime_payment:<email>` | Dodo payment ID that granted Lifetime Access; no TTL |
+| `lifetime_payment_email:<payment_id>` | Buyer email for refund/dispute revocation lookup; no TTL |
+| `lifetime_revoked:<payment_id>` | Marker set by a full refund or lost/accepted dispute so a delayed grant cannot restore access; no TTL |
 | `subscription_id:<email>` | Dodo subscription ID used for cancellation; no TTL |
 | `renewal_date:<email>` | Renewal date used by reminder processing; no TTL |
 | `cancel_token:<email>` | Six-digit cancellation OTP; 15-minute TTL |

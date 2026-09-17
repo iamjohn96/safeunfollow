@@ -3,22 +3,20 @@
 import { useState } from 'react';
 import { t, type Lang } from '@/utils/i18n';
 import { trackFunnel } from '@/utils/analytics';
+import { lifetimeCheckoutUrl } from '@/utils/premium-offer';
 
 interface PremiumModalProps {
   lang: Lang;
   onClose: () => void;
   onVerified: () => void;
+  purchased?: boolean;
 }
 
-export function PremiumModal({ lang, onClose, onVerified }: PremiumModalProps) {
+export function PremiumModal({ lang, onClose, onVerified, purchased = false }: PremiumModalProps) {
   const [email, setEmail] = useState('');
   const [token, setToken] = useState('');
   const [restoreStep, setRestoreStep] = useState<'email' | 'code'>('email');
   const [verifyState, setVerifyState] = useState<'idle' | 'loading' | 'success' | 'fail'>('idle');
-  const [tab, setTab] = useState<'yearly' | 'monthly'>('yearly');
-
-  const monthlyUrl = process.env.NEXT_PUBLIC_DODO_MONTHLY_URL ?? '#';
-  const yearlyUrl = process.env.NEXT_PUBLIC_DODO_YEARLY_URL ?? '#';
 
   const restoreCopy = {
     en: { send: 'Send code', code: '6-digit code', sent: 'If this purchase is eligible, a code was sent to your email.', verify: 'Activate', fail: 'The code is invalid, expired, or access could not be verified.' },
@@ -86,33 +84,26 @@ export function PremiumModal({ lang, onClose, onVerified }: PremiumModalProps) {
             ))}
           </ul>
 
-          {/* Plan toggle */}
-          <div className="bg-zinc-50 rounded-xl p-1 flex gap-1">
-            <button
-              onClick={() => setTab('yearly')}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${tab === 'yearly' ? 'bg-white shadow text-zinc-900' : 'text-zinc-500 hover:text-zinc-700'}`}
-            >
-              {t('modal.yearly_label', lang)}
-              <span className="ml-1 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-semibold">{t('modal.yearly_save', lang)}</span>
-            </button>
-            <button
-              onClick={() => setTab('monthly')}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${tab === 'monthly' ? 'bg-white shadow text-zinc-900' : 'text-zinc-500 hover:text-zinc-700'}`}
-            >
-              {t('modal.monthly_label', lang)}
-            </button>
-          </div>
-
-          {/* CTA button */}
-          <a
-            href={tab === 'yearly' ? yearlyUrl : monthlyUrl}
-            onClick={() => trackFunnel('premium_checkout_click', lang, { plan: tab })}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full text-center bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
-          >
-            {tab === 'yearly' ? t('modal.buy_yearly', lang) : t('modal.buy_monthly', lang)}
-          </a>
+          {purchased ? (
+            <p role="status" className="rounded-xl bg-green-50 border border-green-100 px-4 py-3 text-sm text-green-700">
+              {t('modal.purchased_note', lang)}
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {/* One-time checkout */}
+              <a
+                href={lifetimeCheckoutUrl(lang)}
+                onClick={() => trackFunnel('premium_checkout_click', lang, { plan: 'lifetime' })}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cta="lifetime-checkout"
+                className="block w-full text-center bg-pink-600 hover:bg-pink-700 text-white font-semibold py-3 rounded-xl transition-colors text-sm"
+              >
+                {t('modal.buy_lifetime', lang)}
+              </a>
+              <p className="text-xs text-zinc-500 text-center leading-relaxed">{t('modal.one_time_note', lang)}</p>
+            </div>
+          )}
 
           {/* Divider */}
           <div className="flex items-center gap-3 text-xs text-zinc-400">

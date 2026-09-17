@@ -29,18 +29,18 @@ const conversionCopy = {
       ['Account connection', 'None', 'Required', 'None'],
       ['Account access', 'None', 'Required', 'None'],
       ['Privacy', 'Local browser processing', 'Account data shared with app', 'Local file handling'],
-      ['Repeat snapshots', 'Unlimited with Premium', 'Varies by app', 'Manual copies'],
-      ['CSV / history export', 'Included with Premium', 'Varies by app', 'Manual setup'],
+      ['Repeat snapshots', 'Unlimited with Lifetime Access', 'Varies by app', 'Manual copies'],
+      ['CSV / history export', 'Included with Lifetime Access', 'Varies by app', 'Manual setup'],
     ],
     faqExtras: [
       { q: 'Is my data private?', a: 'Yes. Your Instagram data is processed locally in your browser and is not uploaded to SafeUnfollow servers.' },
-      { q: 'What do I get with Premium?', a: 'Premium adds unlimited snapshots, change history, and CSV export. The workflow stays privacy-first with no Instagram login or account connection.' },
+      { q: 'What does Lifetime Access include?', a: 'The free check shows every count and the first 20 accounts in each list. A one-time $3.99 payment unlocks the full lists, search, CSV export, unlimited snapshots, and change history. There is no subscription, and the workflow still needs no Instagram login or account connection.' },
     ],
     howCta: 'Upload Your Instagram Data ZIP',
     howCtaNote: 'No login or password required',
-    premiumEyebrow: 'Start free. Upgrade when you need history.',
+    premiumEyebrow: 'Start free. Pay once when you need the full list.',
     premiumSecondary: 'Run a free ZIP check first',
-    premiumNote: 'Premium adds history—not account access. The same no-login, local ZIP workflow stays in place.',
+    premiumNote: 'Lifetime Access adds full results and history—not account access. The same no-login, local ZIP workflow stays in place.',
     valueHeading: 'One ZIP. A clearer picture of your Instagram relationships.',
     valueSubtitle: 'SafeUnfollow reads only the followers and following lists needed for these insights.',
     values: [
@@ -71,18 +71,18 @@ const conversionCopy = {
       ['Conexão de conta', 'Nenhuma', 'Obrigatória', 'Nenhuma'],
       ['Risco da conta', 'Sem acesso à conta', 'Risco de acesso', 'Nenhum'],
       ['Privacidade', 'Processamento local', 'Dados compartilhados', 'Arquivo local'],
-      ['Capturas repetidas', 'Ilimitadas no Premium', 'Varia', 'Cópias manuais'],
-      ['CSV / histórico', 'Incluído no Premium', 'Varia', 'Configuração manual'],
+      ['Capturas repetidas', 'Ilimitadas com acesso vitalício', 'Varia', 'Cópias manuais'],
+      ['CSV / histórico', 'Incluído no acesso vitalício', 'Varia', 'Configuração manual'],
     ],
     faqExtras: [
       { q: 'Meus dados são privados?', a: 'Sim. Seus dados do Instagram são processados localmente e não são enviados aos servidores do SafeUnfollow.' },
-      { q: 'O que recebo com o Premium?', a: 'Capturas ilimitadas, histórico de mudanças e exportação CSV, mantendo o fluxo sem login ou conexão da conta.' },
+      { q: 'O que inclui o acesso vitalício?', a: 'A análise grátis mostra todos os totais e as 20 primeiras contas de cada lista. Um pagamento único de US$ 3,99 libera as listas completas, a busca, a exportação CSV, capturas ilimitadas e o histórico de mudanças. Não há assinatura, e o fluxo continua sem login ou conexão da conta.' },
     ],
     howCta: 'Enviar ZIP de dados do Instagram',
     howCtaNote: 'Sem login ou senha',
-    premiumEyebrow: 'Comece grátis. Faça upgrade quando precisar de histórico.',
+    premiumEyebrow: 'Comece grátis. Pague uma vez quando precisar da lista completa.',
     premiumSecondary: 'Analisar um ZIP grátis primeiro',
-    premiumNote: 'O Premium adiciona histórico, não acesso à conta. O fluxo local e sem login permanece igual.',
+    premiumNote: 'O acesso vitalício adiciona resultados completos e histórico, não acesso à conta. O fluxo local e sem login permanece igual.',
     valueHeading: 'Um ZIP. Uma visão mais clara dos seus relacionamentos.',
     valueSubtitle: 'O SafeUnfollow lê apenas as listas de seguidores e seguidos necessárias para estas análises.',
     values: [
@@ -109,16 +109,16 @@ const conversionCopy = {
     comparisonRows: [
       ['Вход в аккаунт', 'Нет', 'Да', 'Нет'], ['Подключение аккаунта', 'Нет', 'Обязательно', 'Нет'],
       ['Риск для аккаунта', 'Нет доступа', 'Риск доступа', 'Нет'], ['Конфиденциальность', 'Локальная обработка', 'Данные передаются приложению', 'Локальный файл'],
-      ['Повторные снимки', 'Без ограничений в Премиум', 'Зависит от приложения', 'Ручные копии'], ['CSV / история', 'Включено в Премиум', 'Зависит', 'Ручная настройка'],
+      ['Повторные снимки', 'Без ограничений с пожизненным доступом', 'Зависит от приложения', 'Ручные копии'], ['CSV / история', 'Включено в пожизненный доступ', 'Зависит', 'Ручная настройка'],
     ],
     faqExtras: [
       { q: 'Мои данные конфиденциальны?', a: 'Да. Данные Instagram обрабатываются локально и не отправляются на серверы SafeUnfollow.' },
-      { q: 'Что даёт Премиум?', a: 'Неограниченные снимки, история изменений и CSV без входа или подключения аккаунта Instagram.' },
+      { q: 'Что даёт пожизненный доступ?', a: 'Бесплатная проверка показывает все итоги и первые 20 аккаунтов в каждом списке. Разовый платёж $3.99 открывает полные списки, поиск, экспорт CSV, неограниченные снимки и историю изменений. Подписки нет, вход в Instagram и подключение аккаунта по-прежнему не нужны.' },
     ],
     howCta: 'Загрузить ZIP с данными Instagram', howCtaNote: 'Без входа и пароля',
-    premiumEyebrow: 'Начните бесплатно. Переходите на Премиум, когда понадобится история.',
+    premiumEyebrow: 'Начните бесплатно. Оплатите один раз, когда понадобится полный список.',
     premiumSecondary: 'Сначала бесплатно проверить ZIP',
-    premiumNote: 'Премиум добавляет историю, а не доступ к аккаунту. Локальная работа без входа сохраняется.',
+    premiumNote: 'Пожизненный доступ добавляет полные результаты и историю, а не доступ к аккаунту. Локальная работа без входа сохраняется.',
     valueHeading: 'Один ZIP. Более ясная картина ваших связей в Instagram.',
     valueSubtitle: 'SafeUnfollow читает только списки подписчиков и подписок, необходимые для анализа.',
     values: [
@@ -145,15 +145,15 @@ const conversionCopy = {
     comparisonRows: [
       ['Login necesario', 'No', 'Sí', 'No'], ['Conexión de cuenta', 'Ninguna', 'Obligatoria', 'Ninguna'],
       ['Riesgo de cuenta', 'Sin acceso', 'Riesgo de acceso', 'Ninguno'], ['Privacidad', 'Procesamiento local', 'Datos compartidos', 'Archivo local'],
-      ['Instantáneas', 'Ilimitadas con Premium', 'Varía', 'Copias manuales'], ['CSV / historial', 'Incluido con Premium', 'Varía', 'Configuración manual'],
+      ['Instantáneas', 'Ilimitadas con acceso de por vida', 'Varía', 'Copias manuales'], ['CSV / historial', 'Incluido en el acceso de por vida', 'Varía', 'Configuración manual'],
     ],
     faqExtras: [
       { q: '¿Mis datos son privados?', a: 'Sí. Tus datos se procesan localmente y no se envían a los servidores de SafeUnfollow.' },
-      { q: '¿Qué incluye Premium?', a: 'Instantáneas ilimitadas, historial de cambios y CSV, sin login ni conexión de cuenta.' },
+      { q: '¿Qué incluye el acceso de por vida?', a: 'El análisis gratis muestra todos los totales y las 20 primeras cuentas de cada lista. Un pago único de $3.99 desbloquea las listas completas, la búsqueda, la exportación CSV, instantáneas ilimitadas y el historial de cambios. No hay suscripción y el flujo sigue sin login ni conexión de cuenta.' },
     ],
     howCta: 'Subir ZIP de datos de Instagram', howCtaNote: 'Sin login ni contraseña',
-    premiumEyebrow: 'Empieza gratis. Mejora cuando necesites historial.', premiumSecondary: 'Analizar un ZIP gratis primero',
-    premiumNote: 'Premium añade historial, no acceso a la cuenta. El flujo local sin login se mantiene.',
+    premiumEyebrow: 'Empieza gratis. Paga una vez cuando necesites la lista completa.', premiumSecondary: 'Analizar un ZIP gratis primero',
+    premiumNote: 'El acceso de por vida añade resultados completos e historial, no acceso a la cuenta. El flujo local sin login se mantiene.',
     valueHeading: 'Un ZIP. Una visión más clara de tus relaciones.',
     valueSubtitle: 'SafeUnfollow solo lee las listas de seguidores y seguidos necesarias para estos análisis.',
     values: [
@@ -486,8 +486,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
               data-cta-location="premium-section"
               className="bg-white text-pink-600 font-bold px-7 py-3.5 rounded-full text-sm hover:bg-pink-50 transition-colors shadow-lg"
             >
-              {t('premium.cta', lang)} — {t('premium.yearly', lang)}
-              <span className="ml-2 text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full">{t('premium.save', lang)}</span>
+              {t('premium.cta', lang)}
             </button>
             {localizedConversionCopy && (
               <Link
@@ -501,7 +500,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
             )}
           </div>
           <p className="mt-4 text-white/60 text-xs">
-            {t('premium.monthly_available', lang, { price: t('premium.monthly', lang) })}
+            {t('premium.price_note', lang)}
           </p>
           {localizedConversionCopy && (
             <p className="mt-3 text-white/70 text-xs leading-relaxed">{localizedConversionCopy.premiumNote}</p>

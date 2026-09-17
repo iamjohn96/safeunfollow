@@ -35,6 +35,12 @@ export async function isPremiumEmail(email: string): Promise<boolean> {
   return false;
 }
 
+// 'lifetime' for one-time Lifetime Access purchases; absent for subscription-based Premium.
+export async function getPremiumPlan(email: string): Promise<'lifetime' | null> {
+  const val = await redis.get(`premium_plan:${email.toLowerCase().trim()}`);
+  return val === 'lifetime' ? 'lifetime' : null;
+}
+
 export interface PremiumUser {
   email: string;
   renewal?: number;

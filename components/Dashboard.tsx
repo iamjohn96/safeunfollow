@@ -17,6 +17,7 @@ import { audienceCopy } from '@/utils/audience-copy';
 import { AudienceInsights } from './AudienceInsights';
 import { exportTimestamp, persistAnalysisDraft } from '@/utils/analysis-draft';
 import { usePremium } from '@/utils/use-premium';
+import { previewAccounts } from '@/utils/premium-offer';
 
 interface Snapshot {
   id: string;
@@ -29,6 +30,8 @@ interface DashboardProps {
   data: ParsedData;
   lang: Lang;
   onReset?: () => void;
+  purchaseReturn?: boolean;
+  onPurchaseReturnHandled?: () => void;
 }
 
 function AccountCard({ account }: { account: InstagramAccount }) {
@@ -52,21 +55,44 @@ function AccountCard({ account }: { account: InstagramAccount }) {
   );
 }
 
+export function LockedPreview({ shown, total, lang, onUnlock }: { shown: number; total: number; lang: Lang; onUnlock: () => void }) {
+  return (
+    <div data-section="free-preview-gate" className="mt-3 rounded-xl border border-pink-100 bg-pink-50/60 p-4 text-center">
+      <p className="text-sm text-zinc-700 mb-3">{t('dashboard.preview.locked', lang, { shown, total })}</p>
+      <button
+        onClick={onUnlock}
+        data-cta="result-gate-unlock"
+        className="bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors"
+      >
+        {t('dashboard.preview.unlock', lang, { total })}
+      </button>
+      <p className="mt-2 text-xs text-zinc-500">{t('premium.price_note', lang)}</p>
+    </div>
+  );
+}
+
 function AccountList({
   accounts,
   emptyMessage,
   searchPlaceholder,
   noResultsMessage,
+  unlocked,
+  lang,
+  onUnlock,
 }: {
   accounts: InstagramAccount[];
   emptyMessage: string;
   searchPlaceholder: string;
   noResultsMessage: string;
+  unlocked: boolean;
+  lang: Lang;
+  onUnlock: () => void;
 }) {
   const [query, setQuery] = useState('');
   const filtered = accounts.filter(account =>
     account.username.toLowerCase().includes(query.toLowerCase()),
   );
+  const { visible, hidden } = previewAccounts(unlocked ? filtered : accounts, unlocked);
 
   if (accounts.length === 0) {
     return <p className="text-sm text-zinc-400 text-center py-16">{emptyMessage}</p>;
@@ -74,19 +100,22 @@ function AccountList({
 
   return (
     <div>
-      <input
-        type="search"
-        value={query}
-        onChange={event => setQuery(event.target.value)}
-        placeholder={searchPlaceholder}
-        className="w-full border border-zinc-200 rounded-lg px-3 py-2 mb-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-      />
+      {unlocked && (
+        <input
+          type="search"
+          value={query}
+          onChange={event => setQuery(event.target.value)}
+          placeholder={searchPlaceholder}
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 mb-3 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+        />
+      )}
       <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
-        {filtered.map(account => <AccountCard key={account.username} account={account} />)}
-        {filtered.length === 0 && (
+        {visible.map(account => <AccountCard key={account.username} account={account} />)}
+        {unlocked && filtered.length === 0 && (
           <p className="text-sm text-zinc-400 text-center py-8">{noResultsMessage}</p>
         )}
       </div>
+      {hidden > 0 && <LockedPreview shown={visible.length} total={accounts.length} lang={lang} onUnlock={onUnlock} />}
     </div>
   );
 }
@@ -121,7 +150,7 @@ function LockedOverlay({ lang, onUnlock }: { lang: Lang; onUnlock: () => void })
   );
 }
 
-export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
+export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = false, onPurchaseReturnHandled }: DashboardProps) {
   const [today] = useState(() => new Date().toISOString().slice(0, 10));
   const [profile, setProfile] = useState(inputData.profileId ?? '');
   const [date, setDate] = useState(inputData.observedAt ? new Date(inputData.observedAt).toISOString().slice(0, 10) : '');
@@ -129,7 +158,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
   const copy = audienceCopy[lang];
   const [tab, setTab] = useState<'nonfollowers' | 'followersOnly' | 'mutuals' | 'changes'>('nonfollowers');
   const [isPremium, setIsPremium] = usePremium();
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(purchaseReturn);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [snapshotMsg, setSnapshotMsg] = useState('');
   const [snapshotSaved, setSnapshotSaved] = useState(false);
@@ -230,6 +259,12 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
   const filteredNonFollowers = nonFollowers.filter(a =>
     a.username.toLowerCase().includes(search.toLowerCase())
   );
+  const nonFollowerPreview = previewAccounts(isPremium ? filteredNonFollowers : nonFollowers, isPremium);
+
+  function openUnlock(source: string) {
+    trackFunnel('premium_opened', lang, { source });
+    setShowModal(true);
+  }
 
   function handleExport() {
     exportToCsv(nonFollowers, 'non-followers.csv');
@@ -238,12 +273,18 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
   function handlePremiumVerified() {
     setIsPremium(true);
     setShowModal(false);
+    onPurchaseReturnHandled?.();
+  }
+
+  function closeModal() {
+    setShowModal(false);
+    onPurchaseReturnHandled?.();
   }
 
   return (
     <>
       {showModal && (
-        <PremiumModal lang={lang} onClose={() => setShowModal(false)} onVerified={handlePremiumVerified} />
+        <PremiumModal lang={lang} onClose={closeModal} onVerified={handlePremiumVerified} purchased={purchaseReturn && !isPremium} />
       )}
 
       <div className="max-w-2xl mx-auto px-4 py-8">
@@ -257,7 +298,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
           <label className="block text-sm">{copy.profile}<input className="block border rounded p-2 w-full" value={profile} onChange={e => { setProfile(e.target.value); persistAnalysisDraft(localStorage, inputData, e.target.value, date, today); setSnapshotSaved(false); }} maxLength={31} autoComplete="off" /></label>
           <label className="block text-sm">{copy.date}<input type="date" className="block border rounded p-2 w-full" max={today} defaultValue={date} onChange={e => { setDate(e.target.value); persistAnalysisDraft(localStorage, inputData, profile, e.target.value, today); setSnapshotSaved(false); }} /></label>
         </div>
-        {qualified(data) && <AudienceInsights key={data.profileId} data={data} snapshots={snapshots} lang={lang} isPremium={isPremium} />}
+        {qualified(data) && <AudienceInsights key={data.profileId} data={data} snapshots={snapshots} lang={lang} isPremium={isPremium} onUnlock={() => openUnlock('cleanup_gate')} />}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="bg-white border border-zinc-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-zinc-900">{data.following.length}</div>
@@ -297,7 +338,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
 
           {!isPremium && (
             <button
-              onClick={() => { trackFunnel('premium_opened', lang, { source: 'dashboard' }); setShowModal(true); }}
+              onClick={() => openUnlock('dashboard')}
               className="text-sm font-medium border border-pink-200 text-pink-600 hover:bg-pink-50 px-4 py-2 rounded-full transition-colors"
             >
               {t('nav.premium', lang)} ✦
@@ -367,26 +408,31 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
               </div>
             ) : (
               <>
-                <div className="mb-3">
-                  <input
-                    type="search"
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    placeholder={relationshipCopy.search}
-                    className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                  />
-                </div>
+                {isPremium && (
+                  <div className="mb-3">
+                    <input
+                      type="search"
+                      value={search}
+                      onChange={e => setSearch(e.target.value)}
+                      placeholder={relationshipCopy.search}
+                      className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    />
+                  </div>
+                )}
                 <p className="text-xs text-zinc-400 mb-2">
                   {t('dashboard.nonfollowers.count', lang, { count: nonFollowers.length })}
                 </p>
                 <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
-                  {filteredNonFollowers.map(account => (
+                  {nonFollowerPreview.visible.map(account => (
                     <AccountCard key={account.username} account={account} />
                   ))}
-                  {filteredNonFollowers.length === 0 && (
+                  {isPremium && filteredNonFollowers.length === 0 && (
                     <p className="text-sm text-zinc-400 text-center py-8">{relationshipCopy.noResults}</p>
                   )}
                 </div>
+                {nonFollowerPreview.hidden > 0 && (
+                  <LockedPreview shown={nonFollowerPreview.visible.length} total={nonFollowers.length} lang={lang} onUnlock={() => openUnlock('result_gate')} />
+                )}
               </>
             )}
           </div>
@@ -398,6 +444,9 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
             emptyMessage={relationshipCopy.followersOnlyEmpty}
             searchPlaceholder={relationshipCopy.search}
             noResultsMessage={relationshipCopy.noResults}
+            unlocked={isPremium}
+            lang={lang}
+            onUnlock={() => openUnlock('result_gate')}
           />
         )}
 
@@ -407,6 +456,9 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
             emptyMessage={relationshipCopy.mutualsEmpty}
             searchPlaceholder={relationshipCopy.search}
             noResultsMessage={relationshipCopy.noResults}
+            unlocked={isPremium}
+            lang={lang}
+            onUnlock={() => openUnlock('result_gate')}
           />
         )}
 
@@ -440,7 +492,7 @@ export function Dashboard({ data: inputData, lang, onReset }: DashboardProps) {
                   </div>
                   {/* Account lists locked */}
                   <div className="relative min-h-[250px]">
-                    <LockedOverlay lang={lang} onUnlock={() => setShowModal(true)} />
+                    <LockedOverlay lang={lang} onUnlock={() => openUnlock('changes_gate')} />
                   </div>
                 </div>
               ) : (

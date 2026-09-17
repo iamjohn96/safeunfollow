@@ -147,7 +147,7 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
               onClick={() => setShowModal(true)}
               className="text-xs font-semibold text-pink-600 hover:text-pink-700 transition-colors flex-shrink-0"
             >
-              Upgrade →
+              {t('nav.premium', lang)} ✦
             </button>
           </div>
         )}

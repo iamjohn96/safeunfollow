@@ -8,6 +8,7 @@ import {
   registerOtpFailure,
   clearOtpFailures,
   getOtpFailLimit,
+  getPremiumPlan,
 } from '@/lib/redis';
 
 const DODO_API_BASE = 'https://api.dodopayments.com';
@@ -64,6 +65,12 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     if (!hasPremium) {
       await deleteCancelToken(normalised);
       return NextResponse.json({ error: 'No active subscription found for this email' }, { status: 404 });
+    }
+
+    if (await getPremiumPlan(normalised) === 'lifetime') {
+      // One-time purchases have no subscription to cancel; never delete paid lifetime access here.
+      await deleteCancelToken(normalised);
+      return NextResponse.json({ error: 'Lifetime Access is a one-time purchase with no subscription to cancel.' }, { status: 409 });
     }
 
     const subscriptionId = await getSubscriptionId(normalised);

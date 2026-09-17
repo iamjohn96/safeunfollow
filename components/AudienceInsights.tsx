@@ -3,13 +3,14 @@ import { useState } from 'react';
 import { cleanupCandidates, compareAudience, previousSnapshot, type Snapshot } from '@/utils/audience';
 import { audienceCopy } from '@/utils/audience-copy';
 import type { ParsedData } from '@/utils/parser';
-import type { Lang } from '@/utils/i18n';
+import { t, type Lang } from '@/utils/i18n';
+import { FREE_PREVIEW_LIMIT } from '@/utils/premium-offer';
 
 const premiumNotice = {
-  en: 'Comparisons between exports require Premium.',
-  pt: 'Comparações entre exportações exigem Premium.',
-  ru: 'Для сравнения экспортов нужен Премиум.',
-  es: 'Las comparaciones entre exports requieren Premium.',
+  en: 'Comparisons between exports require Lifetime Access.',
+  pt: 'Comparações entre exportações exigem o acesso vitalício.',
+  ru: 'Для сравнения экспортов нужен пожизненный доступ.',
+  es: 'Las comparaciones entre exportaciones requieren el acceso de por vida.',
 };
 
 export function ChangeSummary({ a, b, lang }: { a: ParsedData; b: ParsedData; lang: Lang }) {
@@ -25,7 +26,7 @@ export function ChangeSummary({ a, b, lang }: { a: ParsedData; b: ParsedData; la
   </div>;
 }
 
-export function AudienceInsights({ data, snapshots, lang, isPremium }: { data: ParsedData; snapshots: Snapshot[]; lang: Lang; isPremium: boolean }) {
+export function AudienceInsights({ data, snapshots, lang, isPremium, onUnlock }: { data: ParsedData; snapshots: Snapshot[]; lang: Lang; isPremium: boolean; onUnlock?: () => void }) {
   const c = audienceCopy[lang];
   const [keep, setKeep] = useState<string[]>([]);
   const [filter, setFilter] = useState('all');
@@ -48,6 +49,8 @@ export function AudienceInsights({ data, snapshots, lang, isPremium }: { data: P
   }
   const candidates = cleanupCandidates(data, isPremium ? snapshots : [], keep);
   const filtered = candidates.filter(a => filter === 'all' || a.category === filter);
+  // Free users see the first FREE_PREVIEW_LIMIT candidates of the selected category only.
+  const shownLimit = isPremium ? limit : Math.min(limit, FREE_PREVIEW_LIMIT);
   return <section className="my-6 rounded-2xl border border-pink-100 bg-white p-5 space-y-4">
     <h2 className="font-semibold">{c.title}</h2>
     {isPremium && previous ? <ChangeSummary a={previous.data} b={data} lang={lang} /> : <p className="text-sm text-zinc-500">{isPremium ? c.pending : premiumNotice[lang]}</p>}
@@ -57,8 +60,14 @@ export function AudienceInsights({ data, snapshots, lang, isPremium }: { data: P
         <option value="all">{c.all} ({candidates.length})</option>
         {(['keep', 'recent', 'persistent', 'previouslyMutual', 'uncertain'] as const).map(key => <option key={key} value={key}>{c[key]} ({candidates.filter(a => a.category === key).length})</option>)}
       </select></label>
-      <ul className="space-y-3">{filtered.slice(0, limit).map(a => <li className="flex items-center justify-between gap-2 border-b pb-2" key={a.username}><div className="min-w-0"><p className="truncate">@{a.username}</p><p className="text-xs text-zinc-500">{c[a.category]}</p></div><button className="text-sm text-pink-600" aria-label={`${keep.includes(a.username) ? c.restore : c.keep} @${a.username}`} onClick={() => toggle(a.username)}>{keep.includes(a.username) ? c.restore : c.keep}</button></li>)}</ul>
-      {filtered.length > limit && <button onClick={() => setLimit(n => n + 30)} className="text-pink-600">{c.more}</button>}
+      <ul className="space-y-3">{filtered.slice(0, shownLimit).map(a => <li className="flex items-center justify-between gap-2 border-b pb-2" key={a.username}><div className="min-w-0"><p className="truncate">@{a.username}</p><p className="text-xs text-zinc-500">{c[a.category]}</p></div><button className="text-sm text-pink-600" aria-label={`${keep.includes(a.username) ? c.restore : c.keep} @${a.username}`} onClick={() => toggle(a.username)}>{keep.includes(a.username) ? c.restore : c.keep}</button></li>)}</ul>
+      {isPremium && filtered.length > limit && <button onClick={() => setLimit(n => n + 30)} className="text-pink-600">{c.more}</button>}
+      {!isPremium && filtered.length > shownLimit && (
+        <div className="rounded-xl border border-pink-100 bg-pink-50/60 p-3 text-center">
+          <p className="text-sm text-zinc-700 mb-2">{t('dashboard.preview.locked', lang, { shown: shownLimit, total: filtered.length })}</p>
+          {onUnlock && <button onClick={onUnlock} data-cta="cleanup-gate-unlock" className="bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold px-4 py-2 rounded-full">{t('dashboard.preview.unlock', lang, { total: filtered.length })}</button>}
+        </div>
+      )}
     </>}
     {error && <p role="alert">{error}</p>}
   </section>;

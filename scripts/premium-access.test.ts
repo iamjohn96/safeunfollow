@@ -41,3 +41,13 @@ test('browser storage failures are not described as missing Instagram files', ()
   assert.match(upload, /stage === 'storage' \? 'storage' : 'upload\.error\.missing'/);
   assert.match(upload, /audienceCopy\[lang\]\.storage/);
 });
+
+test('lifetime purchases cannot be removed through the subscription cancellation flow', () => {
+  const cancel = readFileSync('app/api/premium/cancel/route.ts', 'utf8');
+  const verify = readFileSync('app/api/premium/cancel/verify/route.ts', 'utf8');
+  const guard = cancel.indexOf("getPremiumPlan(normalised) === 'lifetime'");
+  assert.ok(guard > 0);
+  assert.ok(guard < cancel.indexOf('removePremiumEmail(normalised)'));
+  assert.match(cancel, /status: 409/);
+  assert.match(verify, /getPremiumPlan\(normalised\) === 'lifetime'/);
+});

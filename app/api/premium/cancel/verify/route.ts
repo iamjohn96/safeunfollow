@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomInt } from 'crypto';
-import { isPremiumEmail, setCancelToken, checkOtpSendRateLimit } from '@/lib/redis';
+import { isPremiumEmail, setCancelToken, checkOtpSendRateLimit, getPremiumPlan } from '@/lib/redis';
 
 const EMAIL_FROM = process.env.EMAIL_FROM ?? 'noreply@safeunfollow.com';
 
@@ -63,7 +63,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const hasPremium = await isPremiumEmail(normalised);
-    if (!hasPremium) {
+    // Lifetime Access has no subscription to cancel, so no cancellation code is issued.
+    if (!hasPremium || await getPremiumPlan(normalised) === 'lifetime') {
       return NextResponse.json({ message: 'If eligible, a confirmation code has been sent.' });
     }
 
