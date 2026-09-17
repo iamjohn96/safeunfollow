@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { t, localizedPath, type Lang } from '@/utils/i18n';
 import { trackFunnel } from '@/utils/analytics';
 
+import { SentenceLines } from '@/components/SentenceLines';
 const stepIcons = ['⚙️', '📱', '☑️', '⏳', '📥'];
 
 function GuideContent({ initialLang }: { initialLang: Lang }) {
@@ -22,13 +23,13 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
       {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 bg-zinc-100 text-zinc-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-          {t('guide.badge', lang)}
+          <SentenceLines text={t('guide.badge', lang)} />
         </div>
         <h1 id="guide-heading" className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-3">
           {t('guide.title', lang)}
         </h1>
         <p className="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
-          {t('guide.subtitle', lang)}
+          <SentenceLines text={t('guide.subtitle', lang)} />
         </p>
       </div>
 
@@ -40,14 +41,14 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
             className="bg-white border border-zinc-100 rounded-2xl p-6 hover:border-pink-100 hover:shadow-sm transition-all flex gap-4"
           >
             <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-pink-50 border border-pink-100 flex items-center justify-center text-lg">
-              {stepIcons[i]}
+              <SentenceLines text={stepIcons[i]} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="text-xs font-bold text-zinc-300 tracking-widest mb-1">
                 STEP 0{i + 1}
               </div>
               <h2 className="text-sm font-semibold text-zinc-900 mb-1">{step.title}</h2>
-              <p className="text-sm text-zinc-500 leading-relaxed">{step.desc}</p>
+              <p className="text-sm text-zinc-500 leading-relaxed"><SentenceLines text={step.desc} /></p>
             </div>
           </li>
         ))}
@@ -55,7 +56,7 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
 
       {/* Note */}
       <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-8 text-sm text-amber-700 leading-relaxed">
-        {t('guide.note', lang)}
+        <SentenceLines text={t('guide.note', lang)} />
       </div>
 
       {/* CTA */}
@@ -70,7 +71,7 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </Link>
-        <p className="mt-3 text-xs text-zinc-400">{t('guide.no_login', lang)}</p>
+        <p className="mt-3 text-xs text-zinc-400"><SentenceLines text={t('guide.no_login', lang)} /></p>
       </div>
     </section>
   );

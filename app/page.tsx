@@ -8,6 +8,7 @@ import { trackFunnel } from '@/utils/analytics';
 import { JsonLd } from '@/components/JsonLd';
 import { homeStructuredData } from '@/lib/structured-data';
 
+import { SentenceLines } from '@/components/SentenceLines';
 const conversionCopy = {
   en: {
     heroTrust: ['No login', 'No password', 'Instagram Data ZIP only'],
@@ -247,7 +248,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
             {t('hero.headline', lang)}
           </h1>
           <p className="text-lg text-zinc-500 max-w-xl mx-auto mb-8 leading-relaxed">
-            {t('hero.subheadline', lang)}
+            <SentenceLines text={t('hero.subheadline', lang)} />
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -299,18 +300,18 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
               {localizedConversionCopy.valueHeading}
             </h2>
             <p className="text-sm text-zinc-500 text-center max-w-2xl mx-auto mb-9 leading-relaxed">
-              {localizedConversionCopy.valueSubtitle}
+              <SentenceLines text={localizedConversionCopy.valueSubtitle} />
             </p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {localizedConversionCopy.values.map((value) => (
                 <article key={value.title} className="rounded-2xl border border-zinc-100 bg-zinc-50 p-5">
                   <div className="text-2xl mb-3" aria-hidden="true">{value.icon}</div>
                   <h3 className="text-sm font-bold text-zinc-900 mb-2">{value.title}</h3>
-                  <p className="text-xs leading-relaxed text-zinc-500">{value.desc}</p>
+                  <p className="text-xs leading-relaxed text-zinc-500"><SentenceLines text={value.desc} /></p>
                 </article>
               ))}
             </div>
-            <p className="mt-6 text-center text-xs text-zinc-400">{localizedConversionCopy.valueScope}</p>
+            <p className="mt-6 text-center text-xs text-zinc-400"><SentenceLines text={localizedConversionCopy.valueScope} /></p>
           </div>
         </section>
       )}
@@ -327,7 +328,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
                   <div className="text-xl" aria-hidden="true">{badge.icon}</div>
                   <div>
                     <h3 className="text-sm font-bold text-zinc-900 mb-1">{badge.title}</h3>
-                    <p className="text-xs leading-relaxed text-zinc-500">{badge.desc}</p>
+                    <p className="text-xs leading-relaxed text-zinc-500"><SentenceLines text={badge.desc} /></p>
                   </div>
                 </div>
               ))}
@@ -347,7 +348,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
               <div className="text-3xl mb-3">{step.icon}</div>
               <div className="text-xs font-bold text-zinc-300 mb-2 tracking-widest">{step.num}</div>
               <h3 className="text-base font-semibold text-zinc-900 mb-2">{step.title}</h3>
-              <p className="text-sm text-zinc-500 leading-relaxed">{step.desc}</p>
+              <p className="text-sm text-zinc-500 leading-relaxed"><SentenceLines text={step.desc} /></p>
             </div>
           ))}
         </div>
@@ -364,7 +365,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </Link>
-            <p className="mt-3 text-xs text-zinc-400">{localizedConversionCopy.howCtaNote}</p>
+            <p className="mt-3 text-xs text-zinc-400"><SentenceLines text={localizedConversionCopy.howCtaNote} /></p>
           </div>
         )}
       </section>
@@ -378,7 +379,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
           {localizedConversionCopy ? (
             <>
               <p className="text-sm text-zinc-500 text-center max-w-2xl mx-auto -mt-6 mb-8 leading-relaxed">
-                {localizedConversionCopy.comparisonSubtitle}
+                <SentenceLines text={localizedConversionCopy.comparisonSubtitle} />
               </p>
               <div className="overflow-x-auto rounded-2xl border border-zinc-200 shadow-sm">
                 <table className="w-full min-w-[760px] border-collapse text-left text-xs sm:text-sm">
@@ -411,7 +412,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
                 <div key={i} className="p-6 rounded-2xl bg-zinc-50 border border-zinc-100 hover:bg-pink-50 hover:border-pink-100 transition-all">
                   <div className="text-2xl mb-3">{f.icon}</div>
                   <h3 className="text-base font-semibold text-zinc-900 mb-2">{f.title}</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">{f.desc}</p>
+                  <p className="text-sm text-zinc-500 leading-relaxed"><SentenceLines text={f.desc} /></p>
                 </div>
               ))}
             </div>
@@ -448,7 +449,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
                 hidden={openFaq !== i}
                 className="px-5 pb-4"
               >
-                <p className="text-sm text-zinc-500 leading-relaxed">{faq.a}</p>
+                <p className="text-sm text-zinc-500 leading-relaxed"><SentenceLines text={faq.a} /></p>
               </div>
             </div>
           ))}
@@ -460,11 +461,11 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
         <div className="max-w-2xl mx-auto px-4 text-center">
           {localizedConversionCopy && (
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/70 mb-3">
-              {localizedConversionCopy.premiumEyebrow}
+              <SentenceLines text={localizedConversionCopy.premiumEyebrow} />
             </p>
           )}
           <h2 id="premium-heading" className="text-2xl font-bold mb-3">{t('premium.title', lang)}</h2>
-          <p className="text-white/80 text-sm mb-6">{t('premium.subtitle', lang)}</p>
+          <p className="text-white/80 text-sm mb-6"><SentenceLines text={t('premium.subtitle', lang)} /></p>
           <ul className="grid sm:grid-cols-3 gap-3 mb-8 text-sm text-left">
             <li className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-3">
               <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs font-bold">✓</span>
@@ -500,10 +501,10 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
             )}
           </div>
           <p className="mt-4 text-white/60 text-xs">
-            {t('premium.price_note', lang)}
+            <SentenceLines text={t('premium.price_note', lang)} />
           </p>
           {localizedConversionCopy && (
-            <p className="mt-3 text-white/70 text-xs leading-relaxed">{localizedConversionCopy.premiumNote}</p>
+            <p className="mt-3 text-white/70 text-xs leading-relaxed"><SentenceLines text={localizedConversionCopy.premiumNote} /></p>
           )}
         </div>
       </section>

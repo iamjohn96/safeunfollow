@@ -3,6 +3,7 @@ import type { MarkdownDocument } from '@/lib/markdown-content';
 import { renderMarkdown } from '@/lib/markdown-rendering';
 import styles from './markdown-article.module.css';
 
+import { SentenceLines } from '@/components/SentenceLines';
 export default async function MarkdownArticle({
   document,
   backHref,
@@ -34,7 +35,7 @@ export default async function MarkdownArticle({
         <h1 className="text-3xl font-bold text-zinc-900 mt-2 leading-tight">
           {document.data.title}
         </h1>
-        <p className="text-zinc-500 mt-3 leading-relaxed">{document.data.description}</p>
+        <p className="text-zinc-500 mt-3 leading-relaxed"><SentenceLines text={document.data.description} /></p>
       </header>
 
       <div

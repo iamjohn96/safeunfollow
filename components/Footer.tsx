@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { t, langFromPathname, localizedPath } from '@/utils/i18n';
 import { usePathname } from 'next/navigation';
+import { SentenceLines } from '@/components/SentenceLines';
 
 const LANGS = ['en', 'pt', 'ru', 'es'] as const;
 const LANG_LABELS: Record<string, string> = { en: 'EN', pt: 'PT', ru: 'RU', es: 'ES' };
@@ -10,32 +11,32 @@ const LANG_LABELS: Record<string, string> = { en: 'EN', pt: 'PT', ru: 'RU', es: 
 export function Footer() {
   const pathname = usePathname();
   const lang = langFromPathname(pathname);
+  const links = [
+    { href: '/privacy', label: t('footer.privacy', lang) },
+    { href: '/terms', label: t('footer.terms', lang) },
+    { href: '/guide', label: t('footer.guide', lang) },
+    { href: '/cancel', label: t('footer.cancel', lang) },
+  ];
 
   return (
     <footer className="border-t border-zinc-100 bg-white mt-auto">
-      <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-zinc-400">
-          <span className="font-semibold text-zinc-700">Safe<span className="text-pink-600">Unfollow</span></span>
-          <span className="hidden sm:inline">—</span>
-          <span>{t('footer.tagline', lang)}</span>
+      <div className="max-w-5xl mx-auto px-4 py-10 flex flex-col items-center gap-5 text-center">
+        {/* Row 1: brand and tagline, one sentence per line */}
+        <div className="space-y-1">
+          <p className="font-semibold text-zinc-700">Safe<span className="text-pink-600">Unfollow</span></p>
+          <p className="text-sm text-zinc-400 leading-relaxed"><SentenceLines text={t('footer.tagline', lang)} /></p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-          <Link href={localizedPath('/privacy', lang)} className="text-zinc-400 hover:text-zinc-700 transition-colors">
-            {t('footer.privacy', lang)}
-          </Link>
-          <Link href={localizedPath('/terms', lang)} className="text-zinc-400 hover:text-zinc-700 transition-colors">
-            {t('footer.terms', lang)}
-          </Link>
-          <Link href={localizedPath('/guide', lang)} className="text-zinc-400 hover:text-zinc-700 transition-colors">
-            {t('footer.guide', lang)}
-          </Link>
-          <Link href={localizedPath('/cancel', lang)} className="text-zinc-400 hover:text-zinc-700 transition-colors">
-            {t('footer.cancel', lang)}
-          </Link>
-        </div>
+        {/* Row 2: links on a single line (wraps only on narrow screens) */}
+        <nav aria-label="Footer" className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+          {links.map(link => (
+            <Link key={link.href} href={localizedPath(link.href, lang)} className="whitespace-nowrap text-zinc-400 hover:text-zinc-700 transition-colors">
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
-        {/* Language switcher */}
+        {/* Row 3: language switcher */}
         <div className="flex items-center gap-2 text-xs">
           {LANGS.map(l => (
             <a

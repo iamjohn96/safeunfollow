@@ -5,6 +5,7 @@ import { t, type Lang } from '@/utils/i18n';
 import { trackFunnel } from '@/utils/analytics';
 import { lifetimeCheckoutUrl } from '@/utils/premium-offer';
 
+import { SentenceLines } from '@/components/SentenceLines';
 interface PremiumModalProps {
   lang: Lang;
   onClose: () => void;
@@ -70,7 +71,7 @@ export function PremiumModal({ lang, onClose, onVerified, purchased = false }: P
             </svg>
           </button>
           <h2 className="text-xl font-bold mb-1">{t('modal.title', lang)}</h2>
-          <p className="text-sm text-white/80">{t('modal.subtitle', lang)}</p>
+          <p className="text-sm text-white/80"><SentenceLines text={t('modal.subtitle', lang)} /></p>
         </div>
 
         <div className="px-6 py-5 space-y-5">
@@ -86,7 +87,7 @@ export function PremiumModal({ lang, onClose, onVerified, purchased = false }: P
 
           {purchased ? (
             <p role="status" className="rounded-xl bg-green-50 border border-green-100 px-4 py-3 text-sm text-green-700">
-              {t('modal.purchased_note', lang)}
+              <SentenceLines text={t('modal.purchased_note', lang)} />
             </p>
           ) : (
             <div className="space-y-2">
@@ -101,7 +102,7 @@ export function PremiumModal({ lang, onClose, onVerified, purchased = false }: P
               >
                 {t('modal.buy_lifetime', lang)}
               </a>
-              <p className="text-xs text-zinc-500 text-center leading-relaxed">{t('modal.one_time_note', lang)}</p>
+              <p className="text-xs text-zinc-500 text-center leading-relaxed"><SentenceLines text={t('modal.one_time_note', lang)} /></p>
             </div>
           )}
 
@@ -138,14 +139,14 @@ export function PremiumModal({ lang, onClose, onVerified, purchased = false }: P
           </div>
 
           {restoreStep === 'code' && verifyState !== 'success' && (
-            <p className="text-xs text-zinc-500 text-center">{restoreCopy.sent}</p>
+            <p className="text-xs text-zinc-500 text-center"><SentenceLines text={restoreCopy.sent} /></p>
           )}
 
           {verifyState === 'success' && (
-            <p className="text-sm text-green-600 font-medium text-center">{t('modal.verify_success', lang)}</p>
+            <p className="text-sm text-green-600 font-medium text-center"><SentenceLines text={t('modal.verify_success', lang)} /></p>
           )}
           {verifyState === 'fail' && (
-            <p className="text-sm text-red-500 text-center">{restoreCopy.fail}</p>
+            <p className="text-sm text-red-500 text-center"><SentenceLines text={restoreCopy.fail} /></p>
           )}
         </div>
       </div>

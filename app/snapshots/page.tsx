@@ -10,6 +10,7 @@ import { ChangeSummary } from '@/components/AudienceInsights';
 import { PremiumModal } from '@/components/PremiumModal';
 import { usePremium } from '@/utils/use-premium';
 
+import { SentenceLines } from '@/components/SentenceLines';
 interface Snapshot {
   id: string;
   timestamp: number;
@@ -48,7 +49,7 @@ function SnapshotCard({
       </button>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-zinc-900">{snap.label}</p>
+        <p className="text-sm font-semibold text-zinc-900"><SentenceLines text={snap.label} /></p>
         <p className="text-xs text-zinc-400 mt-0.5">
           {snap.data.following.length} following · {snap.data.followers.length} followers
         </p>
@@ -128,13 +129,13 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
       )}
 
       <section className="max-w-2xl mx-auto px-4 py-10" aria-labelledby="snapshots-heading">
-        {storageError && <p role="alert">{audienceCopy[lang].storage}</p>}
+        {storageError && <p role="alert"><SentenceLines text={audienceCopy[lang].storage} /></p>}
         <div className="mb-8">
           <h1 id="snapshots-heading" className="text-2xl font-bold text-zinc-900 mb-1">
             {t('snapshots.title', lang)}
           </h1>
-          <p className="text-sm text-zinc-500">{t('snapshots.subtitle', lang)}</p>
-          <p className="mt-2 text-xs leading-relaxed text-zinc-400">{localHistory}</p>
+          <p className="text-sm text-zinc-500"><SentenceLines text={t('snapshots.subtitle', lang)} /></p>
+          <p className="mt-2 text-xs leading-relaxed text-zinc-400"><SentenceLines text={localHistory} /></p>
         </div>
 
         {!isPremium && snapshots.length >= 1 && (
@@ -142,7 +143,7 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
             <svg className="w-5 h-5 text-pink-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <p className="text-sm text-pink-700 flex-1">{t('snapshots.limit', lang)}</p>
+            <p className="text-sm text-pink-700 flex-1"><SentenceLines text={t('snapshots.limit', lang)} /></p>
             <button
               onClick={() => setShowModal(true)}
               className="text-xs font-semibold text-pink-600 hover:text-pink-700 transition-colors flex-shrink-0"
@@ -155,7 +156,7 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
         {snapshots.length === 0 ? (
           <div className="text-center py-20 text-zinc-400">
             <div className="text-4xl mb-3">📸</div>
-            <p className="text-sm mb-4">{t('snapshots.empty', lang)}</p>
+            <p className="text-sm mb-4"><SentenceLines text={t('snapshots.empty', lang)} /></p>
             <Link
               href={`/upload${langParam}`}
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-pink-600 hover:text-pink-700 transition-colors"
@@ -191,7 +192,7 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
                 </div>
-                <p className="text-sm text-zinc-600 mb-3">{t('dashboard.changes.locked', lang)}</p>
+                <p className="text-sm text-zinc-600 mb-3"><SentenceLines text={t('dashboard.changes.locked', lang)} /></p>
                 <button
                   onClick={() => setShowModal(true)}
                   className="bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors"
@@ -262,7 +263,7 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
                   )}
                 </section>
               </div>
-            ) : <p role="status" className="text-sm text-amber-700">{audienceCopy[lang].legacy}</p>}
+            ) : <p role="status" className="text-sm text-amber-700"><SentenceLines text={audienceCopy[lang].legacy} /></p>}
           </div>
         )}
 

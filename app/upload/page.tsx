@@ -9,6 +9,7 @@ import { PremiumModal } from '@/components/PremiumModal';
 import { trackFunnel, uploadFailureReason } from '@/utils/analytics';
 import { audienceCopy } from '@/utils/audience-copy';
 
+import { SentenceLines } from '@/components/SentenceLines';
 function UploadContent({ initialLang }: { initialLang: Lang }) {
   const lang = initialLang;
   const [isDragging, setIsDragging] = useState(false);
@@ -143,11 +144,11 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
       <div className="w-full max-w-lg">
         {/* Header */}
         <div className="text-center mb-8">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-pink-600 mb-2">{uploadValue.eyebrow}</p>
+          <p className="text-xs font-bold uppercase tracking-[0.14em] text-pink-600 mb-2"><SentenceLines text={uploadValue.eyebrow} /></p>
           <h1 id="upload-heading" className="text-2xl font-bold text-zinc-900 mb-2">
             {t('upload.title', lang)}
           </h1>
-          <p className="text-sm text-zinc-500">{t('upload.subtitle', lang)}</p>
+          <p className="text-sm text-zinc-500"><SentenceLines text={t('upload.subtitle', lang)} /></p>
         </div>
 
         <div className="mb-6 rounded-2xl border border-pink-100 bg-pink-50/60 p-5">
@@ -157,7 +158,7 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
               <li key={item} className="flex items-center gap-1.5"><span className="text-green-600">✓</span>{item}</li>
             ))}
           </ul>
-          <p className="mt-3 text-xs leading-relaxed text-zinc-400">{uploadValue.scope}</p>
+          <p className="mt-3 text-xs leading-relaxed text-zinc-400"><SentenceLines text={uploadValue.scope} /></p>
         </div>
 
         {/* Drop zone */}
@@ -191,7 +192,7 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
           {status === 'processing' ? (
             <div className="flex flex-col items-center gap-3">
               <div className="w-10 h-10 rounded-full border-2 border-pink-400 border-t-transparent animate-spin" />
-              <p className="text-sm font-medium text-zinc-600">{t('upload.processing', lang)}</p>
+              <p className="text-sm font-medium text-zinc-600"><SentenceLines text={t('upload.processing', lang)} /></p>
             </div>
           ) : (
             <>
@@ -200,8 +201,8 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
               </div>
-              <p className="text-sm font-semibold text-zinc-700 mb-1">{t('upload.drag', lang)}</p>
-              <p className="text-xs text-zinc-400 mb-4">{t('upload.or', lang)}</p>
+              <p className="text-sm font-semibold text-zinc-700 mb-1"><SentenceLines text={t('upload.drag', lang)} /></p>
+              <p className="text-xs text-zinc-400 mb-4"><SentenceLines text={t('upload.or', lang)} /></p>
               <span className="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">
                 {t('upload.browse', lang)}
               </span>
@@ -210,12 +211,12 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
         </div>
 
         {/* Format hint */}
-        <p className="text-center text-xs text-zinc-400 mt-3">{t('upload.formats', lang)}</p>
+        <p className="text-center text-xs text-zinc-400 mt-3"><SentenceLines text={t('upload.formats', lang)} /></p>
 
         {/* Error */}
         {status === 'error' && (
           <div className="mt-4 p-4 bg-red-50 border border-red-100 rounded-xl text-sm text-red-600 text-center">
-            {errorKey === 'storage' ? audienceCopy[lang].storage : t(errorKey, lang)}
+            <SentenceLines text={errorKey === 'storage' ? audienceCopy[lang].storage : t(errorKey, lang)} />
           </div>
         )}
 

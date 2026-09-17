@@ -19,6 +19,7 @@ import { exportTimestamp, persistAnalysisDraft } from '@/utils/analysis-draft';
 import { usePremium } from '@/utils/use-premium';
 import { previewAccounts } from '@/utils/premium-offer';
 
+import { SentenceLines } from '@/components/SentenceLines';
 interface Snapshot {
   id: string;
   timestamp: number;
@@ -43,7 +44,7 @@ function AccountCard({ account }: { account: InstagramAccount }) {
       className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors group rounded-lg"
     >
       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 select-none">
-        {account.username[0]?.toUpperCase()}
+        <SentenceLines text={account.username[0]?.toUpperCase()} />
       </div>
       <span className="text-sm font-medium text-zinc-800 group-hover:text-pink-600 transition-colors truncate">
         @{account.username}
@@ -58,7 +59,7 @@ function AccountCard({ account }: { account: InstagramAccount }) {
 export function LockedPreview({ shown, total, lang, onUnlock }: { shown: number; total: number; lang: Lang; onUnlock: () => void }) {
   return (
     <div data-section="free-preview-gate" className="mt-3 rounded-xl border border-pink-100 bg-pink-50/60 p-4 text-center">
-      <p className="text-sm text-zinc-700 mb-3">{t('dashboard.preview.locked', lang, { shown, total })}</p>
+      <p className="text-sm text-zinc-700 mb-3"><SentenceLines text={t('dashboard.preview.locked', lang, { shown, total })} /></p>
       <button
         onClick={onUnlock}
         data-cta="result-gate-unlock"
@@ -66,7 +67,7 @@ export function LockedPreview({ shown, total, lang, onUnlock }: { shown: number;
       >
         {t('dashboard.preview.unlock', lang, { total })}
       </button>
-      <p className="mt-2 text-xs text-zinc-500">{t('premium.price_note', lang)}</p>
+      <p className="mt-2 text-xs text-zinc-500"><SentenceLines text={t('premium.price_note', lang)} /></p>
     </div>
   );
 }
@@ -95,7 +96,7 @@ function AccountList({
   const { visible, hidden } = previewAccounts(unlocked ? filtered : accounts, unlocked);
 
   if (accounts.length === 0) {
-    return <p className="text-sm text-zinc-400 text-center py-16">{emptyMessage}</p>;
+    return <p className="text-sm text-zinc-400 text-center py-16"><SentenceLines text={emptyMessage} /></p>;
   }
 
   return (
@@ -112,7 +113,7 @@ function AccountList({
       <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
         {visible.map(account => <AccountCard key={account.username} account={account} />)}
         {unlocked && filtered.length === 0 && (
-          <p className="text-sm text-zinc-400 text-center py-8">{noResultsMessage}</p>
+          <p className="text-sm text-zinc-400 text-center py-8"><SentenceLines text={noResultsMessage} /></p>
         )}
       </div>
       {hidden > 0 && <LockedPreview shown={visible.length} total={accounts.length} lang={lang} onUnlock={onUnlock} />}
@@ -129,7 +130,7 @@ function LockedOverlay({ lang, onUnlock }: { lang: Lang; onUnlock: () => void })
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
-        <p className="text-sm text-zinc-600 text-center max-w-xs px-4">{t('dashboard.changes.locked', lang)}</p>
+        <p className="text-sm text-zinc-600 text-center max-w-xs px-4"><SentenceLines text={t('dashboard.changes.locked', lang)} /></p>
         <button
           onClick={onUnlock}
           className="bg-pink-600 hover:bg-pink-700 text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors"
@@ -290,11 +291,11 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-zinc-900 mb-2">{relationshipCopy.heading}</h1>
-          <p className="text-sm text-zinc-500 leading-relaxed">{relationshipCopy.description}</p>
+          <p className="text-sm text-zinc-500 leading-relaxed"><SentenceLines text={relationshipCopy.description} /></p>
         </div>
         {/* Stats bar */}
         <div className="mb-6 rounded-xl border p-4 space-y-3">
-          <p className="text-xs text-zinc-500">{copy.setup}</p>
+          <p className="text-xs text-zinc-500"><SentenceLines text={copy.setup} /></p>
           <label className="block text-sm">{copy.profile}<input className="block border rounded p-2 w-full" value={profile} onChange={e => { setProfile(e.target.value); persistAnalysisDraft(localStorage, inputData, e.target.value, date, today); setSnapshotSaved(false); }} maxLength={31} autoComplete="off" /></label>
           <label className="block text-sm">{copy.date}<input type="date" className="block border rounded p-2 w-full" max={today} defaultValue={date} onChange={e => { setDate(e.target.value); persistAnalysisDraft(localStorage, inputData, profile, e.target.value, today); setSnapshotSaved(false); }} /></label>
         </div>
@@ -302,19 +303,19 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <div className="bg-white border border-zinc-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-zinc-900">{data.following.length}</div>
-            <div className="text-xs text-zinc-400 mt-0.5">{relationshipCopy.following}</div>
+            <div className="text-xs text-zinc-400 mt-0.5"><SentenceLines text={relationshipCopy.following} /></div>
           </div>
           <div className="bg-white border border-zinc-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-zinc-900">{data.followers.length}</div>
-            <div className="text-xs text-zinc-400 mt-0.5">{relationshipCopy.followers}</div>
+            <div className="text-xs text-zinc-400 mt-0.5"><SentenceLines text={relationshipCopy.followers} /></div>
           </div>
           <div className="bg-pink-50 border border-pink-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-pink-600">{nonFollowers.length}</div>
-            <div className="text-xs text-pink-500 mt-0.5">{relationshipCopy.oneWayOut}</div>
+            <div className="text-xs text-pink-500 mt-0.5"><SentenceLines text={relationshipCopy.oneWayOut} /></div>
           </div>
           <div className="bg-white border border-zinc-100 rounded-xl p-4">
             <div className="text-2xl font-bold text-zinc-900">{mutuals.length}</div>
-            <div className="text-xs text-zinc-400 mt-0.5">{relationshipCopy.mutuals}</div>
+            <div className="text-xs text-zinc-400 mt-0.5"><SentenceLines text={relationshipCopy.mutuals} /></div>
           </div>
         </div>
 
@@ -349,7 +350,7 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
             <span role="status" className="text-sm text-zinc-700 font-medium">{snapshotMsg}</span>
           )}
         </div>
-        <p className="mb-5 text-xs leading-relaxed text-zinc-500">{relationshipCopy.localHistory}</p>
+        <p className="mb-5 text-xs leading-relaxed text-zinc-500"><SentenceLines text={relationshipCopy.localHistory} /></p>
 
         {/* Snapshot saved prompt */}
         {snapshotSaved && onReset && (
@@ -357,7 +358,7 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
             <svg className="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <p className="text-sm text-green-700 flex-1">{t('upload.snapshot_prompt', lang)}</p>
+            <p className="text-sm text-green-700 flex-1"><SentenceLines text={t('upload.snapshot_prompt', lang)} /></p>
             <button
               onClick={onReset}
               className="text-xs font-semibold text-green-700 hover:text-green-800 underline underline-offset-2 transition-colors flex-shrink-0"
@@ -404,7 +405,7 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
             {nonFollowers.length === 0 ? (
               <div className="text-center py-16 text-zinc-400">
                 <div className="text-4xl mb-3">🎉</div>
-                <p className="text-sm">{t('dashboard.nonfollowers.empty', lang)}</p>
+                <p className="text-sm"><SentenceLines text={t('dashboard.nonfollowers.empty', lang)} /></p>
               </div>
             ) : (
               <>
@@ -420,14 +421,14 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
                   </div>
                 )}
                 <p className="text-xs text-zinc-400 mb-2">
-                  {t('dashboard.nonfollowers.count', lang, { count: nonFollowers.length })}
+                  <SentenceLines text={t('dashboard.nonfollowers.count', lang, { count: nonFollowers.length })} />
                 </p>
                 <div className="bg-white border border-zinc-100 rounded-xl divide-y divide-zinc-50 overflow-hidden">
                   {nonFollowerPreview.visible.map(account => (
                     <AccountCard key={account.username} account={account} />
                   ))}
                   {isPremium && filteredNonFollowers.length === 0 && (
-                    <p className="text-sm text-zinc-400 text-center py-8">{relationshipCopy.noResults}</p>
+                    <p className="text-sm text-zinc-400 text-center py-8"><SentenceLines text={relationshipCopy.noResults} /></p>
                   )}
                 </div>
                 {nonFollowerPreview.hidden > 0 && (

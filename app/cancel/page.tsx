@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { t, localizedPath, type Lang } from '@/utils/i18n';
 
+import { SentenceLines } from '@/components/SentenceLines';
 type Step = 'form' | 'token' | 'confirm' | 'success' | 'error';
 
 function CancelPageContent({ initialLang }: { initialLang: Lang }) {
@@ -91,7 +92,7 @@ function CancelPageContent({ initialLang }: { initialLang: Lang }) {
               {t('cancel.title', lang)}
             </h1>
             <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
-              {t('cancel.subtitle', lang)}
+              <SentenceLines text={t('cancel.subtitle', lang)} />
             </p>
 
             <label htmlFor="email" className="block text-sm font-medium text-zinc-700 mb-1.5">
@@ -109,12 +110,12 @@ function CancelPageContent({ initialLang }: { initialLang: Lang }) {
 
             {/* What cancellation means */}
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-6 text-sm text-amber-800 space-y-1">
-              <p className="font-semibold">{t('cancel.warning_title', lang)}</p>
+              <p className="font-semibold"><SentenceLines text={t('cancel.warning_title', lang)} /></p>
               <ul className="list-disc list-inside space-y-0.5 text-amber-700">
-                <li>{t('cancel.warning1', lang)}</li>
-                <li>{t('cancel.warning2', lang)}</li>
-                <li>{t('cancel.warning3', lang)}</li>
-                <li>{t('cancel.warning4', lang)}</li>
+                <li><SentenceLines text={t('cancel.warning1', lang)} /></li>
+                <li><SentenceLines text={t('cancel.warning2', lang)} /></li>
+                <li><SentenceLines text={t('cancel.warning3', lang)} /></li>
+                <li><SentenceLines text={t('cancel.warning4', lang)} /></li>
               </ul>
             </div>
 
@@ -151,10 +152,10 @@ function CancelPageContent({ initialLang }: { initialLang: Lang }) {
               {t('cancel.check_email', lang)}
             </h2>
             <p className="text-sm text-zinc-500 mb-1">
-              {t('cancel.code_sent', lang)}
+              <SentenceLines text={t('cancel.code_sent', lang)} />
             </p>
             <p className="text-sm font-semibold text-zinc-900 mb-6 break-all">
-              {email}
+              <SentenceLines text={email} />
             </p>
 
             <label htmlFor="token" className="block text-sm font-medium text-zinc-700 mb-1.5">
@@ -175,7 +176,7 @@ function CancelPageContent({ initialLang }: { initialLang: Lang }) {
             />
 
             <p className="text-xs text-zinc-400 mb-6 text-center">
-              {t('cancel.code_expires', lang)}
+              <SentenceLines text={t('cancel.code_expires', lang)} />
             </p>
 
             <div className="flex flex-col gap-3">
@@ -212,13 +213,13 @@ function CancelPageContent({ initialLang }: { initialLang: Lang }) {
               {t('cancel.confirm_title', lang)}
             </h2>
             <p className="text-sm text-zinc-500 mb-1">
-              {t('cancel.confirm_subtitle', lang)}
+              <SentenceLines text={t('cancel.confirm_subtitle', lang)} />
             </p>
             <p className="text-sm font-semibold text-zinc-900 mb-6 break-all">
-              {email}
+              <SentenceLines text={email} />
             </p>
             <p className="text-sm text-zinc-500 mb-8">
-              {t('cancel.confirm_warning', lang)}
+              <SentenceLines text={t('cancel.confirm_warning', lang)} />
             </p>
 
             <div className="flex flex-col gap-3">
@@ -254,13 +255,13 @@ function CancelPageContent({ initialLang }: { initialLang: Lang }) {
               {t('cancel.success_title', lang)}
             </h2>
             <p className="text-sm text-zinc-500 mb-1">
-              {t('cancel.success_subtitle', lang)}
+              <SentenceLines text={t('cancel.success_subtitle', lang)} />
             </p>
             <p className="text-sm font-semibold text-zinc-900 mb-6 break-all">
-              {email}
+              <SentenceLines text={email} />
             </p>
             <p className="text-sm text-zinc-500 mb-8 leading-relaxed">
-              {t('cancel.success_msg', lang)}
+              <SentenceLines text={t('cancel.success_msg', lang)} />
             </p>
             <Link
               href={localizedPath('/', lang)}
@@ -286,7 +287,7 @@ function CancelPageContent({ initialLang }: { initialLang: Lang }) {
               {t('cancel.error_title', lang)}
             </h2>
             <p className="text-sm text-zinc-500 mb-6 leading-relaxed">
-              {errorMsg}
+              <SentenceLines text={errorMsg} />
             </p>
             <div className="flex flex-col gap-3">
               <button

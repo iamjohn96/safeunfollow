@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 
+import { SentenceLines } from '@/components/SentenceLines';
 export const metadata: Metadata = {
   title: 'Instagram Data Analyzer Guide | SafeUnfollow',
   description: 'Learn how to analyze an official Instagram data export for mutuals, one-way follows, and follower changes without sharing your login.',
@@ -65,7 +66,7 @@ export default function BlogPage() {
                 {post.title}
               </Link>
             </h3>
-            <p className="text-sm text-zinc-500 leading-relaxed mb-4">{post.description}</p>
+            <p className="text-sm text-zinc-500 leading-relaxed mb-4"><SentenceLines text={post.description} /></p>
             <Link
               href={`/blog/${post.slug}`}
               className="text-sm font-medium text-pink-600 hover:text-pink-700 transition-colors"

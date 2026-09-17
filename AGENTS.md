@@ -33,6 +33,7 @@ Read `PROJECT_STATE.md` before making changes. It contains the current milestone
 - Use strict TypeScript, existing `@/` imports, and the established component style. Validate unknown external input before use.
 - Keep parsing and audience calculations pure and deterministic where practical. Normalize usernames and profile identifiers consistently with existing helpers.
 - Preserve the active public locales: English at unprefixed routes, plus Portuguese (`/pt`), Russian (`/ru`), and Spanish (`/es`). A user-facing change must remain coherent in all four languages.
+- Render multi-sentence UI copy with `components/SentenceLines.tsx` so each sentence starts on its own line (owner preference, 2026-09-17). Long-form Markdown articles are exempt.
 - Preserve existing browser storage keys and schemas unless a migration is included. Important keys include `lastParsedData`, `snapshots`, `audience-keep-v1:<profile>`, `isPremium`, `premiumEmail`, and `premiumSession`.
 - Preserve public routes, canonical URLs, locale alternates, and redirects from retired blog slugs. SEO changes must not silently break indexed URLs.
 - Preserve Redis key compatibility unless a reviewed migration covers deployed data. Current patterns are documented in `README.md` and `PROJECT_STATE.md`.
