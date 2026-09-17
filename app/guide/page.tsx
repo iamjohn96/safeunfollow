@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { t, localizedPath, type Lang } from '@/utils/i18n';
 import { trackFunnel } from '@/utils/analytics';
 
-const stepIcons = ['⚙️', '☑️', '📤', '📥'];
+const stepIcons = ['⚙️', '📱', '☑️', '⏳', '📥'];
 
 function GuideContent({ initialLang }: { initialLang: Lang }) {
   const lang = initialLang;
@@ -14,6 +14,7 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
     { title: t('guide.step2.title', lang), desc: t('guide.step2.desc', lang) },
     { title: t('guide.step3.title', lang), desc: t('guide.step3.desc', lang) },
     { title: t('guide.step4.title', lang), desc: t('guide.step4.desc', lang) },
+    { title: t('guide.step5.title', lang), desc: t('guide.step5.desc', lang) },
   ];
 
   return (
@@ -21,7 +22,7 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
       {/* Header */}
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 bg-zinc-100 text-zinc-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
-          Step-by-step guide
+          {t('guide.badge', lang)}
         </div>
         <h1 id="guide-heading" className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-3">
           {t('guide.title', lang)}
@@ -32,7 +33,7 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
       </div>
 
       {/* Steps */}
-      <ol className="space-y-4 mb-10" aria-label="Steps to download Instagram data">
+      <ol className="space-y-4 mb-10" aria-label={t('guide.steps_label', lang)}>
         {steps.map((step, i) => (
           <li
             key={i}
@@ -54,7 +55,7 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
 
       {/* Note */}
       <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 mb-8 text-sm text-amber-700 leading-relaxed">
-        <strong className="font-semibold">Note:</strong> Instagram typically sends an email notification when your data export is ready. Check your inbox for a link to download the ZIP file.
+        {t('guide.note', lang)}
       </div>
 
       {/* CTA */}
@@ -69,7 +70,7 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </Link>
-        <p className="mt-3 text-xs text-zinc-400">No account login required</p>
+        <p className="mt-3 text-xs text-zinc-400">{t('guide.no_login', lang)}</p>
       </div>
     </section>
   );

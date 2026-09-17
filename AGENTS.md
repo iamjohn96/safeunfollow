@@ -48,6 +48,10 @@ Read `PROJECT_STATE.md` before making changes. It contains the current milestone
 - Redis and email/payment credentials are server-only and must never use a `NEXT_PUBLIC_` prefix. Only checkout URLs and the public app URL are browser-visible.
 - Use synthetic data for automated and browser tests. Real customer data, live webhook replay, real email delivery, and subscription mutations require explicit approval and an impact review.
 
+## Web platform baseline
+
+This project's Baseline target is Baseline Widely available. Most visitors use mobile browsers, including older Android devices, so prefer Widely available web features and add a lightweight fallback when a newer feature is necessary. When a Modern Web Guidance skill is available, consult it for browser APIs, CSS, performance, and accessibility work, and keep its telemetry disabled with `DISABLE_TELEMETRY=1`.
+
 ## Test and verification rules
 
 - For ordinary code changes, run `npm test`, `npm run lint`, `npm run build`, and `git diff --check` before claiming completion.

@@ -21,7 +21,7 @@ This guide explains what the export can reveal, what it cannot prove from a sing
 
 Instagram lets you request a copy of your information through Accounts Center. Menu names can change, but the current flow generally starts in **Accounts Center**, continues to **Your information and permissions**, and then opens **Export your information** or **Download your information**. Use Instagram's [official information export help](https://www.facebook.com/help/instagram/181231772500920) if the labels on your device differ.
 
-When requesting the export, select your Instagram profile and include the followers and following information. Choose **JSON** rather than HTML because JSON preserves structured values that an analyzer can compare reliably. A wider date range is preferable when Instagram offers that option.
+Tap **Create export**, select your Instagram profile, and choose **Export to device**. When customizing the information, select only **Followers and following**, set the date range to **All time**, and choose **JSON** rather than HTML because JSON preserves structured values that an analyzer can compare reliably.
 
 The downloaded ZIP can contain many folders. For relationship analysis, the important files are normally the follower and following JSON files. Their exact folders and names can vary between export versions, but they commonly include names such as:
 

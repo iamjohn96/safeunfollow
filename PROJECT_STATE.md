@@ -1,6 +1,6 @@
 # SafeUnfollow project state
 
-Last verified: 2026-09-13
+Last verified: 2026-09-17
 
 Branch at review: `main`
 
@@ -80,6 +80,16 @@ Next priorities, in order:
 1. Refresh read-only GA4, Search Console, Dodo, and Redis-health evidence for a recent observation window. If the sample remains small, write an observation conclusion and do not change features or price.
 2. Verify the production Dodo endpoint subscribes to every implemented lifecycle event and exercise restore/cancellation in provider test mode or isolated storage without a real charge or live-customer mutation.
 3. Monitor recent real Instagram export compatibility and the ZIP-to-analysis success rate. Add parser fixtures/tests only from sanitized synthetic reproductions when format drift is found.
+
+### 2026-09-17 decision and evidence
+
+Read-only evidence for 2026-08-18 to 2026-09-16 (GA4): 315 users, 95 `upload_started`, 17 `analysis_completed`, 0 `snapshot_saved`, 3 `premium_opened`, 0 `premium_checkout_click`. `upload_failed` affected 72 users: `invalid_relationship_data` 52, `missing_relationship_files` 22, `unsupported_format` 11. Vercel Analytics showed 606 visitors in 30 days; Search Console clicks are mostly branded queries. No external paying customer is known.
+
+Decision: stop growth investment for now and run a 60-day validation in this order: (1) reproduce and fix the export-parsing failures with the owner's own current export and sanitized synthetic fixtures; (2) evaluate a one-time purchase instead of subscription-only Premium, because repeat use requires a new Instagram export and no snapshot saves were observed; (3) after 60 days, keep investing or move to maintenance mode based on successful analyses and verified Dodo purchases. The download guide now follows the current Accounts Center export flow (Export to device, Followers and following only, All time, JSON) in all active locales.
+
+Parser root cause confirmed on 2026-09-17 with the owner's own export (not committed): the current `following.json` entries store the username in the item `title` and keep only `href` (`https://www.instagram.com/_u/<username>`) and `timestamp` in `string_list_data`, with no `value`. The previous parser rejected the whole file, which matches the dominant `invalid_relationship_data` failure. The parser now derives the username from `value`, then `title`, then an instagram.com profile href, and still rejects entries where none is valid. The owner's export parsed successfully after the fix in a local production build. That export used a three-month date range yet still contained relationships dated months earlier, so a short date range did not truncate relationships in this single sample; the guide still recommends All time as the safe default.
+
+Operational facts verified on 2026-09-17: production Redis is the Vercel Marketplace store `safeunfollow-redis` (Upstash, Pay As You Go, available); the older free store is uninstalled. Stripe cannot be opened for a South Korea–based business, so Dodo Payments remains the billing provider.
 
 ## 5. Architecture and data boundaries
 

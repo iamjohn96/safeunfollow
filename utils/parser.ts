@@ -14,7 +14,7 @@ export interface ParsedData {
 
 interface StringListEntry {
   href?: string;
-  value: string;
+  value?: string;
   timestamp: number;
 }
 
@@ -23,16 +23,41 @@ interface InstagramExportItem {
   title?: string;
 }
 
+const USERNAME_PATTERN = /^[a-zA-Z0-9._]{1,30}$/;
+const PROFILE_URL_PATTERN = /^https?:\/\/(?:www\.)?instagram\.com\/(?:_u\/)?([^/?#]+)\/?(?:[?#].*)?$/i;
+
+function validUsername(candidate: unknown): string | null {
+  if (typeof candidate !== 'string') return null;
+  const trimmed = candidate.trim();
+  return USERNAME_PATTERN.test(trimmed) ? trimmed : null;
+}
+
+// Instagram has shipped several relationship-entry shapes. Older exports put the
+// username in string_list_data[].value; newer following.json files put it in the
+// item title and keep only a profile href (often /_u/<username>) in the entry.
+export function exportEntryUsername(item: unknown, entry: unknown): string | null {
+  const entryRecord = entry && typeof entry === 'object' ? entry as Record<string, unknown> : {};
+  const itemRecord = item && typeof item === 'object' ? item as Record<string, unknown> : {};
+  const fromValue = validUsername(entryRecord.value);
+  if (fromValue) return fromValue;
+  const fromTitle = validUsername(itemRecord.title);
+  if (fromTitle) return fromTitle;
+  if (typeof entryRecord.href !== 'string') return null;
+  const match = entryRecord.href.trim().match(PROFILE_URL_PATTERN);
+  return match ? validUsername(match[1]) : null;
+}
+
 function parseAccountList(data: unknown): InstagramAccount[] {
   if (!Array.isArray(data)) return [];
 
   const accounts: InstagramAccount[] = [];
 
   for (const item of data as InstagramExportItem[]) {
-    if (!item.string_list_data || !Array.isArray(item.string_list_data)) continue;
+    if (!item || !Array.isArray(item.string_list_data)) continue;
     for (const entry of item.string_list_data) {
-      if (typeof entry.value === 'string' && /^[a-zA-Z0-9._]{1,30}$/.test(entry.value.trim())) {
-        accounts.push({ username: entry.value.trim().toLowerCase(), timestamp: Number.isFinite(entry.timestamp) && entry.timestamp > 0 ? entry.timestamp : 0 });
+      const username = exportEntryUsername(item, entry);
+      if (username) {
+        accounts.push({ username: username.toLowerCase(), timestamp: Number.isFinite(entry?.timestamp) && entry.timestamp > 0 ? entry.timestamp : 0 });
       }
     }
   }
@@ -95,7 +120,7 @@ export async function parseJsonFiles(files: { name: string; content: string }[])
     const list = Array.isArray(parsed) ? parsed : parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>)[`relationships_${kind}`] : undefined;
     if (!Array.isArray(list)) throw new Error('invalid-relationship-file');
     for (const item of list) {
-      if (!item || !Array.isArray(item.string_list_data) || !item.string_list_data.length || item.string_list_data.some((entry: StringListEntry) => !entry || typeof entry.value !== 'string' || !/^[a-zA-Z0-9._]{1,30}$/.test(entry.value.trim()))) throw new Error('invalid-relationship-file');
+      if (!item || !Array.isArray(item.string_list_data) || !item.string_list_data.length || item.string_list_data.some((entry: StringListEntry) => !exportEntryUsername(item, entry))) throw new Error('invalid-relationship-file');
     }
     seen.add(kind);
     if (kind === 'followers') {
