@@ -1,4 +1,5 @@
 import type { Lang } from '@/utils/i18n';
+import { LIFETIME_PRICE_USD } from '@/utils/premium-offer';
 
 const BASE_URL = 'https://safeunfollow.com';
 
@@ -33,6 +34,14 @@ export function homeStructuredData(lang: Lang) {
         browserRequirements: 'Requires JavaScript and a modern web browser',
         isAccessibleForFree: true,
         inLanguage: lang,
+        offers: {
+          '@type': 'Offer',
+          name: 'Lifetime Access',
+          price: LIFETIME_PRICE_USD,
+          priceCurrency: 'USD',
+          availability: 'https://schema.org/InStock',
+          url: `${BASE_URL}/upload`,
+        },
         featureList: [
           'Mutual follower analysis',
           'One-way follow analysis',
@@ -50,8 +59,8 @@ export function articleStructuredData(article: {
   description: string;
   date: string;
   slug: string;
-}) {
-  const url = `${BASE_URL}/blog/${article.slug}`;
+}, basePath: '/blog/' | '/pillars/' = '/blog/') {
+  const url = `${BASE_URL}${basePath}${article.slug}`;
 
   return {
     '@context': 'https://schema.org',
@@ -64,5 +73,38 @@ export function articleStructuredData(article: {
     url,
     author: { '@type': 'Organization', name: 'SafeUnfollow', url: BASE_URL },
     publisher: { '@type': 'Organization', name: 'SafeUnfollow', url: BASE_URL },
+  };
+}
+
+export function faqStructuredData(faqs: { q: string; a: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map(faq => ({
+      '@type': 'Question',
+      name: faq.q,
+      acceptedAnswer: { '@type': 'Answer', text: faq.a },
+    })),
+  };
+}
+
+export function howToStructuredData(guide: {
+  name: string;
+  description: string;
+  url: string;
+  steps: { title: string; desc: string }[];
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: guide.name,
+    description: guide.description,
+    url: guide.url,
+    step: guide.steps.map((step, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: step.title,
+      text: step.desc,
+    })),
   };
 }

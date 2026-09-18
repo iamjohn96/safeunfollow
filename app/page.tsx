@@ -6,7 +6,7 @@ import { t, localizedPath, type Lang } from '@/utils/i18n';
 import { PremiumModal } from '@/components/PremiumModal';
 import { trackFunnel } from '@/utils/analytics';
 import { JsonLd } from '@/components/JsonLd';
-import { homeStructuredData } from '@/lib/structured-data';
+import { homeStructuredData, faqStructuredData } from '@/lib/structured-data';
 
 import { SentenceLines } from '@/components/SentenceLines';
 const conversionCopy = {
@@ -231,6 +231,7 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
   return (
     <>
       <JsonLd data={homeStructuredData(lang)} />
+      <JsonLd data={faqStructuredData(faqs)} />
       {showModal && (
         <PremiumModal lang={lang} onClose={() => setShowModal(false)} onVerified={() => setShowModal(false)} />
       )}

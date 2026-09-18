@@ -5,6 +5,10 @@ import { t, localizedPath, type Lang } from '@/utils/i18n';
 import { trackFunnel } from '@/utils/analytics';
 
 import { SentenceLines } from '@/components/SentenceLines';
+import { JsonLd } from '@/components/JsonLd';
+import { howToStructuredData } from '@/lib/structured-data';
+
+const BASE_URL = 'https://safeunfollow.com';
 const stepIcons = ['⚙️', '📱', '☑️', '⏳', '📥'];
 
 function GuideContent({ initialLang }: { initialLang: Lang }) {
@@ -19,6 +23,15 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
   ];
 
   return (
+    <>
+      <JsonLd
+        data={howToStructuredData({
+          name: t('guide.title', lang),
+          description: t('guide.subtitle', lang),
+          url: `${BASE_URL}${localizedPath('/guide', lang)}`,
+          steps,
+        })}
+      />
     <section className="py-16 px-4 max-w-2xl mx-auto" aria-labelledby="guide-heading">
       {/* Header */}
       <div className="text-center mb-12">
@@ -74,6 +87,7 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
         <p className="mt-3 text-xs text-zinc-400"><SentenceLines text={t('guide.no_login', lang)} /></p>
       </div>
     </section>
+    </>
   );
 }
 

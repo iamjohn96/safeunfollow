@@ -17,6 +17,17 @@ SafeUnfollow is a Next.js application with a cron-compatible SEO publishing pipe
 
 The LLM generates only the article body. Code generates `title`, `description`, `date`, `slug`, and `keywords` frontmatter. The blog page renders the frontmatter title as the article's only H1.
 
+## Structured data and AI/search crawlability
+
+- `app/robots.ts` allows every crawler via a `*` rule, plus an explicit named rule for `OAI-SearchBot`, `ChatGPT-User`, `ClaudeBot`, `Claude-User`, `GPTBot`, `PerplexityBot`, `Google-Extended`, and `Applebot-Extended`. The named rule documents intent; the `*` rule is what actually grants access.
+- `public/llms.txt` is a plain-text description of the product, its real pricing, and key pages for AI systems that read it. Update it whenever pricing, supported languages, or the privacy/no-login facts change.
+- `lib/structured-data.ts` is the single source for JSON-LD, rendered through `components/JsonLd.tsx`:
+  - `homeStructuredData(lang)` — `WebSite` + `WebApplication` (with an `Offer` for the real Lifetime Access price) on the homepage.
+  - `faqStructuredData(faqs)` — `FAQPage` on the homepage FAQ section, fed the same `{q, a}` array the page renders. Never pass FAQs that are not visibly rendered.
+  - `howToStructuredData(...)` — `HowTo` on `/guide`, fed the same five export steps shown on the page.
+  - `articleStructuredData(article, basePath)` — `Article` on `/blog/[slug]` (`basePath` defaults to `/blog/`) and on `/pillars/[slug]` (pass `/pillars/`).
+- `scripts/ai-discovery.test.ts` covers all of the above: crawler allowlist, `llms.txt` facts, and the shape of every schema type. Run it with `npm test`.
+
 ## Workflow
 
 ```text

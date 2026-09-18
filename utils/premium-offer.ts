@@ -8,7 +8,9 @@ const DEFAULT_LIFETIME_PRODUCT_ID = 'pdt_0NnnAFSCBOcQrM32OLj5p';
 export const LIFETIME_PRODUCT_ID =
   (process.env.NEXT_PUBLIC_DODO_LIFETIME_PRODUCT_ID ?? '').trim() || DEFAULT_LIFETIME_PRODUCT_ID;
 
-export const LIFETIME_PRICE_LABEL = '$3.99';
+export const LIFETIME_PRICE_USD = '3.99';
+
+export const LIFETIME_PRICE_LABEL = `$${LIFETIME_PRICE_USD}`;
 
 // Free users see this many accounts per relationship list and cleanup list.
 export const FREE_PREVIEW_LIMIT = 20;

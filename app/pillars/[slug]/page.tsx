@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import MarkdownArticle from '@/app/_components/markdown-article';
 import { getMarkdownDocument, getMarkdownDocuments } from '@/lib/markdown-content';
+import { JsonLd } from '@/components/JsonLd';
+import { articleStructuredData } from '@/lib/structured-data';
 
 const BASE_URL = 'https://safeunfollow.com';
 
@@ -45,5 +47,10 @@ export default async function PillarPage({
 
   if (!pillar) notFound();
 
-  return <MarkdownArticle document={pillar} backHref="/blog" backLabel="Back to Blog" />;
+  return (
+    <>
+      <JsonLd data={articleStructuredData(pillar.data, '/pillars/')} />
+      <MarkdownArticle document={pillar} backHref="/blog" backLabel="Back to Blog" />
+    </>
+  );
 }

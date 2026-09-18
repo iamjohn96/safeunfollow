@@ -1,0 +1,29 @@
+# SafeUnfollow
+
+> Analyze your official Instagram Data ZIP to see mutual follows, one-way follows, and follower changes between snapshots. No Instagram login, OAuth, API access, or account connection — all parsing happens locally in the browser.
+
+## What it does
+- Parses the official Instagram "Download your information" export (JSON format, Followers and following)
+- Shows accounts that follow you and you don't follow back, accounts you follow that don't follow back, and mutual follows
+- Saves dated snapshots in the browser and compares two snapshots to show newly gained and lost followers over time
+- Gives deterministic cleanup review categories, with no AI-generated scoring, recommendations, or automated Instagram actions
+
+## What it does not do
+- Does not require an Instagram login, OAuth authorization, or API connection
+- Does not perform any Instagram action (no auto-follow, auto-unfollow, DMs, or scheduling)
+- Does not upload the contents of the Instagram export to SafeUnfollow's servers; parsing and storage are local to the browser
+
+## Pricing
+Free: totals and the first 20 accounts per relationship list, one saved snapshot.
+SafeUnfollow Lifetime Access: a one-time purchase (US$3.99, adjusted for purchasing power parity where applicable) for full lists, search, CSV export, and unlimited snapshots. It is not a subscription.
+
+## Languages
+English (default, unprefixed URLs), Portuguese (/pt), Russian (/ru), Spanish (/es).
+
+## Key pages
+- Home: https://safeunfollow.com
+- How to download your Instagram Data ZIP: https://safeunfollow.com/guide
+- Upload and analyze: https://safeunfollow.com/upload
+- Privacy Policy: https://safeunfollow.com/privacy
+- Terms of Service: https://safeunfollow.com/terms
+- Blog: https://safeunfollow.com/blog
