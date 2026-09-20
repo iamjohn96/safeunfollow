@@ -105,6 +105,16 @@ Shipped `components/FeedbackPrompt.tsx`, a skippable, non-blocking card (star ra
 
 No carousel, marquee, or public testimonial display was built. That was explicitly deferred until enough public-opt-in reviews exist to show (paired with the same 5-purchase threshold as the 60-day checkpoint) — displaying too few or fabricated reviews would be misleading and was rejected as a direction. There is no admin UI yet to read `feedback:entries` back; the next agent doing anything with this data should add a read-only script/route rather than exposing it publicly. 5 new tests added (`scripts/feedback.test.ts`, 122/122 passing); `npm run lint` and `npm run build` (51 routes, including the new `/api/feedback`) both passed. Not yet pushed/deployed by the owner.
 
+### 2026-09-20 contact email unification
+
+Second external Dodo purchase (2026-09-20, EUR checkout) prompted an audit of the full payment flow (webhook signature verification, idempotency via `dodo:event:<id>`, Redis persistence ordering before email notification, partial-refund-does-not-revoke logic) with zero live calls made — pure code and `npm run test:automation` review, no impact to production. Result: sound, no changes needed to the payment logic itself.
+
+Audit also found the customer-facing contact addresses were split and partly unmonitored: `privacy@safeunfollow.com` (Privacy Policy) and `legal@safeunfollow.com` (Terms) in `utils/legal-content.ts`, and `noreply@safeunfollow.com` (`EMAIL_FROM`) as the unmonitored, no-reply-to sending address on all four transactional emails (purchase welcome, cancellation code, renewal reminder, restore verification). No dedicated refund-request address existed; the Terms only pointed to Dodo Payments' own checkout-time refund policy since Dodo is merchant of record.
+
+Unified per owner instruction: both `privacy@` and `legal@` in `utils/legal-content.ts` now read `support@jonnylab.app` (all four active locales). Added `reply_to: 'support@jonnylab.app'` to all four Resend send calls (`app/api/webhook/dodo/route.ts`, `app/api/premium/cancel/verify/route.ts`, `app/api/premium/remind/route.ts`, `app/api/premium/restore/verify/route.ts`) so a customer reply now reaches a monitored inbox instead of bouncing into `noreply@`. The `EMAIL_FROM` sending domain itself was deliberately left as `noreply@safeunfollow.com` — Resend requires the sending domain to be verified, and switching it to an unverified domain would have broken all four live transactional emails; owner confirmed `support@jonnylab.app` is a verified, working inbox (test email received) but this only covers `reply_to`, not the Resend sending-domain verification needed to change `from` itself. Dodo Payments' own merchant-side notification email (to the owner) and its own customer receipt email are configured in the Dodo dashboard, not in this codebase, and were out of scope for this change.
+
+`npm run lint`, `npm run test:automation` (122/122), and `npm run build` (51 routes) all passed after the change. Committed as `415ae9f`; push left to the owner per the established workflow.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data
