@@ -29,6 +29,7 @@ async function sendCancelTokenEmail(email: string, token: string): Promise<boole
     },
     body: JSON.stringify({
       from: EMAIL_FROM,
+      reply_to: 'support@jonnylab.app',
       to: email,
       subject: 'SafeUnfollow cancellation code',
       html,

@@ -25,7 +25,7 @@ export const privacyContent: Record<Lang, LegalDocument> = {
       { title: '6. Third-Party Services', paragraphs: ['Dodo Payments and analytics providers apply their own privacy policies. External links, including instagram.com, are provided for convenience and are outside our control.'] },
       { title: '7. Children', paragraphs: ['SafeUnfollow is not directed to children under 13, and we do not knowingly collect their data.'] },
       { title: '8. Changes', paragraphs: ['We may update this policy. Continued use after an update constitutes acceptance of the revised policy.'] },
-      { title: '9. Contact', paragraphs: ['Questions may be sent to privacy@safeunfollow.com.'] },
+      { title: '9. Contact', paragraphs: ['Questions may be sent to support@jonnylab.app.'] },
     ],
   },
   pt: {
@@ -39,7 +39,7 @@ export const privacyContent: Record<Lang, LegalDocument> = {
       { title: '6. Serviços de terceiros', paragraphs: ['Dodo Payments e provedores de analytics possuem políticas próprias. Links externos, como instagram.com, estão fora do nosso controle.'] },
       { title: '7. Crianças', paragraphs: ['O SafeUnfollow não é direcionado a menores de 13 anos e não coleta conscientemente seus dados.'] },
       { title: '8. Alterações', paragraphs: ['Podemos atualizar esta política. O uso contínuo após uma alteração representa aceitação da versão atualizada.'] },
-      { title: '9. Contato', paragraphs: ['Envie dúvidas para privacy@safeunfollow.com.'] },
+      { title: '9. Contato', paragraphs: ['Envie dúvidas para support@jonnylab.app.'] },
     ],
   },
   ru: {
@@ -53,7 +53,7 @@ export const privacyContent: Record<Lang, LegalDocument> = {
       { title: '6. Сторонние сервисы', paragraphs: ['Dodo Payments и поставщики аналитики применяют собственные политики. Внешние ссылки, включая instagram.com, находятся вне нашего контроля.'] },
       { title: '7. Дети', paragraphs: ['SafeUnfollow не предназначен для детей младше 13 лет, и мы сознательно не собираем их данные.'] },
       { title: '8. Изменения', paragraphs: ['Мы можем обновлять эту политику. Продолжение использования означает принятие новой версии.'] },
-      { title: '9. Контакты', paragraphs: ['Вопросы направляйте на privacy@safeunfollow.com.'] },
+      { title: '9. Контакты', paragraphs: ['Вопросы направляйте на support@jonnylab.app.'] },
     ],
   },
   es: {
@@ -67,7 +67,7 @@ export const privacyContent: Record<Lang, LegalDocument> = {
       { title: '6. Servicios de terceros', paragraphs: ['Dodo Payments y los proveedores de analítica tienen sus propias políticas. Los enlaces externos, incluido instagram.com, quedan fuera de nuestro control.'] },
       { title: '7. Menores', paragraphs: ['SafeUnfollow no está dirigido a menores de 13 años y no recopilamos conscientemente sus datos.'] },
       { title: '8. Cambios', paragraphs: ['Podemos actualizar esta política. El uso continuado implica aceptar la versión revisada.'] },
-      { title: '9. Contacto', paragraphs: ['Envía tus preguntas a privacy@safeunfollow.com.'] },
+      { title: '9. Contacto', paragraphs: ['Envía tus preguntas a support@jonnylab.app.'] },
     ],
   },
 };
@@ -85,7 +85,7 @@ export const termsContent: Record<Lang, LegalDocument> = {
       { title: '7. Intellectual Property', paragraphs: ['Service content, design, and code belong to SafeUnfollow and may not be copied or redistributed without permission.'] },
       { title: '8. Changes', paragraphs: ['We may update these Terms. Continued use after an update constitutes acceptance of the revised Terms.'] },
       { title: '9. Governing Law', paragraphs: ['These Terms are governed by the laws of the jurisdiction in which SafeUnfollow operates, without regard to conflict-of-law provisions.'] },
-      { title: '10. Contact', paragraphs: ['Questions may be sent to legal@safeunfollow.com.'] },
+      { title: '10. Contact', paragraphs: ['Questions may be sent to support@jonnylab.app.'] },
     ],
   },
   pt: {
@@ -100,7 +100,7 @@ export const termsContent: Record<Lang, LegalDocument> = {
       { title: '7. Propriedade intelectual', paragraphs: ['Conteúdo, design e código pertencem ao SafeUnfollow e não podem ser copiados ou redistribuídos sem permissão.'] },
       { title: '8. Alterações', paragraphs: ['Podemos atualizar estes Termos. O uso contínuo representa aceitação da versão revisada.'] },
       { title: '9. Lei aplicável', paragraphs: ['Estes Termos seguem as leis da jurisdição em que o SafeUnfollow opera.'] },
-      { title: '10. Contato', paragraphs: ['Envie dúvidas para legal@safeunfollow.com.'] },
+      { title: '10. Contato', paragraphs: ['Envie dúvidas para support@jonnylab.app.'] },
     ],
   },
   ru: {
@@ -115,7 +115,7 @@ export const termsContent: Record<Lang, LegalDocument> = {
       { title: '7. Интеллектуальная собственность', paragraphs: ['Контент, дизайн и код принадлежат SafeUnfollow и не могут копироваться или распространяться без разрешения.'] },
       { title: '8. Изменения', paragraphs: ['Мы можем обновлять Условия. Продолжение использования означает принятие новой версии.'] },
       { title: '9. Применимое право', paragraphs: ['Условия регулируются законодательством юрисдикции, в которой работает SafeUnfollow.'] },
-      { title: '10. Контакты', paragraphs: ['Вопросы направляйте на legal@safeunfollow.com.'] },
+      { title: '10. Контакты', paragraphs: ['Вопросы направляйте на support@jonnylab.app.'] },
     ],
   },
   es: {
@@ -130,7 +130,7 @@ export const termsContent: Record<Lang, LegalDocument> = {
       { title: '7. Propiedad intelectual', paragraphs: ['El contenido, diseño y código pertenecen a SafeUnfollow y no pueden copiarse ni redistribuirse sin permiso.'] },
       { title: '8. Cambios', paragraphs: ['Podemos actualizar estos Términos. El uso continuado implica aceptar la versión revisada.'] },
       { title: '9. Ley aplicable', paragraphs: ['Estos Términos se rigen por las leyes de la jurisdicción donde opera SafeUnfollow.'] },
-      { title: '10. Contacto', paragraphs: ['Envía tus preguntas a legal@safeunfollow.com.'] },
+      { title: '10. Contacto', paragraphs: ['Envía tus preguntas a support@jonnylab.app.'] },
     ],
   },
 };

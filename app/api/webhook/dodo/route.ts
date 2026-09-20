@@ -83,6 +83,7 @@ async function sendWelcomeEmail(email: string, eventId: string, plan: 'subscript
     },
     body: JSON.stringify({
       from: EMAIL_FROM,
+      reply_to: 'support@jonnylab.app',
       to: email,
       subject: plan === 'lifetime' ? 'Your SafeUnfollow Lifetime Access is ready' : 'SafeUnfollow Premium 구독이 시작되었습니다',
       html: plan === 'lifetime' ? lifetimeWelcomeHtml() : html,

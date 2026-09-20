@@ -19,6 +19,7 @@ async function sendRestoreEmail(email: string, token: string): Promise<boolean> 
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: EMAIL_FROM,
+      reply_to: 'support@jonnylab.app',
       to: email,
       subject: 'SafeUnfollow Premium verification code',
       html: `<div><p>Your SafeUnfollow Premium verification code is: <strong>${token}</strong></p><p>This code expires in 15 minutes.</p></div>`,

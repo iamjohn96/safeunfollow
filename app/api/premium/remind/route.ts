@@ -29,6 +29,7 @@ async function sendReminderEmail(email: string, renewalDate: string): Promise<bo
     },
     body: JSON.stringify({
       from: EMAIL_FROM,
+      reply_to: 'support@jonnylab.app',
       to: email,
       subject: 'Your SafeUnfollow Premium subscription renews in 7 days',
       html,
