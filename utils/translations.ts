@@ -84,6 +84,16 @@ export type TranslationKey =
   | 'modal.buy_lifetime'
   | 'modal.one_time_note'
   | 'modal.purchased_note'
+  | 'feedback.purchase_title'
+  | 'feedback.analysis_title'
+  | 'feedback.rating_label'
+  | 'feedback.star_aria'
+  | 'feedback.comment_placeholder'
+  | 'feedback.public_optin'
+  | 'feedback.submit'
+  | 'feedback.skip'
+  | 'feedback.thanks'
+  | 'feedback.error'
   | 'dashboard.preview.locked'
   | 'dashboard.preview.unlock'
   | 'modal.verify_placeholder'
@@ -171,6 +181,16 @@ const en: Translations = {
   'modal.buy_lifetime': 'Pay $3.99 once',
   'modal.one_time_note': 'One-time payment. No subscription and nothing renews. Local prices may vary by country.',
   'modal.purchased_note': 'Thanks for your purchase! Enter your purchase email below to unlock this browser.',
+  'feedback.purchase_title': 'Got 30 seconds for quick feedback?',
+  'feedback.analysis_title': 'Was this analysis helpful?',
+  'feedback.rating_label': 'How would you rate it?',
+  'feedback.star_aria': 'Rate {n} out of 5',
+  'feedback.comment_placeholder': 'Anything you\'d like to share? (optional)',
+  'feedback.public_optin': 'You can share this as an anonymous quote on the site',
+  'feedback.submit': 'Send feedback',
+  'feedback.skip': 'No thanks',
+  'feedback.thanks': 'Thanks for the feedback!',
+  'feedback.error': 'Something went wrong. Please try again.',
   'snapshots.limit': 'Free users can save 1 snapshot. Lifetime Access unlocks unlimited snapshots.',
   'dashboard.changes.locked': 'Unlock Lifetime Access to see who unfollowed you since your last snapshot.',
   'dashboard.changes.unlock': 'Unlock changes',
@@ -325,6 +345,16 @@ const ko: Translations = {
   'modal.buy_lifetime': '$3.99 한 번 결제',
   'modal.one_time_note': '1회 결제예요. 구독이나 자동 갱신이 없어요. 국가에 따라 현지 가격이 다를 수 있어요.',
   'modal.purchased_note': '구매해 주셔서 감사해요! 아래에 구매 이메일을 입력하면 이 브라우저에서 잠금이 해제돼요.',
+  'feedback.purchase_title': '구매해 주셔서 감사해요. 30초만 시간 내서 피드백 남겨주실래요?',
+  'feedback.analysis_title': '분석 결과가 도움이 되었나요?',
+  'feedback.rating_label': '별점을 매겨주세요',
+  'feedback.star_aria': '5점 중 {n}점',
+  'feedback.comment_placeholder': '남기고 싶은 말이 있다면 적어주세요 (선택)',
+  'feedback.public_optin': '이 후기를 사이트에 익명으로 공개해도 좋아요',
+  'feedback.submit': '피드백 보내기',
+  'feedback.skip': '괜찮아요',
+  'feedback.thanks': '피드백 감사해요!',
+  'feedback.error': '문제가 발생했어요. 다시 시도해 주세요.',
   'snapshots.limit': '무료 사용자는 스냅샷 1개를 저장할 수 있어요. 평생 이용권은 스냅샷을 무제한으로 저장해요.',
   'dashboard.changes.locked': '마지막 스냅샷 이후 누가 언팔로우했는지 보려면 평생 이용권을 잠금 해제하세요.',
   'dashboard.changes.unlock': '변경 사항 잠금 해제',
@@ -479,6 +509,16 @@ const ja: Translations = {
   'modal.buy_lifetime': '$3.99を一回払い',
   'modal.one_time_note': '一回払いです。サブスクリプションや自動更新はありません。国によって現地価格が異なる場合があります。',
   'modal.purchased_note': 'ご購入ありがとうございます。下に購入時のメールを入力すると、このブラウザで解放されます。',
+  'feedback.purchase_title': 'ご購入ありがとうございます。30秒だけフィードバックをいただけますか？',
+  'feedback.analysis_title': 'この分析結果は役に立ちましたか？',
+  'feedback.rating_label': '評価をお願いします',
+  'feedback.star_aria': '5点中{n}点',
+  'feedback.comment_placeholder': 'ご意見があればご記入ください（任意）',
+  'feedback.public_optin': 'この感想を匿名でサイトに掲載してもよいです',
+  'feedback.submit': 'フィードバックを送信',
+  'feedback.skip': '今はしない',
+  'feedback.thanks': 'フィードバックありがとうございます！',
+  'feedback.error': 'エラーが発生しました。もう一度お試しください。',
   'snapshots.limit': '無料ユーザーは1件のスナップショットを保存できます。買い切りアクセスで無制限になります。',
   'dashboard.changes.locked': '前回のスナップショット以降にアンフォローした人を見るには、買い切りアクセスを解放してください。',
   'dashboard.changes.unlock': '変更を解放',
@@ -633,6 +673,16 @@ const es: Translations = {
   'modal.buy_lifetime': 'Pagar $3.99 una vez',
   'modal.one_time_note': 'Pago único. Sin suscripción ni renovaciones. El precio local puede variar según el país.',
   'modal.purchased_note': '¡Gracias por tu compra! Ingresa abajo el correo de la compra para desbloquear este navegador.',
+  'feedback.purchase_title': '¿Nos regalas 30 segundos de tu opinión?',
+  'feedback.analysis_title': '¿Te resultó útil este análisis?',
+  'feedback.rating_label': '¿Cómo lo calificarías?',
+  'feedback.star_aria': 'Calificar {n} de 5',
+  'feedback.comment_placeholder': '¿Algo que quieras contarnos? (opcional)',
+  'feedback.public_optin': 'Puedes compartir esto como una cita anónima en el sitio',
+  'feedback.submit': 'Enviar comentario',
+  'feedback.skip': 'No, gracias',
+  'feedback.thanks': '¡Gracias por tu comentario!',
+  'feedback.error': 'Algo salió mal. Inténtalo de nuevo.',
   'snapshots.limit': 'Los usuarios gratuitos pueden guardar 1 instantánea. El acceso de por vida desbloquea instantáneas ilimitadas.',
   'dashboard.changes.locked': 'Desbloquea el acceso de por vida para ver quién dejó de seguirte desde tu última instantánea.',
   'dashboard.changes.unlock': 'Desbloquear cambios',
@@ -788,6 +838,16 @@ const pt: Translations = {
   'modal.buy_lifetime': 'Pagar US$ 3,99 uma vez',
   'modal.one_time_note': 'Pagamento único. Sem assinatura e sem renovação. O preço local pode variar por país.',
   'modal.purchased_note': 'Obrigado pela compra! Digite abaixo o e-mail da compra para desbloquear este navegador.',
+  'feedback.purchase_title': 'Nos dá 30 segundos de feedback?',
+  'feedback.analysis_title': 'Essa análise foi útil?',
+  'feedback.rating_label': 'Como você avaliaria?',
+  'feedback.star_aria': 'Avaliar {n} de 5',
+  'feedback.comment_placeholder': 'Algo que queira compartilhar? (opcional)',
+  'feedback.public_optin': 'Você pode compartilhar isso como um depoimento anônimo no site',
+  'feedback.submit': 'Enviar feedback',
+  'feedback.skip': 'Não, obrigado',
+  'feedback.thanks': 'Obrigado pelo feedback!',
+  'feedback.error': 'Algo deu errado. Tente novamente.',
   'snapshots.limit': 'Usuários gratuitos podem salvar uma captura. O acesso vitalício libera capturas ilimitadas.',
   'dashboard.changes.locked': 'Desbloqueie o acesso vitalício para ver quem deixou de seguir você desde a última captura.',
   'dashboard.changes.unlock': 'Desbloquear mudanças',
@@ -919,6 +979,16 @@ const ru: Translations = {
   'modal.buy_lifetime': 'Оплатить $3.99 один раз',
   'modal.one_time_note': 'Разовый платёж. Без подписки и автопродления. Цена может отличаться в зависимости от страны.',
   'modal.purchased_note': 'Спасибо за покупку! Введите ниже e-mail покупки, чтобы открыть доступ в этом браузере.',
+  'feedback.purchase_title': 'Уделите 30 секунд для отзыва?',
+  'feedback.analysis_title': 'Этот анализ был полезен?',
+  'feedback.rating_label': 'Как бы вы оценили?',
+  'feedback.star_aria': 'Оценка {n} из 5',
+  'feedback.comment_placeholder': 'Хотите что-то добавить? (необязательно)',
+  'feedback.public_optin': 'Вы можете разрешить анонимно опубликовать этот отзыв на сайте',
+  'feedback.submit': 'Отправить отзыв',
+  'feedback.skip': 'Не сейчас',
+  'feedback.thanks': 'Спасибо за отзыв!',
+  'feedback.error': 'Что-то пошло не так. Попробуйте ещё раз.',
   'snapshots.limit': 'Бесплатно можно сохранить один снимок. Пожизненный доступ снимает ограничение.',
   'dashboard.changes.locked': 'Откройте пожизненный доступ, чтобы увидеть отписавшихся после последнего снимка.',
   'dashboard.changes.unlock': 'Открыть изменения',

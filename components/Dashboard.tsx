@@ -18,6 +18,7 @@ import { AudienceInsights } from './AudienceInsights';
 import { exportTimestamp, persistAnalysisDraft } from '@/utils/analysis-draft';
 import { usePremium } from '@/utils/use-premium';
 import { previewAccounts } from '@/utils/premium-offer';
+import { FeedbackPrompt } from './FeedbackPrompt';
 
 import { SentenceLines } from '@/components/SentenceLines';
 interface Snapshot {
@@ -318,6 +319,8 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
             <div className="text-xs text-zinc-400 mt-0.5"><SentenceLines text={relationshipCopy.mutuals} /></div>
           </div>
         </div>
+
+        {qualified(data) && <FeedbackPrompt lang={lang} context="analysis" />}
 
         {/* Action buttons */}
         <div className="flex flex-wrap items-center gap-2 mb-4">

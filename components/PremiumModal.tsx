@@ -6,6 +6,7 @@ import { trackFunnel } from '@/utils/analytics';
 import { lifetimeCheckoutUrl } from '@/utils/premium-offer';
 
 import { SentenceLines } from '@/components/SentenceLines';
+import { FeedbackPrompt } from '@/components/FeedbackPrompt';
 interface PremiumModalProps {
   lang: Lang;
   onClose: () => void;
@@ -86,9 +87,12 @@ export function PremiumModal({ lang, onClose, onVerified, purchased = false }: P
           </ul>
 
           {purchased ? (
-            <p role="status" className="rounded-xl bg-green-50 border border-green-100 px-4 py-3 text-sm text-green-700">
-              <SentenceLines text={t('modal.purchased_note', lang)} />
-            </p>
+            <div>
+              <p role="status" className="rounded-xl bg-green-50 border border-green-100 px-4 py-3 text-sm text-green-700">
+                <SentenceLines text={t('modal.purchased_note', lang)} />
+              </p>
+              <FeedbackPrompt lang={lang} context="purchase" />
+            </div>
           ) : (
             <div className="space-y-2">
               {/* One-time checkout */}

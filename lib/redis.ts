@@ -1,5 +1,6 @@
 import { Redis } from '@upstash/redis';
 import { createHash } from 'crypto';
+import type { FeedbackEntry } from './feedback';
 
 export const redis = new Redis({
   url: process.env.KV_REST_API_URL!,
@@ -240,4 +241,17 @@ export async function checkRateLimit(ip: string): Promise<RateLimitResult> {
     remaining: Math.max(0, RATE_LIMIT_MAX - count),
     resetIn,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Anonymous product feedback (post-purchase / post-analysis opt-in prompt)
+// ---------------------------------------------------------------------------
+
+const FEEDBACK_LIST_KEY = 'feedback:entries';
+const FEEDBACK_MAX_ENTRIES = 1000;
+
+export async function recordFeedback(entry: FeedbackEntry): Promise<void> {
+  await redis.rpush(FEEDBACK_LIST_KEY, JSON.stringify(entry));
+  // Cap unbounded growth; keep only the most recent entries.
+  await redis.ltrim(FEEDBACK_LIST_KEY, -FEEDBACK_MAX_ENTRIES, -1);
 }

@@ -1,6 +1,6 @@
 import type { Lang } from './i18n';
 
-type FunnelEvent = 'home_upload_click' | 'guide_upload_click' | 'upload_started' | 'upload_failed' | 'analysis_completed' | 'snapshot_save_started' | 'snapshot_saved' | 'snapshot_save_failed' | 'premium_opened' | 'premium_checkout_click';
+type FunnelEvent = 'home_upload_click' | 'guide_upload_click' | 'upload_started' | 'upload_failed' | 'analysis_completed' | 'snapshot_save_started' | 'snapshot_saved' | 'snapshot_save_failed' | 'premium_opened' | 'premium_checkout_click' | 'feedback_shown' | 'feedback_submitted' | 'feedback_skipped';
 
 export function uploadFailureReason(error: unknown): string {
   const reasons: Record<string, string> = {
