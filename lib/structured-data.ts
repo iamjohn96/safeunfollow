@@ -59,7 +59,7 @@ export function articleStructuredData(article: {
   description: string;
   date: string;
   slug: string;
-}, basePath: '/blog/' | '/pillars/' = '/blog/') {
+}, basePath: string = '/blog/') {
   const url = `${BASE_URL}${basePath}${article.slug}`;
 
   return {

@@ -1,17 +1,25 @@
 import Link from 'next/link';
 import type { MarkdownDocument } from '@/lib/markdown-content';
 import { renderMarkdown } from '@/lib/markdown-rendering';
+import { t, type Lang } from '@/utils/i18n';
 import styles from './markdown-article.module.css';
 
 import { SentenceLines } from '@/components/SentenceLines';
+
+const DATE_LOCALES: Record<Lang, string> = {
+  en: 'en-US', pt: 'pt-BR', ru: 'ru-RU', es: 'es-ES',
+};
+
 export default async function MarkdownArticle({
   document,
   backHref,
   backLabel,
+  lang = 'en',
 }: {
   document: MarkdownDocument;
   backHref: string;
   backLabel: string;
+  lang?: Lang;
 }) {
   const processedContent = await renderMarkdown(document.content);
 
@@ -26,7 +34,7 @@ export default async function MarkdownArticle({
 
       <header className="mb-10">
         <time className="text-xs text-zinc-400">
-          {new Date(document.data.date).toLocaleDateString('en-US', {
+          {new Date(document.data.date).toLocaleDateString(DATE_LOCALES[lang], {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
@@ -45,17 +53,17 @@ export default async function MarkdownArticle({
 
       <section className={styles.ctaCard} aria-labelledby="article-cta-title">
         <h2 id="article-cta-title" className={styles.ctaHeading}>
-          Ready to discover who unfollowed you on Instagram the safe and private way?
+          {t('blog.cta.heading', lang)}
         </h2>
         <p className={styles.ctaCopy}>
-          <span>Upload your Instagram Data Download to SafeUnfollow.</span>
-          <span>No login. No OAuth. No Instagram API.</span>
+          <span>{t('blog.cta.line1', lang)}</span>
+          <span>{t('blog.cta.line2', lang)}</span>
         </p>
         <Link
-          href="/upload"
+          href={lang === 'en' ? '/upload' : `/${lang}/upload`}
           className={styles.ctaButton}
         >
-          Upload Instagram Data
+          {t('hero.cta', lang)}
         </Link>
       </section>
     </article>

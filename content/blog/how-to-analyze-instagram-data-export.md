@@ -1,7 +1,7 @@
 ---
 title: "How to Analyze Your Instagram Data Export Without Logging In"
 description: "Use an Instagram data analyzer to find mutuals, one-way follows, and follower changes from your official export—without sharing your login."
-date: 2026-08-26
+date: 2026-08-20
 slug: "how-to-analyze-instagram-data-export"
 cluster: "instagram-unfollow"
 keywords:
@@ -138,9 +138,12 @@ The relationship analysis runs in your browser, and the raw ZIP is not stored as
 
 Create one when the value of detecting changes justifies requesting another export. Monthly comparisons may be enough for casual use, while creators managing faster-changing audiences may choose a shorter interval.
 
+[Upload your Instagram data with SafeUnfollow](https://safeunfollow.com/upload)
+
+<!-- AUTO:RELATED_START -->
+Start with the [Instagram Unfollow complete guide](/pillars/instagram-unfollow-guide) for the full topic overview.
+
 ## Related Articles
 
-- [Complete Instagram Unfollow Guide](/pillars/instagram-unfollow-guide)
-- [Safe Instagram Unfollow Guide](/pillars/safe-instagram-unfollow-guide)
-
-[Upload your Instagram data with SafeUnfollow](https://safeunfollow.com/upload)
+- [How to Track Instagram Follower Changes Over Time](/blog/track-instagram-follower-changes-over-time)
+<!-- AUTO:RELATED_END -->

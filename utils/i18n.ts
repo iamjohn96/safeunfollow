@@ -1,5 +1,3 @@
-'use client';
-
 import { translations, type Lang, type TranslationKey } from './translations';
 
 const SUPPORTED_LANGS: Lang[] = ['en', 'pt', 'ru', 'es'];

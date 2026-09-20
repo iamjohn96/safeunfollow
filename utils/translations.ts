@@ -94,6 +94,13 @@ export type TranslationKey =
   | 'feedback.skip'
   | 'feedback.thanks'
   | 'feedback.error'
+  | 'blog.title'
+  | 'blog.subtitle'
+  | 'blog.readMore'
+  | 'blog.back'
+  | 'blog.cta.heading'
+  | 'blog.cta.line1'
+  | 'blog.cta.line2'
   | 'dashboard.preview.locked'
   | 'dashboard.preview.unlock'
   | 'modal.verify_placeholder'
@@ -191,6 +198,13 @@ const en: Translations = {
   'feedback.skip': 'No thanks',
   'feedback.thanks': 'Thanks for the feedback!',
   'feedback.error': 'Something went wrong. Please try again.',
+  'blog.title': "Instagram Data Analyzer Guide",
+  'blog.subtitle': "Understand what your Instagram export can reveal—without connecting your account.",
+  'blog.readMore': "Read more",
+  'blog.back': "Back to Blog",
+  'blog.cta.heading': "Ready to discover who unfollowed you on Instagram the safe and private way?",
+  'blog.cta.line1': "Upload your Instagram Data Download to SafeUnfollow.",
+  'blog.cta.line2': "No login. No OAuth. No Instagram API.",
   'snapshots.limit': 'Free users can save 1 snapshot. Lifetime Access unlocks unlimited snapshots.',
   'dashboard.changes.locked': 'Unlock Lifetime Access to see who unfollowed you since your last snapshot.',
   'dashboard.changes.unlock': 'Unlock changes',
@@ -355,6 +369,13 @@ const ko: Translations = {
   'feedback.skip': '괜찮아요',
   'feedback.thanks': '피드백 감사해요!',
   'feedback.error': '문제가 발생했어요. 다시 시도해 주세요.',
+  'blog.title': "Instagram 데이터 분석기 가이드",
+  'blog.subtitle': "계정을 연결하지 않고도 Instagram 내보내기 데이터로 알 수 있는 것들을 알아보세요.",
+  'blog.readMore': "더 읽기",
+  'blog.back': "블로그로 돌아가기",
+  'blog.cta.heading': "안전하고 프라이빗한 방법으로 누가 나를 언팔로우했는지 알아볼까요?",
+  'blog.cta.line1': "Instagram 데이터 다운로드를 SafeUnfollow에 업로드하세요.",
+  'blog.cta.line2': "로그인 없음. OAuth 없음. Instagram API 없음.",
   'snapshots.limit': '무료 사용자는 스냅샷 1개를 저장할 수 있어요. 평생 이용권은 스냅샷을 무제한으로 저장해요.',
   'dashboard.changes.locked': '마지막 스냅샷 이후 누가 언팔로우했는지 보려면 평생 이용권을 잠금 해제하세요.',
   'dashboard.changes.unlock': '변경 사항 잠금 해제',
@@ -519,6 +540,13 @@ const ja: Translations = {
   'feedback.skip': '今はしない',
   'feedback.thanks': 'フィードバックありがとうございます！',
   'feedback.error': 'エラーが発生しました。もう一度お試しください。',
+  'blog.title': "Instagramデータアナライザーガイド",
+  'blog.subtitle': "アカウントを連携せずに、Instagramのエクスポートから何がわかるかを解説します。",
+  'blog.readMore': "続きを読む",
+  'blog.back': "ブログに戻る",
+  'blog.cta.heading': "安全でプライベートな方法で誰があなたをアンフォローしたか確認しませんか?",
+  'blog.cta.line1': "InstagramデータダウンロードをSafeUnfollowにアップロードしてください。",
+  'blog.cta.line2': "ログイン不要。OAuth不要。Instagram API不要。",
   'snapshots.limit': '無料ユーザーは1件のスナップショットを保存できます。買い切りアクセスで無制限になります。',
   'dashboard.changes.locked': '前回のスナップショット以降にアンフォローした人を見るには、買い切りアクセスを解放してください。',
   'dashboard.changes.unlock': '変更を解放',
@@ -683,6 +711,13 @@ const es: Translations = {
   'feedback.skip': 'No, gracias',
   'feedback.thanks': '¡Gracias por tu comentario!',
   'feedback.error': 'Algo salió mal. Inténtalo de nuevo.',
+  'blog.title': "Guía del analizador de datos de Instagram",
+  'blog.subtitle': "Descubre qué puede revelar tu exportación de Instagram, sin conectar tu cuenta.",
+  'blog.readMore': "Leer más",
+  'blog.back': "Volver al blog",
+  'blog.cta.heading': "¿Listo para descubrir quién te dejó de seguir en Instagram de forma segura y privada?",
+  'blog.cta.line1': "Sube tu descarga de datos de Instagram a SafeUnfollow.",
+  'blog.cta.line2': "Sin login. Sin OAuth. Sin API de Instagram.",
   'snapshots.limit': 'Los usuarios gratuitos pueden guardar 1 instantánea. El acceso de por vida desbloquea instantáneas ilimitadas.',
   'dashboard.changes.locked': 'Desbloquea el acceso de por vida para ver quién dejó de seguirte desde tu última instantánea.',
   'dashboard.changes.unlock': 'Desbloquear cambios',
@@ -848,6 +883,13 @@ const pt: Translations = {
   'feedback.skip': 'Não, obrigado',
   'feedback.thanks': 'Obrigado pelo feedback!',
   'feedback.error': 'Algo deu errado. Tente novamente.',
+  'blog.title': "Guia do analisador de dados do Instagram",
+  'blog.subtitle': "Entenda o que sua exportação do Instagram pode revelar—sem conectar sua conta.",
+  'blog.readMore': "Leia mais",
+  'blog.back': "Voltar ao blog",
+  'blog.cta.heading': "Pronto para descobrir quem deixou de seguir você no Instagram de forma segura e privada?",
+  'blog.cta.line1': "Envie seu Instagram Data Download para o SafeUnfollow.",
+  'blog.cta.line2': "Sem login. Sem OAuth. Sem API do Instagram.",
   'snapshots.limit': 'Usuários gratuitos podem salvar uma captura. O acesso vitalício libera capturas ilimitadas.',
   'dashboard.changes.locked': 'Desbloqueie o acesso vitalício para ver quem deixou de seguir você desde a última captura.',
   'dashboard.changes.unlock': 'Desbloquear mudanças',
@@ -989,6 +1031,13 @@ const ru: Translations = {
   'feedback.skip': 'Не сейчас',
   'feedback.thanks': 'Спасибо за отзыв!',
   'feedback.error': 'Что-то пошло не так. Попробуйте ещё раз.',
+  'blog.title': "Гид по анализатору данных Instagram",
+  'blog.subtitle': "Узнайте, что может показать экспорт данных Instagram — без подключения аккаунта.",
+  'blog.readMore': "Читать далее",
+  'blog.back': "Назад в блог",
+  'blog.cta.heading': "Готовы узнать, кто отписался от вас в Instagram безопасным и приватным способом?",
+  'blog.cta.line1': "Загрузите экспорт данных Instagram в SafeUnfollow.",
+  'blog.cta.line2': "Без входа. Без OAuth. Без API Instagram.",
   'snapshots.limit': 'Бесплатно можно сохранить один снимок. Пожизненный доступ снимает ограничение.',
   'dashboard.changes.locked': 'Откройте пожизненный доступ, чтобы увидеть отписавшихся после последнего снимка.',
   'dashboard.changes.unlock': 'Открыть изменения',

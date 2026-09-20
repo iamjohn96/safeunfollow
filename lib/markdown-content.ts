@@ -3,6 +3,9 @@ import path from 'node:path';
 import matter from 'gray-matter';
 
 export type ContentSection = 'blog' | 'pillars';
+export type ContentLang = 'en' | 'pt' | 'ru' | 'es';
+
+const LOCALIZABLE_LANGS: ContentLang[] = ['pt', 'ru', 'es'];
 
 export interface MarkdownDocument {
   data: {
@@ -15,7 +18,10 @@ export interface MarkdownDocument {
   content: string;
 }
 
-function contentDirectory(section: ContentSection): string {
+function contentDirectory(section: ContentSection, lang?: ContentLang): string {
+  if (lang && LOCALIZABLE_LANGS.includes(lang)) {
+    return path.join(process.cwd(), 'content', section, lang);
+  }
   return path.join(process.cwd(), 'content', section);
 }
 
@@ -24,8 +30,7 @@ function normalizeDate(value: unknown): string {
   return String(value ?? '');
 }
 
-export function getMarkdownDocuments(section: ContentSection): MarkdownDocument[] {
-  const directory = contentDirectory(section);
+function readDocuments(directory: string): MarkdownDocument[] {
   if (!fs.existsSync(directory)) return [];
 
   return fs.readdirSync(directory)
@@ -47,9 +52,35 @@ export function getMarkdownDocuments(section: ContentSection): MarkdownDocument[
     });
 }
 
+/**
+ * Returns documents for a section in the given language.
+ * Non-English content lives under content/<section>/<lang>/*.md; any slug
+ * without a translated file falls back to the English version, mirroring
+ * the fallback already used by utils/i18n.ts#t() for UI strings.
+ */
+export function getMarkdownDocuments(section: ContentSection, lang: ContentLang = 'en'): MarkdownDocument[] {
+  const english = readDocuments(contentDirectory(section));
+  if (lang === 'en') return english;
+
+  const localized = readDocuments(contentDirectory(section, lang));
+  const localizedBySlug = new Map(localized.map(document => [document.data.slug, document]));
+  return english.map(document => localizedBySlug.get(document.data.slug) ?? document);
+}
+
 export function getMarkdownDocument(
   section: ContentSection,
   slug: string,
+  lang: ContentLang = 'en',
 ): MarkdownDocument | null {
-  return getMarkdownDocuments(section).find(document => document.data.slug === slug) ?? null;
+  return getMarkdownDocuments(section, lang).find(document => document.data.slug === slug) ?? null;
+}
+
+/** Languages that actually have a translated file for this slug (English is always available as the fallback). */
+export function availableDocumentLangs(section: ContentSection, slug: string): ContentLang[] {
+  const langs: ContentLang[] = ['en'];
+  for (const lang of LOCALIZABLE_LANGS) {
+    const directory = contentDirectory(section, lang);
+    if (fs.existsSync(path.join(directory, `${slug}.md`))) langs.push(lang);
+  }
+  return langs;
 }

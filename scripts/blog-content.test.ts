@@ -12,7 +12,7 @@ test('the canonical Instagram data analyzer article passes every SEO rule', () =
     keyword: 'instagram data analyzer',
     slug,
     published: true,
-    published_at: '2026-08-26T00:00:00.000Z',
+    published_at: '2026-08-20T00:00:00.000Z',
     last_attempt: null,
     cluster: 'instagram-unfollow',
   };
@@ -22,6 +22,7 @@ test('the canonical Instagram data analyzer article passes every SEO rule', () =
       slug,
       'instagram-unfollow-guide',
       'safe-instagram-unfollow-guide',
+      'track-instagram-follower-changes-over-time',
     ]),
     pillarSlug: 'instagram-unfollow-guide',
   });
@@ -31,5 +32,35 @@ test('the canonical Instagram data analyzer article passes every SEO rule', () =
 
 test('the canonical article exposes an ISO publication date for metadata', () => {
   const document = getMarkdownDocument('blog', 'how-to-analyze-instagram-data-export');
-  assert.equal(document?.data.date, '2026-08-26');
+  assert.equal(document?.data.date, '2026-08-20');
+});
+
+test('the snapshot tracking article passes every SEO rule', () => {
+  const slug = 'track-instagram-follower-changes-over-time';
+  const source = fs.readFileSync(path.join(process.cwd(), 'content', 'blog', `${slug}.md`), 'utf8');
+  const entry = {
+    keyword: 'tracking instagram follower changes',
+    slug,
+    published: true,
+    published_at: '2026-09-20T00:00:00.000Z',
+    last_attempt: null,
+    cluster: 'instagram-unfollow',
+  };
+
+  const result = validatePost(source, entry, {
+    knownSlugs: new Set([
+      slug,
+      'instagram-unfollow-guide',
+      'safe-instagram-unfollow-guide',
+      'how-to-analyze-instagram-data-export',
+    ]),
+    pillarSlug: 'instagram-unfollow-guide',
+  });
+
+  assert.deepEqual(result, { valid: true, errors: [] });
+});
+
+test('the snapshot tracking article exposes an ISO publication date for metadata', () => {
+  const document = getMarkdownDocument('blog', 'track-instagram-follower-changes-over-time');
+  assert.equal(document?.data.date, '2026-09-20');
 });

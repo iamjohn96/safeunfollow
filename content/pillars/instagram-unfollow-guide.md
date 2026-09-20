@@ -31,4 +31,5 @@ Use the supporting guides to compare tracking methods, understand what an export
 ## Supporting Articles
 
 - [How to Analyze Your Instagram Data Export Without Logging In](/blog/how-to-analyze-instagram-data-export)
+- [How to Track Instagram Follower Changes Over Time](/blog/track-instagram-follower-changes-over-time)
 <!-- AUTO:RELATED_END -->

@@ -26,6 +26,7 @@ const pageNames: Record<string, Record<Lang, string>> = {
   privacy: { en: 'Privacy Policy', pt: 'Política de Privacidade', ru: 'Политика конфиденциальности', es: 'Política de Privacidad' },
   terms: { en: 'Terms of Service', pt: 'Termos de Serviço', ru: 'Условия использования', es: 'Términos del Servicio' },
   cancel: { en: 'Cancel Premium', pt: 'Cancelar Premium', ru: 'Отменить Премиум', es: 'Cancelar Premium' },
+  blog: { en: 'Instagram Data Analyzer Guide', pt: 'Guia do analisador de dados do Instagram', ru: 'Гид по анализатору данных Instagram', es: 'Guía del analizador de datos de Instagram' },
 };
 
 export function localeAlternates(path = ''): Metadata['alternates'] {

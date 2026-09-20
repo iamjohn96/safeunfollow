@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
-import { notFound, permanentRedirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import MarkdownArticle from '@/app/_components/markdown-article';
 import { getMarkdownDocument, getMarkdownDocuments, availableDocumentLangs } from '@/lib/markdown-content';
 import { JsonLd } from '@/components/JsonLd';
 import { articleStructuredData } from '@/lib/structured-data';
+import { t } from '@/utils/i18n';
+import { isPublicLocale, type PublicLocale } from '@/lib/locale-metadata';
 
 const BASE_URL = 'https://safeunfollow.com';
 
@@ -13,14 +15,17 @@ export function generateStaticParams() {
 
 export async function generateMetadata({
   params,
-}: PageProps<'/blog/[slug]'>): Promise<Metadata> {
-  const { slug } = await params;
-  const post = getMarkdownDocument('blog', slug);
+}: {
+  params: Promise<{ lang: PublicLocale; slug: string }>;
+}): Promise<Metadata> {
+  const { lang, slug } = await params;
+  if (!isPublicLocale(lang)) return {};
+  const post = getMarkdownDocument('blog', slug, lang);
   if (!post) return {};
 
   const langs = availableDocumentLangs('blog', slug);
-  const languages = Object.fromEntries(langs.map(lang => [
-    lang, lang === 'en' ? `${BASE_URL}/blog/${slug}` : `${BASE_URL}/${lang}/blog/${slug}`,
+  const languages = Object.fromEntries(langs.map(l => [
+    l, l === 'en' ? `${BASE_URL}/blog/${slug}` : `${BASE_URL}/${l}/blog/${slug}`,
   ]));
 
   return {
@@ -28,33 +33,33 @@ export async function generateMetadata({
     description: post.data.description,
     keywords: post.data.keywords,
     alternates: {
-      canonical: `${BASE_URL}/blog/${slug}`,
+      canonical: `${BASE_URL}/${lang}/blog/${slug}`,
       languages: { 'x-default': `${BASE_URL}/blog/${slug}`, ...languages },
     },
     openGraph: {
       title: post.data.title,
       description: post.data.description,
-      url: `${BASE_URL}/blog/${slug}`,
+      url: `${BASE_URL}/${lang}/blog/${slug}`,
       type: 'article',
       publishedTime: post.data.date,
     },
   };
 }
 
-export default async function BlogPostPage({ params }: PageProps<'/blog/[slug]'>) {
-  const { slug } = await params;
-  const post = getMarkdownDocument('blog', slug);
-
-  if (!post && getMarkdownDocument('pillars', slug)) {
-    permanentRedirect(`/pillars/${slug}`);
-  }
-
+export default async function LocalizedBlogPostPage({
+  params,
+}: {
+  params: Promise<{ lang: PublicLocale; slug: string }>;
+}) {
+  const { lang, slug } = await params;
+  if (!isPublicLocale(lang)) notFound();
+  const post = getMarkdownDocument('blog', slug, lang);
   if (!post) notFound();
 
   return (
     <>
-      <JsonLd data={articleStructuredData(post.data)} />
-      <MarkdownArticle document={post} backHref="/blog" backLabel="Back to Blog" lang="en" />
+      <JsonLd data={articleStructuredData(post.data, `/${lang}/blog/`)} />
+      <MarkdownArticle document={post} backHref={`/${lang}/blog`} backLabel={t('blog.back', lang)} lang={lang} />
     </>
   );
 }
