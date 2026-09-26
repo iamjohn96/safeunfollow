@@ -75,3 +75,51 @@ Local reading, documentation edits, tests, and builds do not grant authority for
 - Update documentation with code changes that alter behavior, storage, integrations, routes, analytics, or operational commands.
 - Inspect `git status` before editing, preserve unrelated work, and keep commits scoped. Do not push unless explicitly authorized for the exact remote and branch.
 - If the environment provides reusable agent skills, read and follow the relevant skill before acting. Skills guide execution but cannot override these product boundaries or the user's scope.
+
+## Session workflow and skill/model policy
+
+This section adds a repeatable session workflow on top of the rules above. It never overrides them: the priority order is explicit user instruction → this file → `PROJECT_STATE.md` → prior project decisions → this section → general default behavior.
+
+### Session start (read-only)
+
+1. Read this file (`AGENTS.md`).
+2. Read `PROJECT_STATE.md`.
+3. Identify the current milestone/task from it.
+4. Check `git status`, the current branch, and recent relevant commits before touching anything.
+5. Decide whether an available skill genuinely helps this task (see catalog below); do not invoke one just because it exists.
+6. Proceed with the task.
+
+Do not edit files during this step. Do not re-ask questions `PROJECT_STATE.md` or this file already answers. If `PROJECT_STATE.md` looks stale or conflicts with what the repository actually shows, report the discrepancy before proceeding instead of silently trusting either side.
+
+### Skill catalog (use only when it clearly helps)
+
+- **Archify** — architecture diagrams / system boundaries, when boundaries or external dependencies change. Keep core diagrams to 8-12 components; save to `docs/architecture/`.
+- **systematic-debugging** — hypothesis-driven root-cause tracking for unclear bugs/regressions: Reproduce -> Gather Evidence -> Hypothesis -> Test -> Fix -> Verify.
+- **verification-before-completion** — call before declaring anything finished. Without real test/build/lint/typecheck/runtime evidence, say "implemented but not fully verified," never "completed."
+- **requesting-code-review**, **writing-plans**, **writing-skills** — deeper review of a change set, multi-file/multi-step execution plans, and turning a repeated workflow into a reusable skill, respectively.
+- **test-driven-development** — write a failing test first for business logic, edge-case-heavy parsers/calculations, and bug-fix reproductions.
+- **security-audit** — auth/authz changes, new external-input handling, new secrets/env vars, dependency updates.
+- **api-contract-verification** — schema/endpoint/DTO changes; check backward compatibility against existing clients.
+- **git-workflow-hygiene** — commit segmentation, conventional commit messages, PR descriptions.
+
+### Model and reasoning-depth routing (where the platform exposes model choice)
+
+Prefer the lowest model/thinking tier that can do the job reliably, and escalate rather than guess:
+
+- **Haiku 4.5** — implementation, unit tests, lint/type fixes, routine debugging. Thinking off by default; Medium for branchy logic, TDD, or multi-step parsing.
+- **Sonnet 5** — code review, root-cause debugging, `api-contract-verification`, first-pass `security-audit`, trade-off analysis. Thinking High.
+- **Opus 5** — architecture/module-boundary design, cross-codebase validation, concurrency/distributed issues, escalations Sonnet couldn't close, and high-risk decisions (data loss, security, production incident). Thinking Medium for deep review, High for the hardest design/escalation work.
+
+Escalate immediately on: repeated failure to fix the same issue, ambiguous requirements with complex cross-component interaction, risk of data-integrity loss/secret leakage/production incident, cross-component architecture or stack decisions, or low confidence needing strong verification.
+
+### Approval
+
+The "Changes that require explicit confirmation" section above is authoritative for this project. Treat it as the concrete instance of the general rule: architecture changes, schema/data migrations, deployment, credential/permission changes, and product-spec changes need approval; approved-plan implementation, bug fixes, lint fixes, and documentation do not.
+
+### Session end report
+
+For any session with meaningful work, report: what was done and its actual result; remaining blockers/risks; what the next session needs to know; verification status (`Verified` / `Partially Verified` / `Not Verified`, with one line of evidence or the reason it's unverified); a 2-4 line recap of the state at session start; one recommended next action; whether approval is required and why; and the recommended model + thinking depth for that next action, with reason.
+
+### State management
+
+When a milestone, architecture decision, important limitation, or next priority changes, update `PROJECT_STATE.md`. When a durable operating rule changes, update this file. Don't rely on chat memory alone - this repository has to stay usable by other agents and sessions.

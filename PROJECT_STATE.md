@@ -115,6 +115,10 @@ Unified per owner instruction: both `privacy@` and `legal@` in `utils/legal-cont
 
 `npm run lint`, `npm run test:automation` (122/122), and `npm run build` (51 routes) all passed after the change. Committed as `415ae9f`; push left to the owner per the established workflow.
 
+### 2026-09-27 session operating protocol adopted
+
+Owner supplied a generic "Work Session Operating Prompt" (source-of-truth priority order, session-start procedure, a reusable-skill catalog with trigger conditions, a Haiku/Sonnet/Opus model+thinking-depth routing table, approval policy, state-management rule, session-end report format) and asked for it to be reflected in this repo. It was appended to `AGENTS.md` as a new "Session workflow and skill/model policy" section, explicitly subordinate to every existing rule in that file (in particular, the existing "Changes that require explicit confirmation" list remains authoritative over the new section's generic approval summary). No product, architecture, or approval-boundary change resulted; this is a durable process rule, not a milestone update.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data
