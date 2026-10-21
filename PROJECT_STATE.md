@@ -150,7 +150,7 @@ Shipped:
 - The parser detects the platform from the list key and stores `platform: 'threads'`. For Threads it never falls back to the title; it uses `value`, then a threads.com href.
 - `compareAudience`/`previousSnapshot` and the duplicate check never mix platforms. Threads snapshots are labelled "Threads · …".
 - Account links open threads.com/@user. The dashboard heading and profile label name the platform.
-- `analysis_completed` sends `platform`. It is not registered as a GA custom dimension; registering it is a GA configuration change and needs owner approval.
+- `analysis_completed` sends `platform`. Registered as the event-scoped GA4 custom dimension "Platform" on 2026-10-22, with owner approval; data appears only from that date.
 - The upload page notes Threads support, and the guide has a Threads section (Threads only, All time, JSON, low media quality). Both are in all locales.
 - Tests: `scripts/threads.test.ts` uses synthetic fixtures shaped like the real export.
 
