@@ -6,6 +6,9 @@ import { trackFunnel, uploadFailureReason } from '../utils/analytics';
 test('failure categories never expose arbitrary exception contents', () => {
   assert.equal(uploadFailureReason(new Error('missing-relationship-files')), 'missing_relationship_files');
   assert.equal(uploadFailureReason(new Error('missing-relationship-part')), 'missing_relationship_part');
+  assert.equal(uploadFailureReason(new Error('missing-followers-file')), 'missing_followers_file');
+  assert.equal(uploadFailureReason(new Error('missing-following-file')), 'missing_following_file');
+  assert.equal(uploadFailureReason(new Error('html-export')), 'html_export');
   assert.equal(uploadFailureReason(new Error('invalid-relationship-file')), 'invalid_relationship_data');
   assert.equal(uploadFailureReason(new Error('secret_profile export.json')), 'parse_failed');
   assert.equal(uploadFailureReason(null), 'parse_failed');

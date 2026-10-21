@@ -119,6 +119,22 @@ Unified per owner instruction: both `privacy@` and `legal@` in `utils/legal-cont
 
 Owner supplied a generic "Work Session Operating Prompt" (source-of-truth priority order, session-start procedure, a reusable-skill catalog with trigger conditions, a Haiku/Sonnet/Opus model+thinking-depth routing table, approval policy, state-management rule, session-end report format) and asked for it to be reflected in this repo. It was appended to `AGENTS.md` as a new "Session workflow and skill/model policy" section, explicitly subordinate to every existing rule in that file (in particular, the existing "Changes that require explicit confirmation" list remains authoritative over the new section's generic approval summary). No product, architecture, or approval-boundary change resulted; this is a durable process rule, not a milestone update.
 
+### 2026-10-21 expansion/pricing review and upload-failure diagnostics
+
+Read-only evidence for 2026-09-21 to 2026-10-20. GA4 showed 677 active users. Sessions came from Organic Search 56%, Direct 23%, and AI Assistant 16%. By country, Brazil had 43% of users, the US 10%, and Indonesia 9%. The funnel by users ran `upload_started` 228 → `analysis_completed` 136 (about 60%) → `premium_opened` 23 → `premium_checkout_click` 5. There was 1 `snapshot_saved`. `upload_failed` covered 120 users and 350 events, broken down as `missing_relationship_files` 235 events / 97 users, `unsupported_format` 63/24, `invalid_relationship_data` 27/10, and `parse_failed` 25/10. Dodo showed 7 external Lifetime purchases since 2026-09-19 (EUR 4, BRL 2, GBP 1). Realized revenue per sale is about US$2.6 because of PPP. For the 60-day checkpoint, purchases (7) are above 5, but analysis success (about 60%) is below the 70% target.
+
+Owner-approved order: fix upload failures first, then add Threads, then TikTok. X archives contain only numeric account IDs, so a no-API tool cannot show handles; skip X. Raise the Lifetime price after the 2026-11-16 checkpoint as a multi-platform bundle, not a subscription. The full review is in the JonnyLab project doc `safeunfollow/EXPANSION_AND_PRICING_REVIEW_2026-10-21.md`.
+
+Shipped in this change. The analysis boundary is unchanged: still followers/following JSON only.
+- `missing_relationship_files` was too coarse to act on, so the parser now names the case. `html-export` means the ZIP contains `followers*.html`/`following*.html` but no relationship JSON. `missing-followers-file` and `missing-following-file` mean only one list was found. `missing-relationship-files` now means neither list was found.
+- The GA `failure_reason` values `html_export`, `missing_followers_file`, and `missing_following_file` were added. They use the existing registered dimension, so no GA configuration changed.
+- The upload screen shows a specific message for the HTML and partial cases in all locales.
+- The upload input also accepts the two extracted JSON files selected together (`followers_1.json` + `following.json`), because some phones unpack the ZIP automatically. A single `.html` file is reported as `html_export`.
+- `upload_started.file_type` is now `zip` / `json` / `html` / `other`.
+- `parseZip` reads the file as an ArrayBuffer, which is equivalent in browsers and testable in Node.
+
+Verification: 127/127 automation tests passed, plus lint, tsc, and the production build. A production-build Playwright check on a 390px mobile viewport passed with synthetic data across en/pt/ru/es. JSON ZIP, two JSON files, HTML ZIP, a single `following.json`, and an unsupported file each produced the expected result or message and the expected `failure_reason`. Next step: after about 2 weeks of production data, reread the new failure categories. If `html_export` dominates, consider supporting the HTML export format. That would expand the boundary, so it needs a sanitized real fixture and owner approval.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data

@@ -38,7 +38,8 @@ test('Premium restore requires emailed proof and a browser session', () => {
 
 test('browser storage failures are not described as missing Instagram files', () => {
   const upload = readFileSync('app/upload/page.tsx', 'utf8');
-  assert.match(upload, /stage === 'storage' \? 'storage' : 'upload\.error\.missing'/);
+  assert.match(upload, /stage === 'storage' \? 'browser_storage_failed'/);
+  assert.match(upload, /reason === 'browser_storage_failed'\) return 'storage'/);
   assert.match(upload, /audienceCopy\[lang\]\.storage/);
 });
 

@@ -4,8 +4,11 @@ import {
   computeFollowersOnly,
   computeMutuals,
   computeNonFollowers,
+  parseFiles,
   parseJsonFiles,
+  parseZip,
 } from '../utils/parser';
+import JSZip from 'jszip';
 
 test('relationship analysis is derived from follower and following exports', async () => {
   const followers = [
@@ -110,5 +113,44 @@ test('incomplete multipart follower exports and missing relationship files are r
     ]),
     /missing-relationship-part/,
   );
-  await assert.rejects(parseJsonFiles([{ name: 'following.json', content: following }]), /missing-relationship-files/);
+  await assert.rejects(parseJsonFiles([{ name: 'following.json', content: following }]), /missing-followers-file/);
+  await assert.rejects(parseJsonFiles([{ name: 'followers_1.json', content: followerPart }]), /missing-following-file/);
+  await assert.rejects(parseJsonFiles([{ name: 'personal_information.json', content: '{}' }]), /missing-relationship-files/);
+});
+
+const followersJson = JSON.stringify([{ string_list_data: [{ value: 'mutual_account', timestamp: 1 }] }]);
+const followingJson = JSON.stringify({ relationships_following: [{ string_list_data: [{ value: 'mutual_account', timestamp: 1 }] }] });
+
+async function zipFile(entries: Record<string, string>): Promise<File> {
+  const zip = new JSZip();
+  for (const [name, content] of Object.entries(entries)) zip.file(name, content);
+  return new File([await zip.generateAsync({ type: 'arraybuffer' })], 'export.zip');
+}
+
+test('an HTML-format export is reported as html-export instead of missing files', async () => {
+  const file = await zipFile({
+    'connections/followers_and_following/followers_1.html': '<html></html>',
+    'connections/followers_and_following/following.html': '<html></html>',
+  });
+  await assert.rejects(parseZip(file), /html-export/);
+  await assert.rejects(parseFiles([new File(['<html></html>'], 'followers_1.html')]), /html-export/);
+});
+
+test('a JSON export still parses when unrelated HTML files are present', async () => {
+  const file = await zipFile({
+    'connections/followers_and_following/followers_1.json': followersJson,
+    'connections/followers_and_following/following.json': followingJson,
+    'start_here.html': '<html></html>',
+  });
+  const parsed = await parseZip(file);
+  assert.deepEqual(parsed.followers.map(account => account.username), ['mutual_account']);
+});
+
+test('the two relationship JSON files can be selected together without the ZIP', async () => {
+  const parsed = await parseFiles([new File([followersJson], 'followers_1.json'), new File([followingJson], 'following.json')]);
+  assert.deepEqual(parsed.following.map(account => account.username), ['mutual_account']);
+  await assert.rejects(parseFiles([new File([followingJson], 'following.json')]), /missing-followers-file/);
+  await assert.rejects(parseFiles([new File(['x'], 'notes.txt')]), /unsupported-format/);
+  await assert.rejects(parseFiles([new File([followersJson], 'followers_1.json'), new File(['x'], 'photo.jpg')]), /unsupported-format/);
+  await assert.rejects(parseFiles([]), /unsupported-format/);
 });

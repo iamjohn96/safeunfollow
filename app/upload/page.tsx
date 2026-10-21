@@ -3,18 +3,37 @@
 import { useState, useRef, useCallback } from 'react';
 import { useEffect } from 'react';
 import { t, type Lang } from '@/utils/i18n';
-import { parseFile, type ParsedData } from '@/utils/parser';
+import { parseFiles, type ParsedData } from '@/utils/parser';
 import { Dashboard } from '@/components/Dashboard';
 import { PremiumModal } from '@/components/PremiumModal';
 import { trackFunnel, uploadFailureReason } from '@/utils/analytics';
 import { audienceCopy } from '@/utils/audience-copy';
 
 import { SentenceLines } from '@/components/SentenceLines';
+
+type UploadErrorKey = 'upload.error.invalid' | 'upload.error.missing' | 'upload.error.html' | 'upload.error.partial' | 'storage';
+
+function uploadFileType(files: File[]): string {
+  const names = files.map(file => file.name.toLowerCase());
+  if (names.length === 1 && names[0].endsWith('.zip')) return 'zip';
+  if (names.length > 0 && names.every(name => name.endsWith('.json'))) return 'json';
+  if (names.length > 0 && names.every(name => name.endsWith('.html'))) return 'html';
+  return 'other';
+}
+
+function uploadErrorKey(reason: string): UploadErrorKey {
+  if (reason === 'browser_storage_failed') return 'storage';
+  if (reason === 'html_export') return 'upload.error.html';
+  if (reason === 'missing_followers_file' || reason === 'missing_following_file') return 'upload.error.partial';
+  if (reason === 'unsupported_format') return 'upload.error.invalid';
+  return 'upload.error.missing';
+}
+
 function UploadContent({ initialLang }: { initialLang: Lang }) {
   const lang = initialLang;
   const [isDragging, setIsDragging] = useState(false);
   const [status, setStatus] = useState<'idle' | 'processing' | 'error'>('idle');
-  const [errorKey, setErrorKey] = useState<'upload.error.invalid' | 'upload.error.missing' | 'storage'>('upload.error.invalid');
+  const [errorKey, setErrorKey] = useState<UploadErrorKey>('upload.error.invalid');
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [purchaseReturn, setPurchaseReturn] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -72,28 +91,21 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
     } catch { /* URL cleanup is cosmetic. */ }
   }, []);
 
-  const processFile = useCallback(async (file: File) => {
-    trackFunnel('upload_started', lang, { file_type: file.name.toLowerCase().endsWith('.zip') ? 'zip' : 'other' });
-    const name = file.name.toLowerCase();
-    if (!name.endsWith('.zip')) {
-      trackFunnel('upload_failed', lang, { failure_reason: 'unsupported_format' });
-      setErrorKey('upload.error.invalid');
-      setStatus('error');
-      return;
-    }
-
+  const processFiles = useCallback(async (files: File[]) => {
+    trackFunnel('upload_started', lang, { file_type: uploadFileType(files) });
     setStatus('processing');
     let stage: 'parse' | 'storage' = 'parse';
     try {
-      const data = await parseFile(file);
+      const data = await parseFiles(files);
       stage = 'storage';
       localStorage.setItem('lastParsedData', JSON.stringify(data));
       trackFunnel('analysis_completed', lang, { followers: data.followers.length, following: data.following.length });
       setParsedData(data);
       setStatus('idle');
     } catch (error) {
-      trackFunnel('upload_failed', lang, { failure_reason: stage === 'storage' ? 'browser_storage_failed' : uploadFailureReason(error) });
-      setErrorKey(stage === 'storage' ? 'storage' : 'upload.error.missing');
+      const reason = stage === 'storage' ? 'browser_storage_failed' : uploadFailureReason(error);
+      trackFunnel('upload_failed', lang, { failure_reason: reason });
+      setErrorKey(uploadErrorKey(reason));
       setStatus('error');
     }
   }, [lang]);
@@ -102,18 +114,19 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       setIsDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (file) processFile(file);
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length) processFiles(files);
     },
-    [processFile],
+    [processFiles],
   );
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) processFile(file);
+      const files = Array.from(e.target.files ?? []);
+      if (files.length) processFiles(files);
+      e.target.value = '';
     },
-    [processFile],
+    [processFiles],
   );
 
   if (parsedData) {
@@ -183,7 +196,8 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
           <input
             ref={inputRef}
             type="file"
-            accept=".zip"
+            accept=".zip,.json,.html,application/zip,application/json"
+            multiple
             onChange={handleChange}
             className="sr-only"
             aria-hidden="true"

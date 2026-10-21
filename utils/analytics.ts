@@ -7,6 +7,9 @@ export function uploadFailureReason(error: unknown): string {
     'invalid-relationship-file': 'invalid_relationship_data',
     'missing-relationship-files': 'missing_relationship_files',
     'missing-relationship-part': 'missing_relationship_part',
+    'missing-followers-file': 'missing_followers_file',
+    'missing-following-file': 'missing_following_file',
+    'html-export': 'html_export',
     'unsupported-format': 'unsupported_format',
   };
   // Never send arbitrary exception messages: they may contain export contents.

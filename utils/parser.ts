@@ -23,6 +23,8 @@ interface InstagramExportItem {
   title?: string;
 }
 
+const RELATIONSHIP_JSON_PATTERN = /^(?:followers|following)(?:_\d+)?\.json$/;
+const RELATIONSHIP_HTML_PATTERN = /^(?:followers|following)(?:_\d+)?\.html$/;
 const USERNAME_PATTERN = /^[a-zA-Z0-9._]{1,30}$/;
 const PROFILE_URL_PATTERN = /^https?:\/\/(?:www\.)?instagram\.com\/(?:_u\/)?([^/?#]+)\/?(?:[?#].*)?$/i;
 
@@ -132,7 +134,12 @@ export async function parseJsonFiles(files: { name: string; content: string }[])
     }
   }
 
-  if (seen.size !== 2) throw new Error('missing-relationship-files');
+  if (seen.size !== 2) {
+    // Name the missing side so the upload screen can say what to fix.
+    if (seen.has('followers')) throw new Error('missing-following-file');
+    if (seen.has('following')) throw new Error('missing-followers-file');
+    throw new Error('missing-relationship-files');
+  }
   for (const values of Object.values(parts)) {
     const sorted = [...new Set(values)].sort((a, b) => a - b);
     if (sorted.some((value, i) => value !== i + 1)) throw new Error('missing-relationship-part');
@@ -146,13 +153,15 @@ export async function parseJsonFiles(files: { name: string; content: string }[])
 export async function parseZip(file: File): Promise<ParsedData> {
   // Dynamically import JSZip only when needed
   const JSZip = (await import('jszip')).default;
-  const zip = await JSZip.loadAsync(file);
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
 
   const relevantFiles: { name: string; content: string }[] = [];
+  let hasRelationshipHtml = false;
 
   const promises: Promise<void>[] = [];
   zip.forEach((relativePath, zipEntry) => {
     const name = relativePath.toLowerCase();
+    if (!zipEntry.dir && RELATIONSHIP_HTML_PATTERN.test(name.split('/').pop() ?? '')) hasRelationshipHtml = true;
     if (!zipEntry.dir && name.endsWith('.json') && (name.includes('followers') || name.includes('following'))) {
       promises.push(
         zipEntry.async('string').then(content => {
@@ -163,6 +172,9 @@ export async function parseZip(file: File): Promise<ParsedData> {
   });
 
   await Promise.all(promises);
+  // Instagram offers HTML or JSON; an HTML export has the lists but not in a format we read.
+  const hasRelationshipJson = relevantFiles.some(file => RELATIONSHIP_JSON_PATTERN.test(file.name.toLowerCase().split('/').pop() ?? ''));
+  if (hasRelationshipHtml && !hasRelationshipJson) throw new Error('html-export');
   return parseJsonFiles(relevantFiles);
 }
 
@@ -180,6 +192,19 @@ export async function parseFile(file: File): Promise<ParsedData> {
     return parseJsonFiles([{ name: file.name, content }]);
   }
 
+  if (name.endsWith('.html')) throw new Error('html-export');
+  throw new Error('unsupported-format');
+}
+
+// Accepts the original ZIP, or the extracted followers/following JSON files selected together
+// (some phones unpack the ZIP automatically).
+export async function parseFiles(files: File[]): Promise<ParsedData> {
+  if (files.length === 1) return parseFile(files[0]);
+  const names = files.map(file => file.name.toLowerCase());
+  if (names.length > 1 && names.every(name => name.endsWith('.json'))) {
+    return parseJsonFiles(await Promise.all(files.map(async file => ({ name: file.name, content: await file.text() }))));
+  }
+  if (names.length > 0 && names.every(name => name.endsWith('.html'))) throw new Error('html-export');
   throw new Error('unsupported-format');
 }
 

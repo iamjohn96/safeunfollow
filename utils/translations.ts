@@ -54,6 +54,8 @@ export type TranslationKey =
   | 'upload.processing'
   | 'upload.error.invalid'
   | 'upload.error.missing'
+  | 'upload.error.html'
+  | 'upload.error.partial'
   | 'dashboard.tab.nonfollowers'
   | 'dashboard.tab.changes'
   | 'dashboard.nonfollowers.title'
@@ -257,6 +259,8 @@ const en: Translations = {
   'upload.processing': 'Processing your file…',
   'upload.error.invalid': 'Upload the original Instagram ZIP with both relationship lists in JSON format.',
   'upload.error.missing': 'Incomplete or unsupported export. Upload the original JSON ZIP containing both followers and following, with all parts. Partial lists are not analyzed.',
+  'upload.error.html': 'This export is in HTML format. SafeUnfollow needs JSON. Request a new export and choose JSON as the format.',
+  'upload.error.partial': 'Only one of the two lists was found. Upload the full ZIP, or select followers_1.json and following.json together.',
   'dashboard.tab.nonfollowers': 'Don\'t Follow Back',
   'dashboard.tab.changes': 'Changes',
   'dashboard.nonfollowers.title': 'Accounts That Don\'t Follow You Back',
@@ -428,6 +432,8 @@ const ko: Translations = {
   'upload.processing': '파일 처리 중…',
   'upload.error.invalid': '잘못된 파일 형식입니다. 인스타그램의 .zip 또는 .json 파일을 업로드하세요.',
   'upload.error.missing': '파일에서 팔로워/팔로잉 데이터를 찾을 수 없습니다. 올바른 인스타그램 내보내기를 다운로드했는지 확인하세요.',
+  'upload.error.html': 'HTML 형식의 내보내기입니다. SafeUnfollow는 JSON이 필요합니다. 새로 내보내기를 요청하고 JSON 형식을 선택하세요.',
+  'upload.error.partial': '두 목록 중 하나만 찾았습니다. 전체 ZIP을 올리거나 followers_1.json과 following.json을 함께 선택하세요.',
   'dashboard.tab.nonfollowers': '맞팔 안 함',
   'dashboard.tab.changes': '변경 사항',
   'dashboard.nonfollowers.title': '맞팔 안 한 계정',
@@ -599,6 +605,8 @@ const ja: Translations = {
   'upload.processing': 'ファイルを処理中…',
   'upload.error.invalid': '無効なファイル形式です。InstagramのZIPまたはJSONファイルをアップロードしてください。',
   'upload.error.missing': 'ファイルにフォロワー/フォロー中のデータが見つかりませんでした。正しいInstagramエクスポートをダウンロードしたか確認してください。',
+  'upload.error.html': 'このエクスポートはHTML形式です。SafeUnfollowにはJSONが必要です。新しいエクスポートをリクエストし、JSON形式を選択してください。',
+  'upload.error.partial': '2つのリストのうち1つしか見つかりませんでした。ZIP全体をアップロードするか、followers_1.jsonとfollowing.jsonを一緒に選択してください。',
   'dashboard.tab.nonfollowers': 'フォローバックなし',
   'dashboard.tab.changes': '変更',
   'dashboard.nonfollowers.title': 'フォローバックしていないアカウント',
@@ -770,6 +778,8 @@ const es: Translations = {
   'upload.processing': 'Procesando tu archivo…',
   'upload.error.invalid': 'Sube el ZIP original de Instagram con ambas listas en JSON.',
   'upload.error.missing': 'Export incompleto o no compatible. Sube el ZIP JSON original con seguidores y seguidos y todas sus partes. No se analizan listas parciales.',
+  'upload.error.html': 'Esta exportación está en HTML. SafeUnfollow necesita JSON. Solicita una nueva exportación y elige el formato JSON.',
+  'upload.error.partial': 'Solo se encontró una de las dos listas. Sube el ZIP completo o selecciona juntos followers_1.json y following.json.',
   'dashboard.tab.nonfollowers': 'No te siguen',
   'dashboard.tab.changes': 'Cambios',
   'dashboard.nonfollowers.title': 'Cuentas que no te siguen de vuelta',
@@ -940,6 +950,8 @@ const pt: Translations = {
   'upload.processing': 'Processando seu arquivo…',
   'upload.error.invalid': 'Envie o ZIP original do Instagram com ambas as listas em JSON.',
   'upload.error.missing': 'Exportação incompleta ou incompatível. Envie o ZIP JSON original com seguidores e seguidos e todas as partes. Listas parciais não são analisadas.',
+  'upload.error.html': 'Esta exportação está em HTML. O SafeUnfollow precisa de JSON. Solicite uma nova exportação e escolha o formato JSON.',
+  'upload.error.partial': 'Só uma das duas listas foi encontrada. Envie o ZIP completo ou selecione followers_1.json e following.json juntos.',
   'dashboard.tab.nonfollowers': 'Não seguem você',
   'dashboard.tab.changes': 'Mudanças',
   'dashboard.nonfollowers.empty': 'Todas as contas que você segue também seguem você! 🎉',
@@ -1089,6 +1101,8 @@ const ru: Translations = {
   'upload.processing': 'Обработка файла…',
   'upload.error.invalid': 'Загрузите исходный ZIP Instagram с обоими списками связей в формате JSON.',
   'upload.error.missing': 'Неполный или неподдерживаемый экспорт. Загрузите исходный JSON ZIP со всеми частями подписчиков и подписок. Частичные списки не анализируются.',
+  'upload.error.html': 'Этот экспорт в формате HTML. SafeUnfollow нужен JSON. Запросите новый экспорт и выберите формат JSON.',
+  'upload.error.partial': 'Найден только один из двух списков. Загрузите полный ZIP или выберите вместе followers_1.json и following.json.',
   'dashboard.tab.nonfollowers': 'Не подписаны на вас',
   'dashboard.tab.changes': 'Изменения',
   'dashboard.nonfollowers.empty': 'Все, на кого вы подписаны, подписаны и на вас! 🎉',
