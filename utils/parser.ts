@@ -1,3 +1,5 @@
+import type { Platform } from './platform';
+
 export interface InstagramAccount {
   username: string;
   timestamp: number;
@@ -6,6 +8,7 @@ export interface InstagramAccount {
 export interface ParsedData {
   followers: InstagramAccount[];
   following: InstagramAccount[];
+  platform?: Platform;
   fingerprint?: string;
   profileId?: string;
   observedAt?: number;
@@ -27,6 +30,12 @@ const RELATIONSHIP_JSON_PATTERN = /^(?:followers|following)(?:_\d+)?\.json$/;
 const RELATIONSHIP_HTML_PATTERN = /^(?:followers|following)(?:_\d+)?\.html$/;
 const USERNAME_PATTERN = /^[a-zA-Z0-9._]{1,30}$/;
 const PROFILE_URL_PATTERN = /^https?:\/\/(?:www\.)?instagram\.com\/(?:_u\/)?([^/?#]+)\/?(?:[?#].*)?$/i;
+const THREADS_PROFILE_URL_PATTERN = /^https?:\/\/(?:www\.)?threads\.(?:com|net)\/@?([^/?#@]+)\/?(?:[?#].*)?$/i;
+// Instagram keeps the lists under relationships_<kind>; Threads uses text_post_app_text_post_app_<kind>.
+const LIST_KEYS: Record<Platform, (kind: 'followers' | 'following') => string> = {
+  instagram: kind => `relationships_${kind}`,
+  threads: kind => `text_post_app_text_post_app_${kind}`,
+};
 
 function validUsername(candidate: unknown): string | null {
   if (typeof candidate !== 'string') return null;
@@ -37,80 +46,56 @@ function validUsername(candidate: unknown): string | null {
 // Instagram has shipped several relationship-entry shapes. Older exports put the
 // username in string_list_data[].value; newer following.json files put it in the
 // item title and keep only a profile href (often /_u/<username>) in the entry.
-export function exportEntryUsername(item: unknown, entry: unknown): string | null {
+// Threads titles are display names, so Threads never falls back to the title.
+export function exportEntryUsername(item: unknown, entry: unknown, platform: Platform = 'instagram'): string | null {
   const entryRecord = entry && typeof entry === 'object' ? entry as Record<string, unknown> : {};
   const itemRecord = item && typeof item === 'object' ? item as Record<string, unknown> : {};
   const fromValue = validUsername(entryRecord.value);
   if (fromValue) return fromValue;
-  const fromTitle = validUsername(itemRecord.title);
-  if (fromTitle) return fromTitle;
+  if (platform === 'instagram') {
+    const fromTitle = validUsername(itemRecord.title);
+    if (fromTitle) return fromTitle;
+  }
   if (typeof entryRecord.href !== 'string') return null;
-  const match = entryRecord.href.trim().match(PROFILE_URL_PATTERN);
+  const match = entryRecord.href.trim().match(platform === 'threads' ? THREADS_PROFILE_URL_PATTERN : PROFILE_URL_PATTERN);
   return match ? validUsername(match[1]) : null;
 }
 
-function parseAccountList(data: unknown): InstagramAccount[] {
-  if (!Array.isArray(data)) return [];
-
+function parseAccountList(list: InstagramExportItem[], platform: Platform): InstagramAccount[] {
   const accounts: InstagramAccount[] = [];
-
-  for (const item of data as InstagramExportItem[]) {
-    if (!item || !Array.isArray(item.string_list_data)) continue;
+  for (const item of list) {
     for (const entry of item.string_list_data) {
-      const username = exportEntryUsername(item, entry);
+      const username = exportEntryUsername(item, entry, platform);
       if (username) {
         accounts.push({ username: username.toLowerCase(), timestamp: Number.isFinite(entry?.timestamp) && entry.timestamp > 0 ? entry.timestamp : 0 });
       }
     }
   }
-
   return accounts;
 }
 
-function parseFollowingJson(data: unknown): InstagramAccount[] {
-  // following.json can be { relationships_following: [...] } or directly an array
-  if (Array.isArray(data)) return parseAccountList(data);
+type RelationshipKind = 'followers' | 'following';
+interface PlatformLists { followers: InstagramAccount[]; following: InstagramAccount[]; seen: Set<RelationshipKind>; parts: Record<RelationshipKind, number[]> }
 
-  if (data && typeof data === 'object') {
-    const obj = data as Record<string, unknown>;
-    const key = Object.keys(obj).find(k => k.includes('following'));
-    if (key && Array.isArray(obj[key])) return parseAccountList(obj[key]);
-    // fallback: try any array-valued key
-    for (const val of Object.values(obj)) {
-      if (Array.isArray(val)) return parseAccountList(val);
-    }
+function relationshipList(parsed: unknown, kind: RelationshipKind): { platform: Platform; list: unknown } {
+  // Instagram followers_N.json is a bare array; every other shape is an object keyed by platform.
+  if (Array.isArray(parsed)) return { platform: 'instagram', list: parsed };
+  const record = parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : {};
+  for (const platform of ['instagram', 'threads'] as const) {
+    const key = LIST_KEYS[platform](kind);
+    if (key in record) return { platform, list: record[key] };
   }
-
-  return [];
-}
-
-function parseFollowersJson(data: unknown): InstagramAccount[] {
-  if (Array.isArray(data)) return parseAccountList(data);
-
-  if (data && typeof data === 'object') {
-    const obj = data as Record<string, unknown>;
-    const key = Object.keys(obj).find(k => k.includes('followers'));
-    if (key && Array.isArray(obj[key])) return parseAccountList(obj[key]);
-    for (const val of Object.values(obj)) {
-      if (Array.isArray(val)) return parseAccountList(val);
-    }
-  }
-
-  return [];
+  return { platform: 'instagram', list: undefined };
 }
 
 export async function parseJsonFiles(files: { name: string; content: string }[]): Promise<ParsedData> {
-  let followers: InstagramAccount[] = [];
-  let following: InstagramAccount[] = [];
-  const seen = new Set<string>();
-  const parts: Record<string, number[]> = { followers: [], following: [] };
+  const empty = (): PlatformLists => ({ followers: [], following: [], seen: new Set(), parts: { followers: [], following: [] } });
+  const groups: Record<Platform, PlatformLists> = { instagram: empty(), threads: empty() };
 
   for (const file of files) {
     const name = file.name.toLowerCase().split('/').pop() ?? '';
-    const kind = /^followers(?:_\d+)?\.json$/.test(name) ? 'followers' : /^following(?:_\d+)?\.json$/.test(name) ? 'following' : null;
+    const kind: RelationshipKind | null = /^followers(?:_\d+)?\.json$/.test(name) ? 'followers' : /^following(?:_\d+)?\.json$/.test(name) ? 'following' : null;
     if (!kind) continue;
-    const part = name.match(/_(\d+)\.json$/);
-    if (part) parts[kind].push(Number(part[1]));
     let parsed: unknown;
 
     try {
@@ -119,20 +104,25 @@ export async function parseJsonFiles(files: { name: string; content: string }[])
       throw new Error('invalid-relationship-file');
     }
 
-    const list = Array.isArray(parsed) ? parsed : parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>)[`relationships_${kind}`] : undefined;
+    const { platform, list } = relationshipList(parsed, kind);
     if (!Array.isArray(list)) throw new Error('invalid-relationship-file');
     for (const item of list) {
-      if (!item || !Array.isArray(item.string_list_data) || !item.string_list_data.length || item.string_list_data.some((entry: StringListEntry) => !exportEntryUsername(item, entry))) throw new Error('invalid-relationship-file');
+      if (!item || !Array.isArray(item.string_list_data) || !item.string_list_data.length || item.string_list_data.some((entry: StringListEntry) => !exportEntryUsername(item, entry, platform))) throw new Error('invalid-relationship-file');
     }
-    seen.add(kind);
-    if (kind === 'followers') {
-      const result = parseFollowersJson(parsed);
-      followers.push(...result);
-    } else {
-      const result = parseFollowingJson(parsed);
-      following.push(...result);
-    }
+    const group = groups[platform];
+    const part = name.match(/_(\d+)\.json$/);
+    if (part) group.parts[kind].push(Number(part[1]));
+    group.seen.add(kind);
+    group[kind].push(...parseAccountList(list as InstagramExportItem[], platform));
   }
+
+  // Meta exports one profile per ZIP, so normally only one platform is present.
+  // Prefer a complete list pair; otherwise report against whichever platform was found.
+  const complete = (p: Platform) => groups[p].seen.size === 2;
+  const present = (p: Platform) => groups[p].seen.size > 0;
+  const platform: Platform = complete('instagram') ? 'instagram' : complete('threads') ? 'threads' : present('instagram') || !present('threads') ? 'instagram' : 'threads';
+  const { seen, parts } = groups[platform];
+  let { followers, following } = groups[platform];
 
   if (seen.size !== 2) {
     // Name the missing side so the upload screen can say what to fix.
@@ -147,7 +137,7 @@ export async function parseJsonFiles(files: { name: string; content: string }[])
   const unique = (accounts: InstagramAccount[]) => [...new Map(accounts.map(a => [a.username, a])).values()].sort((a, b) => a.username.localeCompare(b.username));
   followers = unique(followers);
   following = unique(following);
-  return { followers, following, schemaVersion: 2 };
+  return { followers, following, schemaVersion: 2, ...(platform === 'threads' ? { platform } : {}) };
 }
 
 export async function parseZip(file: File): Promise<ParsedData> {

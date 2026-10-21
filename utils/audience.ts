@@ -1,4 +1,5 @@
 import { computeChanges, computeMutuals, computeNonFollowers, type ParsedData } from './parser';
+import { platformOf } from './platform';
 
 export interface Snapshot { id: string; timestamp: number; label: string; data: ParsedData }
 
@@ -14,7 +15,7 @@ export function qualified(data: ParsedData): boolean {
 }
 
 export function compareAudience(a: ParsedData, b: ParsedData) {
-  if (!qualified(a) || !qualified(b) || a.profileId !== b.profileId || a.observedAt === b.observedAt || (a.fingerprint && a.fingerprint === b.fingerprint)) return null;
+  if (!qualified(a) || !qualified(b) || platformOf(a) !== platformOf(b) || a.profileId !== b.profileId || a.observedAt === b.observedAt || (a.fingerprint && a.fingerprint === b.fingerprint)) return null;
   const [previous, current] = a.observedAt! < b.observedAt! ? [a, b] : [b, a];
   const changes = computeChanges(previous, current);
   return { ...changes, previous, current, net: current.followers.length - previous.followers.length,
@@ -23,7 +24,7 @@ export function compareAudience(a: ParsedData, b: ParsedData) {
 }
 
 export function previousSnapshot(snapshots: Snapshot[], current: ParsedData) {
-  return snapshots.filter(s => qualified(s.data) && s.data.profileId === current.profileId && s.data.observedAt! < (current.observedAt ?? 0) && (!current.fingerprint || s.data.fingerprint !== current.fingerprint))
+  return snapshots.filter(s => qualified(s.data) && platformOf(s.data) === platformOf(current) && s.data.profileId === current.profileId && s.data.observedAt! < (current.observedAt ?? 0) && (!current.fingerprint || s.data.fingerprint !== current.fingerprint))
     .sort((a, b) => b.data.observedAt! - a.data.observedAt!)[0] ?? null;
 }
 

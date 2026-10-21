@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { t, type Lang } from '@/utils/i18n';
 import { PremiumModal } from './PremiumModal';
 import {
@@ -21,6 +21,10 @@ import { previewAccounts } from '@/utils/premium-offer';
 import { FeedbackPrompt } from './FeedbackPrompt';
 
 import { SentenceLines } from '@/components/SentenceLines';
+import { platformName, platformOf, profileUrl, type Platform } from '@/utils/platform';
+
+// Account links open on the platform the analysed export came from.
+const PlatformContext = createContext<Platform>('instagram');
 interface Snapshot {
   id: string;
   timestamp: number;
@@ -37,9 +41,10 @@ interface DashboardProps {
 }
 
 function AccountCard({ account }: { account: InstagramAccount }) {
+  const platform = useContext(PlatformContext);
   return (
     <a
-      href={`https://instagram.com/${account.username}`}
+      href={profileUrl(platform, account.username)}
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50 transition-colors group rounded-lg"
@@ -227,7 +232,7 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
     trackFunnel('snapshot_save_started', lang);
     if (!storageReady) { trackFunnel('snapshot_save_failed', lang, { failure_reason: 'browser_storage_failed' }); setSnapshotMsg(copy.storage); return; }
     if (!qualified(data)) { trackFunnel('snapshot_save_failed', lang, { failure_reason: 'invalid_metadata' }); setSnapshotMsg(copy.invalid); return; }
-    if (snapshots.some(s => (data.fingerprint && s.data.fingerprint === data.fingerprint) || (s.data.profileId === data.profileId && s.data.observedAt === data.observedAt))) { trackFunnel('snapshot_save_failed', lang, { failure_reason: 'duplicate_snapshot' }); setSnapshotMsg(copy.duplicate); return; }
+    if (snapshots.some(s => (data.fingerprint && s.data.fingerprint === data.fingerprint) || (platformOf(s.data) === platformOf(data) && s.data.profileId === data.profileId && s.data.observedAt === data.observedAt))) { trackFunnel('snapshot_save_failed', lang, { failure_reason: 'duplicate_snapshot' }); setSnapshotMsg(copy.duplicate); return; }
     // Gate: free users can only have 1 snapshot
     if (!isPremium && snapshots.length >= 1) {
       trackFunnel('snapshot_save_failed', lang, { failure_reason: 'premium_required' });
@@ -241,7 +246,7 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
     const newSnap: Snapshot = {
       id: savedAt.toString(),
       timestamp: savedAt,
-      label: `${data.profileId} · ${date}`,
+      label: `${platformOf(data) === 'threads' ? 'Threads · ' : ''}${data.profileId} · ${date}`,
       data,
     };
 
@@ -284,20 +289,20 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
   }
 
   return (
-    <>
+    <PlatformContext.Provider value={platformOf(data)}>
       {showModal && (
         <PremiumModal lang={lang} onClose={closeModal} onVerified={handlePremiumVerified} purchased={purchaseReturn && !isPremium} />
       )}
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-zinc-900 mb-2">{relationshipCopy.heading}</h1>
+          <h1 className="text-2xl font-bold text-zinc-900 mb-2">{relationshipCopy.heading.replace('Instagram', platformName(platformOf(data)))}</h1>
           <p className="text-sm text-zinc-500 leading-relaxed"><SentenceLines text={relationshipCopy.description} /></p>
         </div>
         {/* Stats bar */}
         <div className="mb-6 rounded-xl border p-4 space-y-3">
           <p className="text-xs text-zinc-500"><SentenceLines text={copy.setup} /></p>
-          <label className="block text-sm">{copy.profile}<input className="block border rounded p-2 w-full" value={profile} onChange={e => { setProfile(e.target.value); persistAnalysisDraft(localStorage, inputData, e.target.value, date, today); setSnapshotSaved(false); }} maxLength={31} autoComplete="off" /></label>
+          <label className="block text-sm">{copy.profile.replace('Instagram', platformName(platformOf(data)))}<input className="block border rounded p-2 w-full" value={profile} onChange={e => { setProfile(e.target.value); persistAnalysisDraft(localStorage, inputData, e.target.value, date, today); setSnapshotSaved(false); }} maxLength={31} autoComplete="off" /></label>
           <label className="block text-sm">{copy.date}<input type="date" className="block border rounded p-2 w-full" max={today} defaultValue={date} onChange={e => { setDate(e.target.value); persistAnalysisDraft(localStorage, inputData, profile, e.target.value, today); setSnapshotSaved(false); }} /></label>
         </div>
         {qualified(data) && <AudienceInsights key={data.profileId} data={data} snapshots={snapshots} lang={lang} isPremium={isPremium} onUnlock={() => openUnlock('cleanup_gate')} />}
@@ -542,6 +547,6 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
           </div>
         )}
       </div>
-    </>
+    </PlatformContext.Provider>
   );
 }

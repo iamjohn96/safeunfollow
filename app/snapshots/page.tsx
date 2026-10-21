@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { t, type Lang } from '@/utils/i18n';
 import { type ParsedData } from '@/utils/parser';
 import { compareAudience, decodeSnapshots } from '@/utils/audience';
+import { platformOf, profileUrl } from '@/utils/platform';
 import { audienceCopy } from '@/utils/audience-copy';
 import { ChangeSummary } from '@/components/AudienceInsights';
 import { PremiumModal } from '@/components/PremiumModal';
@@ -222,7 +223,7 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
                       {changes.newUnfollowers.map(a => (
                         <li key={a.username}>
                           <a
-                            href={`https://instagram.com/${a.username}`}
+                            href={profileUrl(platformOf(compareB.data), a.username)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm text-zinc-700 hover:text-pink-600 transition-colors"
@@ -250,7 +251,7 @@ function SnapshotsContent({ initialLang }: { initialLang: Lang }) {
                       {changes.newFollowers.map(a => (
                         <li key={a.username}>
                           <a
-                            href={`https://instagram.com/${a.username}`}
+                            href={profileUrl(platformOf(compareB.data), a.username)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-sm text-zinc-700 hover:text-green-600 transition-colors"

@@ -135,6 +135,29 @@ Shipped in this change. The analysis boundary is unchanged: still followers/foll
 
 Verification: 127/127 automation tests passed, plus lint, tsc, and the production build. A production-build Playwright check on a 390px mobile viewport passed with synthetic data across en/pt/ru/es. JSON ZIP, two JSON files, HTML ZIP, a single `following.json`, and an unsupported file each produced the expected result or message and the expected `failure_reason`. Next step: after about 2 weeks of production data, reread the new failure categories. If `html_export` dominates, consider supporting the HTML export format. That would expand the boundary, so it needs a sanitized real fixture and owner approval.
 
+### 2026-10-22 Threads export support
+
+Owner approved adding Threads (first step of the multi-platform expansion). Facts verified from the owner's own Threads export (not committed) and the Accounts Center flow on 2026-10-21:
+- Instagram and Threads are exported separately; the profile picker allows one profile per export.
+- Threads has no "Followers and following" category. The relationship lists come with the "Threads" category, so the ZIP also contains posts and media; the owner's ZIP was 2.4 MB with 4 media files.
+- Export defaults are HTML and "Last year". This likely also explains `html_export` failures on Instagram; recheck after two weeks of data.
+- The lists live in `threads/followers.json` and `threads/following.json`. They use the same basenames as Instagram but different keys (`text_post_app_text_post_app_followers` / `_following`).
+- Each row has `title` = display name (not the username) and `string_list_data[].value` = username, with `href` = `https://www.threads.com/<username>`.
+- Before this change, such a ZIP failed as `invalid_relationship_data`.
+
+Shipped:
+- `utils/platform.ts` adds `Platform`, `platformOf` (absent = Instagram, so existing browser data stays valid), and `profileUrl`.
+- The parser detects the platform from the list key and stores `platform: 'threads'`. For Threads it never falls back to the title; it uses `value`, then a threads.com href.
+- `compareAudience`/`previousSnapshot` and the duplicate check never mix platforms. Threads snapshots are labelled "Threads · …".
+- Account links open threads.com/@user. The dashboard heading and profile label name the platform.
+- `analysis_completed` sends `platform`. It is not registered as a GA custom dimension; registering it is a GA configuration change and needs owner approval.
+- The upload page notes Threads support, and the guide has a Threads section (Threads only, All time, JSON, low media quality). Both are in all locales.
+- Tests: `scripts/threads.test.ts` uses synthetic fixtures shaped like the real export.
+
+Verification: 133/133 automation tests, lint, tsc, and production build passed. A Playwright run on the production build with the owner's real Threads ZIP (counts only; no usernames recorded) showed platform `threads`, 2 followers / 52 following, all usernames valid, threads.com links, and the Threads heading in en/pt. The Instagram synthetic ZIP stayed on Instagram, and the guide Threads section appears in en/ru.
+
+Known limitation: the whole ZIP is read into memory, and Threads exports include media. A very large export could be slow or fail on phones. If that shows up, add selective ZIP reading; that would be a new dependency and needs approval.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data

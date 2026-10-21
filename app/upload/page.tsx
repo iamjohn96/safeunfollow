@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useEffect } from 'react';
 import { t, type Lang } from '@/utils/i18n';
 import { parseFiles, type ParsedData } from '@/utils/parser';
+import { platformOf } from '@/utils/platform';
 import { Dashboard } from '@/components/Dashboard';
 import { PremiumModal } from '@/components/PremiumModal';
 import { trackFunnel, uploadFailureReason } from '@/utils/analytics';
@@ -99,7 +100,7 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
       const data = await parseFiles(files);
       stage = 'storage';
       localStorage.setItem('lastParsedData', JSON.stringify(data));
-      trackFunnel('analysis_completed', lang, { followers: data.followers.length, following: data.following.length });
+      trackFunnel('analysis_completed', lang, { platform: platformOf(data), followers: data.followers.length, following: data.following.length });
       setParsedData(data);
       setStatus('idle');
     } catch (error) {
@@ -172,6 +173,7 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
             ))}
           </ul>
           <p className="mt-3 text-xs leading-relaxed text-zinc-400"><SentenceLines text={uploadValue.scope} /></p>
+          <p className="mt-2 text-xs font-medium text-pink-600"><SentenceLines text={t('upload.threads', lang)} /></p>
         </div>
 
         {/* Drop zone */}
