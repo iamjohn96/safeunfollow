@@ -185,6 +185,34 @@ Verification:
 
 Not supported: the TikTok TXT export format.
 
+### 2026-10-23 Threads and TikTok landing pages
+
+Owner approved keeping the homepage Instagram-focused, since current search traffic is Instagram-led, and adding separate platform landing pages.
+
+Shipped:
+- `/threads-unfollow-checker` and `/tiktok-unfollow-checker`, with `/pt`, `/ru` and `/es` variants via the existing `[lang]` re-export pattern.
+- Both use one static server component (`app/_components/platform-landing.tsx`). Copy lives in `lib/platform-landing-copy.ts`: H1, intro, 3 export steps, 4 features, a privacy note, a 4-question FAQ and CTAs to the localized `/upload`.
+- A FAQPage JSON-LD mirrors the rendered FAQ.
+- `localizedMetadata` now takes per-page descriptions, so these pages get platform-specific titles, descriptions, canonicals and hreflang.
+- The sitemap includes both routes in all four languages (priority 0.8).
+- The footer links to both pages.
+- `llms.txt` now describes all three platforms and lists the pages. Its test now checks the platform-neutral "No login" statement.
+- Copy avoids absolute privacy claims.
+- Tests: `scripts/platform-landing.test.ts`.
+
+Verification:
+- 141/141 tests, lint, tsc and the production build pass.
+- Playwright on the production build, en/pt/ru/es at a 390px viewport, confirmed:
+  - localized titles, H1s and canonicals
+  - 5 hreflang links per page
+  - a 4-question FAQPage
+  - CTAs to the localized upload page
+  - footer links
+  - no page errors
+  - 40 landing URLs in sitemap.xml
+
+Known inconsistency, not changed here: the sitewide footer tagline and the upload page still say "100% private" / "processed 100% on your device". That conflicts with the AGENTS.md rule against absolute privacy claims and needs an owner copy decision.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data

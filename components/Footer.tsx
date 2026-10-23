@@ -15,6 +15,8 @@ export function Footer() {
     { href: '/privacy', label: t('footer.privacy', lang) },
     { href: '/terms', label: t('footer.terms', lang) },
     { href: '/guide', label: t('footer.guide', lang) },
+    { href: '/threads-unfollow-checker', label: t('footer.threads', lang) },
+    { href: '/tiktok-unfollow-checker', label: t('footer.tiktok', lang) },
     { href: '/cancel', label: t('footer.cancel', lang) },
   ];
 

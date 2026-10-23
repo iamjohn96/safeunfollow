@@ -1,9 +1,11 @@
 # SafeUnfollow
 
-> Analyze your official Instagram Data ZIP to see mutual follows, one-way follows, and follower changes between snapshots. No Instagram login, OAuth, API access, or account connection — all parsing happens locally in the browser.
+> Analyze your official Instagram, Threads, or TikTok data export to see mutual follows, one-way follows, and follower changes between snapshots. No login, OAuth, API access, or account connection — all parsing happens locally in the browser.
 
 ## What it does
 - Parses the official Instagram "Download your information" export (JSON format, Followers and following)
+- Parses the official Threads export from Meta Accounts Center (JSON; Threads has no followers-only option, so only the follower and following lists are read)
+- Parses the official TikTok "Download your data" export (JSON; only the follower and following lists are read, other sections such as messages are ignored)
 - Shows accounts that follow you and you don't follow back, accounts you follow that don't follow back, and mutual follows
 - Saves dated snapshots in the browser and compares two snapshots to show newly gained and lost followers over time
 - Gives deterministic cleanup review categories, with no AI-generated scoring, recommendations, or automated Instagram actions
@@ -24,6 +26,8 @@ English (default, unprefixed URLs), Portuguese (/pt), Russian (/ru), Spanish (/e
 - Home: https://safeunfollow.com
 - How to download your Instagram Data ZIP: https://safeunfollow.com/guide
 - Upload and analyze: https://safeunfollow.com/upload
+- Threads unfollow checker: https://safeunfollow.com/threads-unfollow-checker
+- TikTok unfollow checker: https://safeunfollow.com/tiktok-unfollow-checker
 - Privacy Policy: https://safeunfollow.com/privacy
 - Terms of Service: https://safeunfollow.com/terms
 - Blog: https://safeunfollow.com/blog

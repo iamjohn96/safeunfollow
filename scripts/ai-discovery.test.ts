@@ -31,7 +31,7 @@ test('llms.txt exists at the site root and states no-login, pricing, and key pag
   assert(existsSync(path), 'public/llms.txt is missing');
   const text = readFileSync(path, 'utf8');
 
-  assert.match(text, /No Instagram login/);
+  assert.match(text, /No login/);
   assert.match(text, new RegExp(`US\\$${LIFETIME_PRICE_USD.replace('.', '\\.')}`));
   assert.match(text, /https:\/\/safeunfollow\.com\/guide/);
   assert.match(text, /https:\/\/safeunfollow\.com\/privacy/);

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { Lang } from '@/utils/i18n';
+import { landingSeo } from '@/lib/platform-landing-copy';
 
 export const PUBLIC_LOCALES = ['pt', 'ru', 'es'] as const;
 export type PublicLocale = typeof PUBLIC_LOCALES[number];
@@ -27,6 +28,14 @@ const pageNames: Record<string, Record<Lang, string>> = {
   terms: { en: 'Terms of Service', pt: 'Termos de Serviço', ru: 'Условия использования', es: 'Términos del Servicio' },
   cancel: { en: 'Cancel Premium', pt: 'Cancelar Premium', ru: 'Отменить Премиум', es: 'Cancelar Premium' },
   blog: { en: 'Instagram Data Analyzer Guide', pt: 'Guia do analisador de dados do Instagram', ru: 'Гид по анализатору данных Instagram', es: 'Guía del analizador de datos de Instagram' },
+  'threads-unfollow-checker': landingSeo.threads.name,
+  'tiktok-unfollow-checker': landingSeo.tiktok.name,
+};
+
+// Pages whose search snippet must describe something other than the Instagram analyzer.
+const pageDescriptions: Partial<Record<string, Record<Lang, string>>> = {
+  'threads-unfollow-checker': landingSeo.threads.description,
+  'tiktok-unfollow-checker': landingSeo.tiktok.description,
 };
 
 export function localeAlternates(path = ''): Metadata['alternates'] {
@@ -46,8 +55,9 @@ export function localizedMetadata(lang: Lang, page?: keyof typeof pageNames): Me
   const suffix = page ? `/${page}` : '';
   const canonical = safeLang === 'en' ? (suffix || '/') : `/${safeLang}${suffix}`;
   const title = page ? `${pageNames[page][safeLang]} | SafeUnfollow` : `SafeUnfollow – ${base.title}`;
+  const description = (page && pageDescriptions[page]?.[safeLang]) || base.description;
   return {
-    title, description: base.description, alternates: { ...localeAlternates(suffix), canonical },
-    openGraph: { title, description: base.description, url: canonical, siteName: 'SafeUnfollow', type: 'website', locale: openGraphLocales[safeLang] },
+    title, description, alternates: { ...localeAlternates(suffix), canonical },
+    openGraph: { title, description, url: canonical, siteName: 'SafeUnfollow', type: 'website', locale: openGraphLocales[safeLang] },
   };
 }

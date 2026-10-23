@@ -135,6 +135,8 @@ export type TranslationKey =
   | 'footer.privacy'
   | 'footer.terms'
   | 'footer.guide'
+  | 'footer.threads'
+  | 'footer.tiktok'
   | 'footer.tagline'
   | 'common.loading'
   | 'common.error'
@@ -315,6 +317,8 @@ const en: Translations = {
   'footer.privacy': 'Privacy Policy',
   'footer.terms': 'Terms of Service',
   'footer.guide': 'Download Guide',
+  'footer.threads': 'Threads Unfollow Checker',
+  'footer.tiktok': 'TikTok Unfollow Checker',
   'footer.tagline': '100% private. No login required.',
   'common.loading': 'Loading…',
   'common.error': 'Something went wrong. Please try again.',
@@ -494,6 +498,8 @@ const ko: Translations = {
   'footer.privacy': '개인정보 처리방침',
   'footer.terms': '서비스 이용약관',
   'footer.guide': '다운로드 가이드',
+  'footer.threads': 'Threads 언팔 체커',
+  'footer.tiktok': 'TikTok 언팔 체커',
   'footer.tagline': '100% 비공개. 로그인 불필요.',
   'common.loading': '로딩 중…',
   'common.error': '오류가 발생했습니다. 다시 시도해 주세요.',
@@ -673,6 +679,8 @@ const ja: Translations = {
   'footer.privacy': 'プライバシーポリシー',
   'footer.terms': '利用規約',
   'footer.guide': 'ダウンロードガイド',
+  'footer.threads': 'Threadsフォロー解除チェッカー',
+  'footer.tiktok': 'TikTokフォロー解除チェッカー',
   'footer.tagline': '100%プライベート。ログイン不要。',
   'common.loading': '読み込み中…',
   'common.error': 'エラーが発生しました。もう一度お試しください。',
@@ -852,6 +860,8 @@ const es: Translations = {
   'footer.privacy': 'Política de privacidad',
   'footer.terms': 'Términos de servicio',
   'footer.guide': 'Guía de descarga',
+  'footer.threads': 'Verificador de unfollow en Threads',
+  'footer.tiktok': 'Verificador de unfollow en TikTok',
   'footer.tagline': '100% privado. Sin inicio de sesión.',
   'common.loading': 'Cargando…',
   'common.error': 'Algo salió mal. Por favor intenta de nuevo.',
@@ -1027,6 +1037,8 @@ const pt: Translations = {
   'footer.privacy': 'Privacidade',
   'footer.terms': 'Termos',
   'footer.guide': 'Guia de download',
+  'footer.threads': 'Verificador de unfollow no Threads',
+  'footer.tiktok': 'Verificador de unfollow no TikTok',
   'footer.tagline': 'Privado. Sem login.',
   'footer.cancel': 'Cancelar assinatura',
   'common.back': 'Voltar',
@@ -1184,6 +1196,8 @@ const ru: Translations = {
   'footer.privacy': 'Конфиденциальность',
   'footer.terms': 'Условия',
   'footer.guide': 'Инструкция',
+  'footer.threads': 'Проверка отписок в Threads',
+  'footer.tiktok': 'Проверка отписок в TikTok',
   'footer.tagline': 'Конфиденциально. Без входа.',
   'footer.cancel': 'Отменить подписку',
   'common.back': 'Назад',
