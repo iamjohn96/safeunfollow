@@ -68,7 +68,7 @@ async function sendWelcomeEmail(email: string, eventId: string, plan: 'subscript
         </a>
       </p>
       <p style="font-size:12px;color:#71717a;margin-top:32px">
-        SafeUnfollow &mdash; 100% 프라이빗, Instagram 로그인 불필요.
+        SafeUnfollow &mdash; 로그인 없이 브라우저에서 분석합니다.
       </p>
     </div>
   `;

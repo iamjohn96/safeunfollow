@@ -211,7 +211,7 @@ Verification:
   - no page errors
   - 40 landing URLs in sitemap.xml
 
-Known inconsistency, not changed here: the sitewide footer tagline and the upload page still say "100% private" / "processed 100% on your device". That conflicts with the AGENTS.md rule against absolute privacy claims and needs an owner copy decision.
+Resolved the same day with owner approval: the "100% private" / "processed 100% on your device" wording was removed sitewide, in line with the AGENTS.md rule against absolute privacy claims. The footer tagline is now "No login. No server upload."; the upload subtitle, trust badges, the ja/es feature titles and the Dodo email footer line were changed to factual wording.
 
 ## 5. Architecture and data boundaries
 

@@ -239,13 +239,13 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
         {/* Trust badges */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-zinc-400">
           <span className="flex items-center gap-1.5">
-            <span className="text-green-500">✓</span> No Instagram login
+            <span className="text-green-500">✓</span> No login
           </span>
           <span className="flex items-center gap-1.5">
             <span className="text-green-500">✓</span> No server upload
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="text-green-500">✓</span> 100% private
+            <span className="text-green-500">✓</span> Analyzed in your browser
           </span>
         </div>
       </div>
