@@ -240,7 +240,7 @@ Code: `LIFETIME_PRICE_USD = '14.99'` is the single source for the Offer schema. 
 
 A new test, `scripts/pricing.test.ts`, fails if any displayed USD price differs from the constant.
 
-The Dodo Lifetime product price is changed right after this deploy. Until then, checkout charges $3.99 while the site shows $14.99, which favours the customer. Review after 4 weeks with Dodo purchases, `premium_opened` and `premium_checkout_click`. Keep the price if purchases stay at or above about 2 per month. Otherwise, reconsider $9.99.
+After the deploy was verified live, the Dodo Lifetime product (`pdt_0NnnAFSCBOcQrM32OLj5p`) was changed from $3.99 to $14.99 on 2026-10-23. It is tax-inclusive with PPP still on. A checkout opened from Korea then showed ₩12,398 (PPP-adjusted); no payment was made. The legacy Monthly ($3.99) and Yearly ($19.99) subscription products are unchanged and not sold on the site. Review after 4 weeks with Dodo purchases, `premium_opened` and `premium_checkout_click`. Keep the price if purchases stay at or above about 2 per month. Otherwise, reconsider $9.99.
 
 ## 5. Architecture and data boundaries
 
