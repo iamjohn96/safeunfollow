@@ -48,6 +48,7 @@ export function homeStructuredData(lang: Lang) {
           'Follower snapshot comparison',
           'Local browser processing',
           'No Instagram login or account connection',
+          'Supports official Instagram, Threads, and TikTok data exports',
         ],
       },
     ],

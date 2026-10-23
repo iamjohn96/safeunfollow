@@ -36,7 +36,9 @@ const conversionCopy = {
     faqExtras: [
       { q: 'Is my data private?', a: 'Yes. Your Instagram data is processed locally in your browser and is not uploaded to SafeUnfollow servers.' },
       { q: 'What does Lifetime Access include?', a: 'The free check shows every count and the first 20 accounts in each list. A one-time $14.99 payment unlocks the full lists, search, CSV export, unlimited snapshots, and change history. There is no subscription, and the workflow still needs no Instagram login or account connection.' },
+      { q: 'Does it work with Threads or TikTok?', a: 'Yes. Upload the official Threads export from Meta Accounts Center or the JSON file from TikTok\'s "Download your data". Each platform is exported separately, and the analysis runs in your browser the same way.' },
     ],
+    platforms: { heading: 'Also works with Threads and TikTok', text: 'Export your Threads or TikTok data the same way and upload it here. Each platform has its own step-by-step page.', threads: 'Threads unfollow checker', tiktok: 'TikTok unfollow checker' },
     howCta: 'Upload Your Instagram Data ZIP',
     howCtaNote: 'No login or password required',
     premiumEyebrow: 'Start free. Pay once when you need the full list.',
@@ -78,7 +80,9 @@ const conversionCopy = {
     faqExtras: [
       { q: 'Meus dados são privados?', a: 'Sim. Seus dados do Instagram são processados localmente e não são enviados aos servidores do SafeUnfollow.' },
       { q: 'O que inclui o acesso vitalício?', a: 'A análise grátis mostra todos os totais e as 20 primeiras contas de cada lista. Um pagamento único de US$ 14,99 libera as listas completas, a busca, a exportação CSV, capturas ilimitadas e o histórico de mudanças. Não há assinatura, e o fluxo continua sem login ou conexão da conta.' },
+      { q: 'Funciona com Threads ou TikTok?', a: 'Sim. Envie a exportação oficial do Threads feita na Central de Contas da Meta ou o arquivo JSON do "Baixar seus dados" do TikTok. Cada plataforma é exportada separadamente, e a análise acontece no seu navegador da mesma forma.' },
     ],
+    platforms: { heading: 'Também funciona com Threads e TikTok', text: 'Exporte seus dados do Threads ou do TikTok da mesma forma e envie aqui. Cada plataforma tem sua página com o passo a passo.', threads: 'Verificador de unfollow no Threads', tiktok: 'Verificador de unfollow no TikTok' },
     howCta: 'Enviar ZIP de dados do Instagram',
     howCtaNote: 'Sem login ou senha',
     premiumEyebrow: 'Comece grátis. Pague uma vez quando precisar da lista completa.',
@@ -115,7 +119,9 @@ const conversionCopy = {
     faqExtras: [
       { q: 'Мои данные конфиденциальны?', a: 'Да. Данные Instagram обрабатываются локально и не отправляются на серверы SafeUnfollow.' },
       { q: 'Что даёт пожизненный доступ?', a: 'Бесплатная проверка показывает все итоги и первые 20 аккаунтов в каждом списке. Разовый платёж $14.99 открывает полные списки, поиск, экспорт CSV, неограниченные снимки и историю изменений. Подписки нет, вход в Instagram и подключение аккаунта по-прежнему не нужны.' },
+      { q: 'Работает ли это с Threads или TikTok?', a: 'Да. Загрузите официальный экспорт Threads из Центра аккаунтов Meta или JSON-файл из «Скачать данные» в TikTok. Каждая платформа экспортируется отдельно, а анализ так же выполняется в вашем браузере.' },
     ],
+    platforms: { heading: 'Также работает с Threads и TikTok', text: 'Экспортируйте данные Threads или TikTok так же и загрузите их сюда. Для каждой платформы есть отдельная пошаговая страница.', threads: 'Проверка отписок в Threads', tiktok: 'Проверка отписок в TikTok' },
     howCta: 'Загрузить ZIP с данными Instagram', howCtaNote: 'Без входа и пароля',
     premiumEyebrow: 'Начните бесплатно. Оплатите один раз, когда понадобится полный список.',
     premiumSecondary: 'Сначала бесплатно проверить ZIP',
@@ -151,7 +157,9 @@ const conversionCopy = {
     faqExtras: [
       { q: '¿Mis datos son privados?', a: 'Sí. Tus datos se procesan localmente y no se envían a los servidores de SafeUnfollow.' },
       { q: '¿Qué incluye el acceso de por vida?', a: 'El análisis gratis muestra todos los totales y las 20 primeras cuentas de cada lista. Un pago único de $14.99 desbloquea las listas completas, la búsqueda, la exportación CSV, instantáneas ilimitadas y el historial de cambios. No hay suscripción y el flujo sigue sin login ni conexión de cuenta.' },
+      { q: '¿Funciona con Threads o TikTok?', a: 'Sí. Sube la exportación oficial de Threads desde el Centro de cuentas de Meta o el archivo JSON de "Descargar tus datos" de TikTok. Cada plataforma se exporta por separado y el análisis ocurre en tu navegador de la misma forma.' },
     ],
+    platforms: { heading: 'También funciona con Threads y TikTok', text: 'Exporta tus datos de Threads o TikTok de la misma forma y súbelos aquí. Cada plataforma tiene su página con los pasos.', threads: 'Verificador de unfollow en Threads', tiktok: 'Verificador de unfollow en TikTok' },
     howCta: 'Subir ZIP de datos de Instagram', howCtaNote: 'Sin login ni contraseña',
     premiumEyebrow: 'Empieza gratis. Paga una vez cuando necesites la lista completa.', premiumSecondary: 'Analizar un ZIP gratis primero',
     premiumNote: 'El acceso de por vida añade resultados completos e historial, no acceso a la cuenta. El flujo local sin login se mantiene.',
@@ -313,6 +321,14 @@ function LandingContent({ initialLang }: { initialLang: Lang }) {
               ))}
             </div>
             <p className="mt-6 text-center text-xs text-zinc-400"><SentenceLines text={localizedConversionCopy.valueScope} /></p>
+            <div className="mt-8 rounded-2xl border border-zinc-100 bg-white p-5 text-center">
+              <h3 className="text-sm font-semibold text-zinc-900">{localizedConversionCopy.platforms.heading}</h3>
+              <p className="mt-1 text-xs text-zinc-500"><SentenceLines text={localizedConversionCopy.platforms.text} /></p>
+              <div className="mt-3 flex flex-wrap justify-center gap-2">
+                <Link href={localizedPath('/threads-unfollow-checker', lang)} className="rounded-full border border-pink-200 px-4 py-1.5 text-xs font-semibold text-pink-600 hover:bg-pink-50">{localizedConversionCopy.platforms.threads}</Link>
+                <Link href={localizedPath('/tiktok-unfollow-checker', lang)} className="rounded-full border border-pink-200 px-4 py-1.5 text-xs font-semibold text-pink-600 hover:bg-pink-50">{localizedConversionCopy.platforms.tiktok}</Link>
+              </div>
+            </div>
           </div>
         </section>
       )}

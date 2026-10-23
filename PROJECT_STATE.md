@@ -249,8 +249,8 @@ Audit list (owner asked to fix them one at a time). Status:
 2. ✅ No share image on any page. Every page also inherited the homepage `twitter:title`/description.
 3. ✅ Guide and upload descriptions reused the homepage description. They now have their own descriptions in all four locales via `pageDescriptions`; the upload description names all three platforms.
 4. ✅ The four pillar descriptions were auto-generated placeholders and are now rewritten from each page's content. `pillarTemplate` in `scripts/topic-clusters.ts` still produces the placeholder for new pillars, so write a real description when a new pillar is created.
-5. The homepage body, FAQ and schema mention only Instagram, and the platform landing pages are linked only from the footer.
-6. The upload page title is Instagram-only (owner decision).
+5. ✅ The homepage mentioned only Instagram outside the footer. The hero stays Instagram-focused, and these were added in all four locales: an "Also works with Threads and TikTok" block with in-body links to both landing pages, a "Does it work with Threads or TikTok?" FAQ (the FAQPage schema now has 7 questions), and a WebApplication featureList entry for the three platforms.
+6. ✅ Owner decision: keep the upload title "Upload Instagram Data ZIP" because most upload traffic is from Instagram. Threads and TikTok users arrive through their own landing pages, and the upload description already names all three platforms.
 7. No Organization schema and no `sameAs` profiles (needs the owner's official account URLs).
 8. Landing pages have no HowTo schema (low priority).
 9. Bing Webmaster Tools and IndexNow are not set up. ChatGPT search and Copilot use Bing.
