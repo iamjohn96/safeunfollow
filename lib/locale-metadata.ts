@@ -34,6 +34,12 @@ const pageNames: Record<string, Record<Lang, string>> = {
 
 // Pages whose search snippet must describe something other than the Instagram analyzer.
 const pageDescriptions: Partial<Record<string, Record<Lang, string>>> = {
+  blog: {
+    en: 'Learn how to analyze an official Instagram data export for mutuals, one-way follows, and follower changes without sharing your login.',
+    pt: 'Aprenda a analisar a exportação oficial de dados do Instagram para ver conexões mútuas, relações unilaterais e mudanças de seguidores sem login.',
+    ru: 'Как анализировать официальный экспорт данных Instagram: взаимные и односторонние подписки и изменения подписчиков без передачи пароля.',
+    es: 'Aprende a analizar la exportación oficial de datos de Instagram: relaciones mutuas, unidireccionales y cambios de seguidores sin compartir tu login.',
+  },
   'threads-unfollow-checker': landingSeo.threads.description,
   'tiktok-unfollow-checker': landingSeo.tiktok.description,
 };

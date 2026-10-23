@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getMarkdownDocuments } from '@/lib/markdown-content';
+import { localizedMetadata } from '@/lib/locale-metadata';
 import { t, localizedPath, type Lang } from '@/utils/i18n';
 
 import { SentenceLines } from '@/components/SentenceLines';
-export const metadata: Metadata = {
-  title: 'Instagram Data Analyzer Guide | SafeUnfollow',
-  description: 'Learn how to analyze an official Instagram data export for mutuals, one-way follows, and follower changes without sharing your login.',
-};
+// Without explicit alternates the root layout's canonical ("/") would apply to /blog.
+export const metadata: Metadata = localizedMetadata('en', 'blog');
 
 const DATE_LOCALES: Record<Lang, string> = {
   en: 'en-US', pt: 'pt-BR', ru: 'ru-RU', es: 'es-ES',

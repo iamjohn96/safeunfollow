@@ -44,3 +44,12 @@ test('landing copy is complete in every language and avoids absolute privacy cla
     }
   }
 });
+
+test('the blog index has its own canonical and localized descriptions (not the homepage)', () => {
+  for (const lang of langs) {
+    const meta = localizedMetadata(lang, 'blog');
+    assert.equal(meta.alternates?.canonical, lang === 'en' ? '/blog' : `/${lang}/blog`);
+    assert.ok(String(meta.description).length <= 160);
+    assert.match(String(meta.description), /Instagram/);
+  }
+});
