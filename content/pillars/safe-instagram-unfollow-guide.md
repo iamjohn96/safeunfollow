@@ -1,6 +1,6 @@
 ---
 title: "Instagram Unfollow Safety Guide"
-description: "A complete SafeUnfollow guide to instagram unfollow safety, privacy, and practical next steps."
+description: "What makes an Instagram unfollow tool safe: no password, OAuth, or session cookies. Check who doesn't follow you back from your own data export."
 date: "2026-06-29"
 slug: "safe-instagram-unfollow-guide"
 cluster: "instagram-unfollow-safety"

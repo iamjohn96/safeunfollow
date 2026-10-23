@@ -35,6 +35,18 @@ const pageNames: Record<string, Record<Lang, string>> = {
 
 // Pages whose search snippet must describe something other than the Instagram analyzer.
 const pageDescriptions: Partial<Record<string, Record<Lang, string>>> = {
+  guide: {
+    en: 'Step-by-step guide to download your Instagram data as JSON (Followers and following, All time), plus the Threads and TikTok export settings.',
+    pt: 'Guia passo a passo para baixar seus dados do Instagram em JSON (Seguidores e seguindo, Todo o período), além das configurações do Threads e do TikTok.',
+    ru: 'Пошаговая инструкция: как скачать данные Instagram в JSON (подписчики и подписки, за всё время), а также настройки экспорта Threads и TikTok.',
+    es: 'Guía paso a paso para descargar tus datos de Instagram en JSON (Seguidores y seguidos, Todo el período), más los ajustes de Threads y TikTok.',
+  },
+  upload: {
+    en: 'Upload your official Instagram, Threads, or TikTok data export to see who doesn\'t follow you back, fans, and mutuals. Analyzed in your browser, no login.',
+    pt: 'Envie a exportação oficial do Instagram, Threads ou TikTok e veja quem não segue você de volta, fãs e mútuos. Análise no navegador, sem login.',
+    ru: 'Загрузите официальный экспорт Instagram, Threads или TikTok и узнайте, кто не подписан на вас в ответ. Анализ в браузере, без входа.',
+    es: 'Sube la exportación oficial de Instagram, Threads o TikTok y mira quién no te sigue de vuelta, fans y mutuos. Análisis en el navegador, sin login.',
+  },
   blog: {
     en: 'Learn how to analyze an official Instagram data export for mutuals, one-way follows, and follower changes without sharing your login.',
     pt: 'Aprenda a analisar a exportação oficial de dados do Instagram para ver conexões mútuas, relações unilaterais e mudanças de seguidores sem login.',

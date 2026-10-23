@@ -1,6 +1,6 @@
 ---
 title: "Instagram Unfollow Limits Guide"
-description: "A complete SafeUnfollow guide to instagram unfollow limits, privacy, and practical next steps."
+description: "Instagram publishes no fixed unfollow limit. Learn what affects action blocks, why daily quotas are only estimates, and how to unfollow deliberately."
 date: "2026-06-29"
 slug: "instagram-unfollow-limits-guide"
 cluster: "instagram-unfollow-limits"

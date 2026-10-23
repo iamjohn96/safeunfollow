@@ -1,6 +1,6 @@
 ---
 title: "Instagram Unfollow Guide"
-description: "A complete SafeUnfollow guide to instagram unfollow, privacy, and practical next steps."
+description: "See who unfollowed you on Instagram by comparing two official data exports. A privacy-first guide with no login, OAuth, or Instagram API."
 date: "2026-06-29"
 slug: "instagram-unfollow-guide"
 cluster: "instagram-unfollow"

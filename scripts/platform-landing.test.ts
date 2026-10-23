@@ -68,3 +68,15 @@ test('every localized page sets its own Twitter title and a 1200x630 share image
     }
   }
 });
+
+test('guide and upload pages have their own descriptions, not the homepage one', () => {
+  const home = localizedMetadata('en').description;
+  for (const page of ['guide', 'upload']) {
+    for (const lang of langs) {
+      const description = String(localizedMetadata(lang, page).description);
+      assert.notEqual(description, localizedMetadata(lang).description, `${lang}/${page}`);
+      assert.ok(description.length <= 160, `${lang}/${page} too long`);
+    }
+  }
+  assert.ok(home);
+});

@@ -1,6 +1,6 @@
 ---
 title: "Instagram Ghost Followers Guide"
-description: "A complete SafeUnfollow guide to instagram ghost followers, privacy, and practical next steps."
+description: "How to spot Instagram ghost followers from your official data export, why low activity alone isn't proof, and how to review accounts without logging in."
 date: "2026-06-29"
 slug: "instagram-ghost-followers-guide-complete"
 cluster: "instagram-ghost-followers"

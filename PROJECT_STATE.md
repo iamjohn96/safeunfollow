@@ -247,8 +247,8 @@ After the deploy was verified live, the Dodo Lifetime product (`pdt_0NnnAFSCBOcQ
 Audit list (owner asked to fix them one at a time). Status:
 1. ✅ `/blog` canonical pointed to `/` (fixed in bcb0842).
 2. ✅ No share image on any page. Every page also inherited the homepage `twitter:title`/description.
-3. Guide and upload descriptions reuse the homepage description.
-4. The four pillar descriptions are auto-generated placeholders.
+3. ✅ Guide and upload descriptions reused the homepage description. They now have their own descriptions in all four locales via `pageDescriptions`; the upload description names all three platforms.
+4. ✅ The four pillar descriptions were auto-generated placeholders and are now rewritten from each page's content. `pillarTemplate` in `scripts/topic-clusters.ts` still produces the placeholder for new pillars, so write a real description when a new pillar is created.
 5. The homepage body, FAQ and schema mention only Instagram, and the platform landing pages are linked only from the footer.
 6. The upload page title is Instagram-only (owner decision).
 7. No Organization schema and no `sameAs` profiles (needs the owner's official account URLs).
