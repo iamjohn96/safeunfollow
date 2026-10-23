@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { socialMetadata } from '@/lib/social-metadata';
 import { notFound, permanentRedirect } from 'next/navigation';
 import MarkdownArticle from '@/app/_components/markdown-article';
 import { getMarkdownDocument, getMarkdownDocuments, availableDocumentLangs } from '@/lib/markdown-content';
@@ -31,13 +32,7 @@ export async function generateMetadata({
       canonical: `${BASE_URL}/blog/${slug}`,
       languages: { 'x-default': `${BASE_URL}/blog/${slug}`, ...languages },
     },
-    openGraph: {
-      title: post.data.title,
-      description: post.data.description,
-      url: `${BASE_URL}/blog/${slug}`,
-      type: 'article',
-      publishedTime: post.data.date,
-    },
+    ...socialMetadata({ title: post.data.title, description: post.data.description, url: `${BASE_URL}/blog/${slug}`, publishedTime: post.data.date }),
   };
 }
 

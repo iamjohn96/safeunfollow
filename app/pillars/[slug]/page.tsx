@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { socialMetadata } from '@/lib/social-metadata';
 import { notFound } from 'next/navigation';
 import MarkdownArticle from '@/app/_components/markdown-article';
 import { getMarkdownDocument, getMarkdownDocuments } from '@/lib/markdown-content';
@@ -27,13 +28,7 @@ export async function generateMetadata({
     alternates: {
       canonical: `${BASE_URL}/pillars/${slug}`,
     },
-    openGraph: {
-      title: pillar.data.title,
-      description: pillar.data.description,
-      url: `${BASE_URL}/pillars/${slug}`,
-      type: 'article',
-      publishedTime: pillar.data.date,
-    },
+    ...socialMetadata({ title: pillar.data.title, description: pillar.data.description, url: `${BASE_URL}/pillars/${slug}`, publishedTime: pillar.data.date }),
   };
 }
 

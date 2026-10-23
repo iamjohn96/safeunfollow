@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { Lang } from '@/utils/i18n';
 import { landingSeo } from '@/lib/platform-landing-copy';
+import { PAGE_OG_IMAGES, socialMetadata } from '@/lib/social-metadata';
 
 export const PUBLIC_LOCALES = ['pt', 'ru', 'es'] as const;
 export type PublicLocale = typeof PUBLIC_LOCALES[number];
@@ -64,6 +65,6 @@ export function localizedMetadata(lang: Lang, page?: keyof typeof pageNames): Me
   const description = (page && pageDescriptions[page]?.[safeLang]) || base.description;
   return {
     title, description, alternates: { ...localeAlternates(suffix), canonical },
-    openGraph: { title, description, url: canonical, siteName: 'SafeUnfollow', type: 'website', locale: openGraphLocales[safeLang] },
+    ...socialMetadata({ title, description, url: canonical, locale: openGraphLocales[safeLang], image: page ? PAGE_OG_IMAGES[page] : undefined }),
   };
 }

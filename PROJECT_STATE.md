@@ -242,6 +242,28 @@ A new test, `scripts/pricing.test.ts`, fails if any displayed USD price differs 
 
 After the deploy was verified live, the Dodo Lifetime product (`pdt_0NnnAFSCBOcQrM32OLj5p`) was changed from $3.99 to $14.99 on 2026-10-23. It is tax-inclusive with PPP still on. A checkout opened from Korea then showed ₩12,398 (PPP-adjusted); no payment was made. The legacy Monthly ($3.99) and Yearly ($19.99) subscription products are unchanged and not sold on the site. Review after 4 weeks with Dodo purchases, `premium_opened` and `premium_checkout_click`. Keep the price if purchases stay at or above about 2 per month. Otherwise, reconsider $9.99.
 
+### 2026-10-23 SEO/AEO pass, part 1: blog canonical, share images, social metadata
+
+Audit list (owner asked to fix them one at a time). Status:
+1. ✅ `/blog` canonical pointed to `/` (fixed in bcb0842).
+2. ✅ No share image on any page. Every page also inherited the homepage `twitter:title`/description.
+3. Guide and upload descriptions reuse the homepage description.
+4. The four pillar descriptions are auto-generated placeholders.
+5. The homepage body, FAQ and schema mention only Instagram, and the platform landing pages are linked only from the footer.
+6. The upload page title is Instagram-only (owner decision).
+7. No Organization schema and no `sameAs` profiles (needs the owner's official account URLs).
+8. Landing pages have no HowTo schema (low priority).
+9. Bing Webmaster Tools and IndexNow are not set up. ChatGPT search and Copilot use Bing.
+10. The sitemap has not been resubmitted in Search Console.
+11. There are no Threads or TikTok blog posts.
+12. ✅ Price copy was handled by the 2026-10-23 price change.
+
+Shipped for item 2:
+- Static 1200×630 share images in `public/og/`: `default.png`, `threads.png`, `tiktok.png`. They are rendered from HTML in the brand style.
+- `lib/social-metadata.ts#socialMetadata` builds both the Open Graph and Twitter fields, using the same title, description and image.
+- It is used by `localizedMetadata` (the landing pages get their platform image), blog posts in every locale, and pillars. The root layout uses the default image.
+- Tests: built HTML shows the right `og:image`, `twitter:image` and page-specific `twitter:title` on the home page, `/pt`, the guide, both landing pages (incl. `/es`), a blog post and a pillar.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data

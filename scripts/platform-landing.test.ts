@@ -53,3 +53,18 @@ test('the blog index has its own canonical and localized descriptions (not the h
     assert.match(String(meta.description), /Instagram/);
   }
 });
+
+test('every localized page sets its own Twitter title and a 1200x630 share image', () => {
+  for (const page of ['guide', 'upload', 'blog', 'threads-unfollow-checker', 'tiktok-unfollow-checker']) {
+    for (const lang of langs) {
+      const meta = localizedMetadata(lang, page);
+      const twitter = meta.twitter as { title?: string; images?: string[] };
+      assert.equal(twitter.title, meta.title, `${lang}/${page} twitter title`);
+      const image = page === 'threads-unfollow-checker' ? '/og/threads.png' : page === 'tiktok-unfollow-checker' ? '/og/tiktok.png' : '/og/default.png';
+      assert.deepEqual(twitter.images, [image]);
+      const og = meta.openGraph as { images?: { url: string; width: number; height: number }[] };
+      assert.equal(og.images?.[0].url, image);
+      assert.equal(og.images?.[0].width, 1200);
+    }
+  }
+});
