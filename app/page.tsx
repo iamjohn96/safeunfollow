@@ -35,7 +35,7 @@ const conversionCopy = {
     ],
     faqExtras: [
       { q: 'Is my data private?', a: 'Yes. Your Instagram data is processed locally in your browser and is not uploaded to SafeUnfollow servers.' },
-      { q: 'What does Lifetime Access include?', a: 'The free check shows every count and the first 20 accounts in each list. A one-time $3.99 payment unlocks the full lists, search, CSV export, unlimited snapshots, and change history. There is no subscription, and the workflow still needs no Instagram login or account connection.' },
+      { q: 'What does Lifetime Access include?', a: 'The free check shows every count and the first 20 accounts in each list. A one-time $14.99 payment unlocks the full lists, search, CSV export, unlimited snapshots, and change history. There is no subscription, and the workflow still needs no Instagram login or account connection.' },
     ],
     howCta: 'Upload Your Instagram Data ZIP',
     howCtaNote: 'No login or password required',
@@ -77,7 +77,7 @@ const conversionCopy = {
     ],
     faqExtras: [
       { q: 'Meus dados são privados?', a: 'Sim. Seus dados do Instagram são processados localmente e não são enviados aos servidores do SafeUnfollow.' },
-      { q: 'O que inclui o acesso vitalício?', a: 'A análise grátis mostra todos os totais e as 20 primeiras contas de cada lista. Um pagamento único de US$ 3,99 libera as listas completas, a busca, a exportação CSV, capturas ilimitadas e o histórico de mudanças. Não há assinatura, e o fluxo continua sem login ou conexão da conta.' },
+      { q: 'O que inclui o acesso vitalício?', a: 'A análise grátis mostra todos os totais e as 20 primeiras contas de cada lista. Um pagamento único de US$ 14,99 libera as listas completas, a busca, a exportação CSV, capturas ilimitadas e o histórico de mudanças. Não há assinatura, e o fluxo continua sem login ou conexão da conta.' },
     ],
     howCta: 'Enviar ZIP de dados do Instagram',
     howCtaNote: 'Sem login ou senha',
@@ -114,7 +114,7 @@ const conversionCopy = {
     ],
     faqExtras: [
       { q: 'Мои данные конфиденциальны?', a: 'Да. Данные Instagram обрабатываются локально и не отправляются на серверы SafeUnfollow.' },
-      { q: 'Что даёт пожизненный доступ?', a: 'Бесплатная проверка показывает все итоги и первые 20 аккаунтов в каждом списке. Разовый платёж $3.99 открывает полные списки, поиск, экспорт CSV, неограниченные снимки и историю изменений. Подписки нет, вход в Instagram и подключение аккаунта по-прежнему не нужны.' },
+      { q: 'Что даёт пожизненный доступ?', a: 'Бесплатная проверка показывает все итоги и первые 20 аккаунтов в каждом списке. Разовый платёж $14.99 открывает полные списки, поиск, экспорт CSV, неограниченные снимки и историю изменений. Подписки нет, вход в Instagram и подключение аккаунта по-прежнему не нужны.' },
     ],
     howCta: 'Загрузить ZIP с данными Instagram', howCtaNote: 'Без входа и пароля',
     premiumEyebrow: 'Начните бесплатно. Оплатите один раз, когда понадобится полный список.',
@@ -150,7 +150,7 @@ const conversionCopy = {
     ],
     faqExtras: [
       { q: '¿Mis datos son privados?', a: 'Sí. Tus datos se procesan localmente y no se envían a los servidores de SafeUnfollow.' },
-      { q: '¿Qué incluye el acceso de por vida?', a: 'El análisis gratis muestra todos los totales y las 20 primeras cuentas de cada lista. Un pago único de $3.99 desbloquea las listas completas, la búsqueda, la exportación CSV, instantáneas ilimitadas y el historial de cambios. No hay suscripción y el flujo sigue sin login ni conexión de cuenta.' },
+      { q: '¿Qué incluye el acceso de por vida?', a: 'El análisis gratis muestra todos los totales y las 20 primeras cuentas de cada lista. Un pago único de $14.99 desbloquea las listas completas, la búsqueda, la exportación CSV, instantáneas ilimitadas y el historial de cambios. No hay suscripción y el flujo sigue sin login ni conexión de cuenta.' },
     ],
     howCta: 'Subir ZIP de datos de Instagram', howCtaNote: 'Sin login ni contraseña',
     premiumEyebrow: 'Empieza gratis. Paga una vez cuando necesites la lista completa.', premiumSecondary: 'Analizar un ZIP gratis primero',

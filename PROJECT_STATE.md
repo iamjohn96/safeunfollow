@@ -221,6 +221,27 @@ Owner request: remove remaining Korean from the codebase. Two changes:
 
 A Hangul search across app, components, lib, utils, public, content, scripts, automation, README and AGENTS now finds nothing. New translation keys no longer need a `ko` entry.
 
+### 2026-10-23 Lifetime price raised to US$14.99
+
+The owner decided to raise the price now instead of waiting for the 2026-11-16 checkpoint. The owner picked US$14.99 from the options $9.99 / $14.99 / $29.99, and PPP stays enabled.
+
+Evidence used:
+- 7 external purchases at $3.99 in about 5 weeks. PPP brought realized revenue to about US$2.6 per sale, or roughly US$16 per month.
+- 5 of 7 buyers paid in EUR/GBP.
+- Comparable products: export-based competitors range from free to €9.99. Login-based apps charge $20–60 for lifetime.
+- Lifetime now covers Instagram, Threads, and TikTok.
+- Break-even versus current revenue: at about US$10 realized per sale, about 1.6 sales per month.
+
+Code: `LIFETIME_PRICE_USD = '14.99'` is the single source for the Offer schema. All displayed prices were updated:
+- homepage FAQ, premium CTA, buy-lifetime and preview-unlock strings in all locales
+- Terms section 4
+- llms.txt
+- the stale "$3.99/month or $19.99/year" line in `scripts/generate-post.ts`
+
+A new test, `scripts/pricing.test.ts`, fails if any displayed USD price differs from the constant.
+
+The Dodo Lifetime product price is changed right after this deploy. Until then, checkout charges $3.99 while the site shows $14.99, which favours the customer. Review after 4 weeks with Dodo purchases, `premium_opened` and `premium_checkout_click`. Keep the price if purchases stay at or above about 2 per month. Otherwise, reconsider $9.99.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data

@@ -17,7 +17,7 @@
 
 ## Pricing
 Free: totals and the first 20 accounts per relationship list, one saved snapshot.
-SafeUnfollow Lifetime Access: a one-time purchase (US$3.99, adjusted for purchasing power parity where applicable) for full lists, search, CSV export, and unlimited snapshots. It is not a subscription.
+SafeUnfollow Lifetime Access: a one-time purchase (US$14.99, adjusted for purchasing power parity where applicable) for full lists, search, CSV export, and unlimited snapshots. It is not a subscription.
 
 ## Languages
 English (default, unprefixed URLs), Portuguese (/pt), Russian (/ru), Spanish (/es).

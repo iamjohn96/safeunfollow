@@ -161,7 +161,7 @@ SafeUnfollow product facts:
 - Users download the Instagram ZIP file.
 - Users upload the downloaded Instagram data file to SafeUnfollow.
 - SafeUnfollow analyzes followers and following data from that uploaded file.
-- Premium is $3.99/month or $19.99/year.
+- Premium is a one-time Lifetime Access purchase (US$14.99, adjusted for purchasing power parity). There is no subscription.
 - Premium includes unlimited snapshots, CSV export, and change history timeline.
 
 Required usage flow:
