@@ -24,6 +24,7 @@
     "redis:monitor": "node --import tsx scripts/redis-monitor.ts",
     "growth:report": "node --import tsx scripts/growth-report.ts report",
     "growth:weekly": "node --import tsx scripts/growth-report.ts weekly",
+    "indexnow": "node --import tsx scripts/indexnow.ts",
     "test:automation": "node --import tsx --test scripts/*.test.ts"
   },
   "dependencies": {

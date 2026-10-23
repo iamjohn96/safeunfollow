@@ -2,6 +2,38 @@ import type { Lang } from '@/utils/i18n';
 import { LIFETIME_PRICE_USD } from '@/utils/premium-offer';
 
 const BASE_URL = 'https://safeunfollow.com';
+const ORGANIZATION_ID = `${BASE_URL}/#organization`;
+const LOGO_URL = `${BASE_URL}/safeunfollow-app-icon.png`;
+
+/** SafeUnfollow is a product of JonnyLab (jonnylab.app). */
+export function organizationStructuredData() {
+  return {
+    '@type': 'Organization',
+    '@id': ORGANIZATION_ID,
+    name: 'SafeUnfollow',
+    url: BASE_URL,
+    logo: {
+      '@type': 'ImageObject',
+      url: LOGO_URL,
+      width: 1170,
+      height: 1170,
+    },
+    email: 'support@jonnylab.app',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: 'support@jonnylab.app',
+      availableLanguage: ['en', 'pt', 'ru', 'es'],
+    },
+    parentOrganization: {
+      '@type': 'Organization',
+      name: 'JonnyLab',
+      url: 'https://jonnylab.app',
+    },
+  };
+}
+
+const publisherRef = { '@id': ORGANIZATION_ID };
 
 const descriptions: Record<Lang, string> = {
   en: 'Analyze mutuals, one-way follows, and follower changes locally from your official Instagram Data ZIP. No Instagram login or account connection.',
@@ -16,12 +48,14 @@ export function homeStructuredData(lang: Lang) {
   return {
     '@context': 'https://schema.org',
     '@graph': [
+      organizationStructuredData(),
       {
         '@type': 'WebSite',
         '@id': `${BASE_URL}/#website`,
         url: BASE_URL,
         name: 'SafeUnfollow',
         inLanguage: lang,
+        publisher: publisherRef,
       },
       {
         '@type': 'WebApplication',
@@ -34,6 +68,7 @@ export function homeStructuredData(lang: Lang) {
         browserRequirements: 'Requires JavaScript and a modern web browser',
         isAccessibleForFree: true,
         inLanguage: lang,
+        publisher: publisherRef,
         offers: {
           '@type': 'Offer',
           name: 'Lifetime Access',
@@ -72,8 +107,14 @@ export function articleStructuredData(article: {
     dateModified: article.date,
     mainEntityOfPage: url,
     url,
-    author: { '@type': 'Organization', name: 'SafeUnfollow', url: BASE_URL },
-    publisher: { '@type': 'Organization', name: 'SafeUnfollow', url: BASE_URL },
+    author: { '@type': 'Organization', '@id': ORGANIZATION_ID, name: 'SafeUnfollow', url: BASE_URL },
+    publisher: {
+      '@type': 'Organization',
+      '@id': ORGANIZATION_ID,
+      name: 'SafeUnfollow',
+      url: BASE_URL,
+      logo: { '@type': 'ImageObject', url: LOGO_URL },
+    },
   };
 }
 

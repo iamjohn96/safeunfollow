@@ -6,6 +6,17 @@ import { articleStructuredData, homeStructuredData, faqStructuredData, howToStru
 import { LIFETIME_PRICE_USD } from '../utils/premium-offer';
 import { existsSync, readFileSync } from 'node:fs';
 
+type SchemaNode = {
+  '@type'?: string;
+  '@id'?: string;
+  url?: string;
+  logo?: { url?: string };
+  offers?: { price?: string; priceCurrency?: string; url?: string };
+  parentOrganization?: { url?: string };
+  contactPoint?: { email?: string };
+  publisher?: { '@id'?: string };
+};
+
 test('AI search crawlers can discover the public site', () => {
   const config = robots();
   const rules = Array.isArray(config.rules) ? config.rules : [config.rules];
@@ -64,7 +75,7 @@ test('structured data describes the application and canonical article', () => {
 
 test('the WebApplication schema states the real Lifetime Access price, not a stale or invented one', () => {
   const home = homeStructuredData('en');
-  const app = home['@graph'].find(node => node['@type'] === 'WebApplication');
+  const app = (home['@graph'] as unknown as SchemaNode[]).find(node => node['@type'] === 'WebApplication');
 
   assert.equal(app?.offers?.price, LIFETIME_PRICE_USD);
   assert.equal(app?.offers?.priceCurrency, 'USD');
@@ -111,4 +122,27 @@ test('HowTo schema numbers steps in order starting at 1', () => {
   assert.equal(schema.step[0].position, 1);
   assert.equal(schema.step[1].position, 2);
   assert.equal(schema.step[1].name, 'Request your data');
+});
+
+test('homepage graph declares the SafeUnfollow organization with logo and JonnyLab as parent', () => {
+  const data = homeStructuredData('en');
+  const graph = data['@graph'] as unknown as SchemaNode[];
+  const org = graph.find(node => node['@type'] === 'Organization');
+  assert.equal(org?.['@id'], 'https://safeunfollow.com/#organization');
+  assert.equal(org?.url, 'https://safeunfollow.com');
+  assert.equal(org?.logo?.url, 'https://safeunfollow.com/safeunfollow-app-icon.png');
+  assert(existsSync('public/safeunfollow-app-icon.png'));
+  assert.equal(org?.parentOrganization?.url, 'https://jonnylab.app');
+  assert.equal(org?.contactPoint?.email, 'support@jonnylab.app');
+
+  const site = graph.find(node => node['@type'] === 'WebSite');
+  const app = graph.find(node => node['@type'] === 'WebApplication');
+  assert.equal(site?.publisher?.['@id'], org?.['@id']);
+  assert.equal(app?.publisher?.['@id'], org?.['@id']);
+});
+
+test('article publisher points at the organization and carries the logo', () => {
+  const article = articleStructuredData({ title: 't', description: 'd', date: '2026-10-23', slug: 's' });
+  assert.equal(article.publisher['@id'], 'https://safeunfollow.com/#organization');
+  assert.equal(article.publisher.logo.url, 'https://safeunfollow.com/safeunfollow-app-icon.png');
 });
