@@ -253,8 +253,8 @@ Audit list (owner asked to fix them one at a time). Status:
 6. ✅ Owner decision: keep the upload title "Upload Instagram Data ZIP" because most upload traffic is from Instagram. Threads and TikTok users arrive through their own landing pages, and the upload description already names all three platforms.
 7. No Organization schema and no `sameAs` profiles (needs the owner's official account URLs).
 8. Landing pages have no HowTo schema (low priority).
-9. Bing Webmaster Tools and IndexNow are not set up. ChatGPT search and Copilot use Bing.
-10. The sitemap has not been resubmitted in Search Console.
+9. ✅ Bing Webmaster Tools: `safeunfollow.com` added on 2026-10-23 by importing it from Google Search Console (owner approved the read-only GSC OAuth grant). `https://safeunfollow.com/sitemap.xml` was submitted in Bing and is processing. IndexNow is not set up. It needs a key file and a ping on deploy, so it requires owner approval.
+10. ✅ Sitemap resubmitted in Google Search Console on 2026-10-23. Before that it was last read on 2026-10-20 with 40 pages.
 11. There are no Threads or TikTok blog posts.
 12. ✅ Price copy was handled by the 2026-10-23 price change.
 
