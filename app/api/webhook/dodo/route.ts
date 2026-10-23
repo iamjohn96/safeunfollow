@@ -47,28 +47,28 @@ async function sendWelcomeEmail(email: string, eventId: string, plan: 'subscript
 
   const html = `
     <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#18181b">
-      <h2 style="color:#db2777">SafeUnfollow Premium 구독이 시작되었습니다 🎉</h2>
-      <p>안녕하세요,</p>
+      <h2 style="color:#db2777">Your SafeUnfollow Premium subscription has started 🎉</h2>
+      <p>Hi,</p>
       <p>
-        <strong>SafeUnfollow Premium</strong> 구독을 시작해 주셔서 감사합니다.
-        이제 아래 프리미엄 기능을 모두 사용하실 수 있습니다:
+        Thank you for subscribing to <strong>SafeUnfollow Premium</strong>.
+        You can now use all of these Premium features:
       </p>
       <ul style="padding-left:20px;line-height:1.8">
-        <li>팔로워 스냅샷 무제한 저장</li>
-        <li>언팔로우 히스토리 전체 열람</li>
-        <li>CSV 내보내기</li>
-        <li>우선 지원</li>
+        <li>Unlimited follower snapshots</li>
+        <li>Full unfollow history</li>
+        <li>CSV export</li>
+        <li>Priority support</li>
       </ul>
-      <p>구독을 취소하려면 아래 링크를 이용하세요:</p>
+      <p>To cancel your subscription, use the link below:</p>
       <p>
         <a href="${cancelUrl}"
            style="display:inline-block;background:#db2777;color:#fff;padding:10px 22px;
                   border-radius:9999px;text-decoration:none;font-weight:600;font-size:14px">
-          구독 취소
+          Cancel subscription
         </a>
       </p>
       <p style="font-size:12px;color:#71717a;margin-top:32px">
-        SafeUnfollow &mdash; 로그인 없이 브라우저에서 분석합니다.
+        SafeUnfollow &mdash; No login. Analyzed in your browser.
       </p>
     </div>
   `;
@@ -85,7 +85,7 @@ async function sendWelcomeEmail(email: string, eventId: string, plan: 'subscript
       from: EMAIL_FROM,
       reply_to: 'support@jonnylab.app',
       to: email,
-      subject: plan === 'lifetime' ? 'Your SafeUnfollow Lifetime Access is ready' : 'SafeUnfollow Premium 구독이 시작되었습니다',
+      subject: plan === 'lifetime' ? 'Your SafeUnfollow Lifetime Access is ready' : 'Your SafeUnfollow Premium subscription has started',
       html: plan === 'lifetime' ? lifetimeWelcomeHtml() : html,
     }),
   });

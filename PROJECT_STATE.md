@@ -213,6 +213,14 @@ Verification:
 
 Resolved the same day with owner approval: the "100% private" / "processed 100% on your device" wording was removed sitewide, in line with the AGENTS.md rule against absolute privacy claims. The footer tagline is now "No login. No server upload."; the upload subtitle, trust badges, the ja/es feature titles and the Dodo email footer line were changed to factual wording.
 
+### 2026-10-23 Korean strings removed
+
+Owner request: remove remaining Korean from the codebase. Two changes:
+- The unused legacy `ko` dictionary in `utils/translations.ts` was deleted. It was never part of the active locale map. The active locales stay en/pt/ru/es, and `ja` remains as an inactive legacy dictionary.
+- The subscription welcome email in `app/api/webhook/dodo/route.ts` was still written in Korean. Legacy subscribers would have received it. The subject and body are now English with the same content. The Lifetime email was already English.
+
+A Hangul search across app, components, lib, utils, public, content, scripts, automation, README and AGENTS now finds nothing. New translation keys no longer need a `ko` entry.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data
