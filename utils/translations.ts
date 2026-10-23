@@ -57,6 +57,7 @@ export type TranslationKey =
   | 'upload.error.html'
   | 'upload.error.partial'
   | 'upload.threads'
+  | 'dashboard.incomplete_followers'
   | 'dashboard.tab.nonfollowers'
   | 'dashboard.tab.changes'
   | 'dashboard.nonfollowers.title'
@@ -127,6 +128,8 @@ export type TranslationKey =
   | 'guide.note'
   | 'guide.threads.title'
   | 'guide.threads.desc'
+  | 'guide.tiktok.title'
+  | 'guide.tiktok.desc'
   | 'guide.no_login'
   | 'guide.cta'
   | 'footer.privacy'
@@ -264,7 +267,8 @@ const en: Translations = {
   'upload.error.missing': 'Incomplete or unsupported export. Upload the original JSON ZIP containing both followers and following, with all parts. Partial lists are not analyzed.',
   'upload.error.html': 'This export is in HTML format. SafeUnfollow needs JSON. Request a new export and choose JSON as the format.',
   'upload.error.partial': 'Only one of the two lists was found. Upload the full ZIP, or select followers_1.json and following.json together.',
-  'upload.threads': 'Threads export ZIPs work too.',
+  'upload.threads': 'Threads and TikTok exports work too.',
+  'dashboard.incomplete_followers': 'TikTok only includes your most recent followers in the export, so this follower list is incomplete. Older followers can appear under "You follow, they don\'t".',
   'dashboard.tab.nonfollowers': 'Don\'t Follow Back',
   'dashboard.tab.changes': 'Changes',
   'dashboard.nonfollowers.title': 'Accounts That Don\'t Follow You Back',
@@ -304,6 +308,8 @@ const en: Translations = {
   'guide.note': 'Menu names can differ slightly by app version and language. If you chose HTML or a shorter date range, create a new export with JSON and All time — a shorter range can leave older followers out.',
   'guide.threads.title': 'Using Threads?',
   'guide.threads.desc': 'Export your Threads profile separately. Threads has no "Followers and following" option, so select only "Threads", set the date range to All time, the format to JSON, and media quality to Low. Then upload that ZIP the same way.',
+  'guide.tiktok.title': 'Using TikTok?',
+  'guide.tiktok.desc': 'In TikTok, go to Settings and privacy → Account → Download your data, choose JSON, and request it. It usually takes a few days, so download it before the link expires. Upload the ZIP or the user_data_tiktok.json inside it. If you have a very large number of followers, only the most recent may be included.',
   'guide.no_login': 'No account login required',
   'guide.cta': 'I have my file — Upload Now',
   'footer.privacy': 'Privacy Policy',
@@ -440,7 +446,8 @@ const ko: Translations = {
   'upload.error.missing': '파일에서 팔로워/팔로잉 데이터를 찾을 수 없습니다. 올바른 인스타그램 내보내기를 다운로드했는지 확인하세요.',
   'upload.error.html': 'HTML 형식의 내보내기입니다. SafeUnfollow는 JSON이 필요합니다. 새로 내보내기를 요청하고 JSON 형식을 선택하세요.',
   'upload.error.partial': '두 목록 중 하나만 찾았습니다. 전체 ZIP을 올리거나 followers_1.json과 following.json을 함께 선택하세요.',
-  'upload.threads': 'Threads 내보내기 ZIP도 분석할 수 있습니다.',
+  'upload.threads': 'Threads와 TikTok 내보내기도 분석할 수 있습니다.',
+  'dashboard.incomplete_followers': 'TikTok 내보내기에는 최근 팔로워만 들어 있어 팔로워 목록이 완전하지 않습니다. 오래된 팔로워가 "맞팔 안 함"에 표시될 수 있습니다.',
   'dashboard.tab.nonfollowers': '맞팔 안 함',
   'dashboard.tab.changes': '변경 사항',
   'dashboard.nonfollowers.title': '맞팔 안 한 계정',
@@ -480,6 +487,8 @@ const ko: Translations = {
   'guide.note': '메뉴 이름은 앱 버전과 언어에 따라 조금 다를 수 있어요. HTML이나 짧은 기간을 선택했다면 JSON과 전체 기간으로 내보내기를 새로 만드세요. 기간이 짧으면 오래된 팔로워가 빠질 수 있어요.',
   'guide.threads.title': 'Threads를 쓰나요?',
   'guide.threads.desc': 'Threads 프로필은 따로 내보내야 합니다. Threads에는 "팔로워 및 팔로잉" 항목이 없으니 "Threads"만 선택하고, 기간은 전체 기간, 형식은 JSON, 미디어 품질은 낮음으로 설정하세요. 받은 ZIP을 같은 방법으로 업로드하면 됩니다.',
+  'guide.tiktok.title': 'TikTok을 쓰나요?',
+  'guide.tiktok.desc': 'TikTok 설정 및 개인정보 → 계정 → 데이터 다운로드에서 JSON 형식을 선택해 요청하세요. 보통 며칠 걸리므로 링크가 만료되기 전에 받아야 합니다. ZIP이나 그 안의 user_data_tiktok.json을 업로드하세요. 팔로워가 아주 많으면 최근 팔로워만 포함될 수 있습니다.',
   'guide.no_login': '계정 로그인 필요 없음',
   'guide.cta': '파일이 있어요 — 지금 업로드',
   'footer.privacy': '개인정보 처리방침',
@@ -616,7 +625,8 @@ const ja: Translations = {
   'upload.error.missing': 'ファイルにフォロワー/フォロー中のデータが見つかりませんでした。正しいInstagramエクスポートをダウンロードしたか確認してください。',
   'upload.error.html': 'このエクスポートはHTML形式です。SafeUnfollowにはJSONが必要です。新しいエクスポートをリクエストし、JSON形式を選択してください。',
   'upload.error.partial': '2つのリストのうち1つしか見つかりませんでした。ZIP全体をアップロードするか、followers_1.jsonとfollowing.jsonを一緒に選択してください。',
-  'upload.threads': 'ThreadsのエクスポートZIPも分析できます。',
+  'upload.threads': 'ThreadsとTikTokのエクスポートも分析できます。',
+  'dashboard.incomplete_followers': 'TikTokのエクスポートには最近のフォロワーしか含まれないため、フォロワー一覧は不完全です。古いフォロワーが「フォローバックなし」に表示されることがあります。',
   'dashboard.tab.nonfollowers': 'フォローバックなし',
   'dashboard.tab.changes': '変更',
   'dashboard.nonfollowers.title': 'フォローバックしていないアカウント',
@@ -656,6 +666,8 @@ const ja: Translations = {
   'guide.note': 'メニュー名はアプリのバージョンや言語によって少し異なる場合があります。HTMLや短い期間を選んだ場合は、JSONと全期間で新しくエクスポートを作成してください。期間が短いと古いフォロワーが含まれないことがあります。',
   'guide.threads.title': 'Threadsの場合',
   'guide.threads.desc': 'Threadsのプロフィールは別にエクスポートしてください。Threadsには「フォロワーとフォロー中」の項目がないため、「Threads」だけを選び、期間はすべての期間、形式はJSON、メディア画質は低に設定してください。届いたZIPを同じ方法でアップロードします。',
+  'guide.tiktok.title': 'TikTokの場合',
+  'guide.tiktok.desc': 'TikTokの「設定とプライバシー」→「アカウント」→「データをダウンロード」でJSON形式を選んでリクエストしてください。通常は数日かかるため、リンクの期限が切れる前にダウンロードしてください。ZIPまたはその中のuser_data_tiktok.jsonをアップロードします。フォロワーが非常に多い場合、最近のフォロワーのみが含まれることがあります。',
   'guide.no_login': 'アカウントへのログインは不要です',
   'guide.cta': 'ファイルがある — 今すぐアップロード',
   'footer.privacy': 'プライバシーポリシー',
@@ -792,7 +804,8 @@ const es: Translations = {
   'upload.error.missing': 'Export incompleto o no compatible. Sube el ZIP JSON original con seguidores y seguidos y todas sus partes. No se analizan listas parciales.',
   'upload.error.html': 'Esta exportación está en HTML. SafeUnfollow necesita JSON. Solicita una nueva exportación y elige el formato JSON.',
   'upload.error.partial': 'Solo se encontró una de las dos listas. Sube el ZIP completo o selecciona juntos followers_1.json y following.json.',
-  'upload.threads': 'También funciona con el ZIP de exportación de Threads.',
+  'upload.threads': 'También funciona con exportaciones de Threads y TikTok.',
+  'dashboard.incomplete_followers': 'TikTok solo incluye tus seguidores más recientes en la exportación, así que esta lista está incompleta. Seguidores antiguos pueden aparecer en "Solo tú sigues".',
   'dashboard.tab.nonfollowers': 'No te siguen',
   'dashboard.tab.changes': 'Cambios',
   'dashboard.nonfollowers.title': 'Cuentas que no te siguen de vuelta',
@@ -832,6 +845,8 @@ const es: Translations = {
   'guide.note': 'Los nombres de los menús pueden variar según la versión y el idioma de la app. Si elegiste HTML o un periodo más corto, crea una nueva exportación con JSON y todo el periodo: un periodo corto puede dejar fuera a seguidores antiguos.',
   'guide.threads.title': '¿Usas Threads?',
   'guide.threads.desc': 'Exporta tu perfil de Threads por separado. Threads no tiene la opción "Seguidores y seguidos", así que selecciona solo "Threads", elige Todo el período, formato JSON y calidad multimedia baja. Luego sube ese ZIP de la misma forma.',
+  'guide.tiktok.title': '¿Usas TikTok?',
+  'guide.tiktok.desc': 'En TikTok ve a Ajustes y privacidad → Cuenta → Descargar tus datos, elige JSON y solicítalo. Suele tardar unos días, así que descárgalo antes de que caduque el enlace. Sube el ZIP o el user_data_tiktok.json que contiene. Si tienes muchísimos seguidores, puede que solo se incluyan los más recientes.',
   'guide.no_login': 'No necesitas iniciar sesión en tu cuenta',
   'guide.cta': 'Tengo mi archivo — Subir ahora',
   'footer.privacy': 'Política de privacidad',
@@ -967,7 +982,8 @@ const pt: Translations = {
   'upload.error.missing': 'Exportação incompleta ou incompatível. Envie o ZIP JSON original com seguidores e seguidos e todas as partes. Listas parciais não são analisadas.',
   'upload.error.html': 'Esta exportação está em HTML. O SafeUnfollow precisa de JSON. Solicite uma nova exportação e escolha o formato JSON.',
   'upload.error.partial': 'Só uma das duas listas foi encontrada. Envie o ZIP completo ou selecione followers_1.json e following.json juntos.',
-  'upload.threads': 'O ZIP de exportação do Threads também funciona.',
+  'upload.threads': 'Exportações do Threads e do TikTok também funcionam.',
+  'dashboard.incomplete_followers': 'O TikTok inclui só seus seguidores mais recentes na exportação, então esta lista está incompleta. Seguidores antigos podem aparecer em "Só você segue".',
   'dashboard.tab.nonfollowers': 'Não seguem você',
   'dashboard.tab.changes': 'Mudanças',
   'dashboard.nonfollowers.empty': 'Todas as contas que você segue também seguem você! 🎉',
@@ -1004,6 +1020,8 @@ const pt: Translations = {
   'guide.note': 'Os nomes dos menus podem variar conforme a versão e o idioma do app. Se você escolheu HTML ou um período menor, crie uma nova exportação com JSON e todo o período: um período curto pode deixar seguidores antigos de fora.',
   'guide.threads.title': 'Usa o Threads?',
   'guide.threads.desc': 'Exporte o perfil do Threads separadamente. O Threads não tem a opção "Seguidores e seguindo", então selecione apenas "Threads", escolha Todo o período, formato JSON e qualidade de mídia baixa. Depois envie esse ZIP da mesma forma.',
+  'guide.tiktok.title': 'Usa o TikTok?',
+  'guide.tiktok.desc': 'No TikTok, vá em Configurações e privacidade → Conta → Baixar seus dados, escolha JSON e solicite. Costuma levar alguns dias, então baixe antes de o link expirar. Envie o ZIP ou o user_data_tiktok.json dentro dele. Se você tiver muitos seguidores, só os mais recentes podem ser incluídos.',
   'guide.no_login': 'Não é preciso fazer login na sua conta',
   'guide.cta': 'Enviar meus dados',
   'footer.privacy': 'Privacidade',
@@ -1121,7 +1139,8 @@ const ru: Translations = {
   'upload.error.missing': 'Неполный или неподдерживаемый экспорт. Загрузите исходный JSON ZIP со всеми частями подписчиков и подписок. Частичные списки не анализируются.',
   'upload.error.html': 'Этот экспорт в формате HTML. SafeUnfollow нужен JSON. Запросите новый экспорт и выберите формат JSON.',
   'upload.error.partial': 'Найден только один из двух списков. Загрузите полный ZIP или выберите вместе followers_1.json и following.json.',
-  'upload.threads': 'ZIP-экспорт Threads тоже поддерживается.',
+  'upload.threads': 'Экспорт Threads и TikTok тоже поддерживается.',
+  'dashboard.incomplete_followers': 'TikTok включает в экспорт только последних подписчиков, поэтому список неполный. Давние подписчики могут попасть в «Подписаны только вы».',
   'dashboard.tab.nonfollowers': 'Не подписаны на вас',
   'dashboard.tab.changes': 'Изменения',
   'dashboard.nonfollowers.empty': 'Все, на кого вы подписаны, подписаны и на вас! 🎉',
@@ -1158,6 +1177,8 @@ const ru: Translations = {
   'guide.note': 'Названия пунктов меню могут немного отличаться в зависимости от версии и языка приложения. Если вы выбрали HTML или более короткий период, создайте новый экспорт в формате JSON за весь период: при коротком периоде старые подписчики могут не попасть в файл.',
   'guide.threads.title': 'Используете Threads?',
   'guide.threads.desc': 'Профиль Threads экспортируется отдельно. В Threads нет пункта «Подписчики и подписки», поэтому выберите только «Threads», период «За всё время», формат JSON и низкое качество медиа. Затем загрузите этот ZIP так же.',
+  'guide.tiktok.title': 'Используете TikTok?',
+  'guide.tiktok.desc': 'В TikTok откройте «Настройки и конфиденциальность» → «Аккаунт» → «Скачать данные», выберите JSON и отправьте запрос. Обычно это занимает несколько дней, поэтому скачайте архив до истечения ссылки. Загрузите ZIP или файл user_data_tiktok.json из него. При очень большом числе подписчиков в экспорт могут попасть только последние.',
   'guide.no_login': 'Вход в аккаунт не требуется',
   'guide.cta': 'Загрузить данные',
   'footer.privacy': 'Конфиденциальность',

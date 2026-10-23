@@ -9,6 +9,8 @@ export interface ParsedData {
   followers: InstagramAccount[];
   following: InstagramAccount[];
   platform?: Platform;
+  // TikTok keeps only the most recent followers in its export; set when the list is shorter than the profile count.
+  incompleteFollowers?: boolean;
   fingerprint?: string;
   profileId?: string;
   observedAt?: number;
@@ -28,11 +30,15 @@ interface InstagramExportItem {
 
 const RELATIONSHIP_JSON_PATTERN = /^(?:followers|following)(?:_\d+)?\.json$/;
 const RELATIONSHIP_HTML_PATTERN = /^(?:followers|following)(?:_\d+)?\.html$/;
+// Browsers rename repeated downloads ("user_data_tiktok (1).json"), so match the stem loosely.
+const TIKTOK_EXPORT_PATTERN = /user_data[^/]*\.json$/;
 const USERNAME_PATTERN = /^[a-zA-Z0-9._]{1,30}$/;
 const PROFILE_URL_PATTERN = /^https?:\/\/(?:www\.)?instagram\.com\/(?:_u\/)?([^/?#]+)\/?(?:[?#].*)?$/i;
 const THREADS_PROFILE_URL_PATTERN = /^https?:\/\/(?:www\.)?threads\.(?:com|net)\/@?([^/?#@]+)\/?(?:[?#].*)?$/i;
 // Instagram keeps the lists under relationships_<kind>; Threads uses text_post_app_text_post_app_<kind>.
-const LIST_KEYS: Record<Platform, (kind: 'followers' | 'following') => string> = {
+// Meta exports (Instagram, Threads) share the followers/following JSON layout.
+type MetaPlatform = Exclude<Platform, 'tiktok'>;
+const LIST_KEYS: Record<MetaPlatform, (kind: 'followers' | 'following') => string> = {
   instagram: kind => `relationships_${kind}`,
   threads: kind => `text_post_app_text_post_app_${kind}`,
 };
@@ -77,7 +83,7 @@ function parseAccountList(list: InstagramExportItem[], platform: Platform): Inst
 type RelationshipKind = 'followers' | 'following';
 interface PlatformLists { followers: InstagramAccount[]; following: InstagramAccount[]; seen: Set<RelationshipKind>; parts: Record<RelationshipKind, number[]> }
 
-function relationshipList(parsed: unknown, kind: RelationshipKind): { platform: Platform; list: unknown } {
+function relationshipList(parsed: unknown, kind: RelationshipKind): { platform: MetaPlatform; list: unknown } {
   // Instagram followers_N.json is a bare array; every other shape is an object keyed by platform.
   if (Array.isArray(parsed)) return { platform: 'instagram', list: parsed };
   const record = parsed && typeof parsed === 'object' ? parsed as Record<string, unknown> : {};
@@ -88,9 +94,65 @@ function relationshipList(parsed: unknown, kind: RelationshipKind): { platform: 
   return { platform: 'instagram', list: undefined };
 }
 
+const uniqueSorted = (accounts: InstagramAccount[]) => [...new Map(accounts.map(a => [a.username, a])).values()].sort((a, b) => a.username.localeCompare(b.username));
+const asRecord = (value: unknown) => value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+
+function tiktokTimestamp(value: unknown): number {
+  const match = typeof value === 'string' ? value.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/) : null;
+  return match ? Date.UTC(+match[1], +match[2] - 1, +match[3], +match[4], +match[5], +match[6]) / 1000 : 0;
+}
+
+function tiktokAccounts(list: unknown): InstagramAccount[] {
+  if (list === null) return [];
+  if (!Array.isArray(list)) throw new Error('invalid-relationship-file');
+  const accounts: InstagramAccount[] = [];
+  for (const item of list) {
+    const record = asRecord(item);
+    if (!record || typeof record.UserName !== 'string') throw new Error('invalid-relationship-file');
+    // "N/A" marks a deleted or unavailable account; it cannot be matched, so it is skipped.
+    const username = validUsername(record.UserName);
+    if (username) accounts.push({ username: username.toLowerCase(), timestamp: tiktokTimestamp(record.Date) });
+  }
+  return accounts;
+}
+
+// TikTok exports everything in one user_data_tiktok.json; the lists sit under "Profile And Settings".
+function parseTikTokExport(parsed: unknown): ParsedData {
+  const profile = asRecord(asRecord(parsed)?.['Profile And Settings']);
+  const follower = asRecord(profile?.Follower);
+  const following = asRecord(profile?.Following);
+  const hasFollowers = !!follower && 'FansList' in follower;
+  const hasFollowing = !!following && 'Following' in following;
+  if (!hasFollowers && !hasFollowing) throw new Error('missing-relationship-files');
+  if (!hasFollowing) throw new Error('missing-following-file');
+  if (!hasFollowers) throw new Error('missing-followers-file');
+  const fans = follower.FansList;
+  const followerCount = asRecord(asRecord(profile?.['Profile Info'])?.ProfileMap)?.followerCount;
+  const listed = Array.isArray(fans) ? fans.length : 0;
+  const incompleteFollowers = typeof followerCount === 'number' && followerCount > listed + 10;
+  return {
+    followers: uniqueSorted(tiktokAccounts(fans)),
+    following: uniqueSorted(tiktokAccounts(following.Following)),
+    schemaVersion: 2,
+    platform: 'tiktok',
+    ...(incompleteFollowers ? { incompleteFollowers: true } : {}),
+  };
+}
+
 export async function parseJsonFiles(files: { name: string; content: string }[]): Promise<ParsedData> {
+  const tiktokFile = files.find(file => TIKTOK_EXPORT_PATTERN.test(file.name.toLowerCase().split('/').pop() ?? ''));
+  if (tiktokFile) {
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(tiktokFile.content);
+    } catch {
+      throw new Error('invalid-relationship-file');
+    }
+    return parseTikTokExport(parsed);
+  }
+
   const empty = (): PlatformLists => ({ followers: [], following: [], seen: new Set(), parts: { followers: [], following: [] } });
-  const groups: Record<Platform, PlatformLists> = { instagram: empty(), threads: empty() };
+  const groups: Record<MetaPlatform, PlatformLists> = { instagram: empty(), threads: empty() };
 
   for (const file of files) {
     const name = file.name.toLowerCase().split('/').pop() ?? '';
@@ -118,9 +180,9 @@ export async function parseJsonFiles(files: { name: string; content: string }[])
 
   // Meta exports one profile per ZIP, so normally only one platform is present.
   // Prefer a complete list pair; otherwise report against whichever platform was found.
-  const complete = (p: Platform) => groups[p].seen.size === 2;
-  const present = (p: Platform) => groups[p].seen.size > 0;
-  const platform: Platform = complete('instagram') ? 'instagram' : complete('threads') ? 'threads' : present('instagram') || !present('threads') ? 'instagram' : 'threads';
+  const complete = (p: MetaPlatform) => groups[p].seen.size === 2;
+  const present = (p: MetaPlatform) => groups[p].seen.size > 0;
+  const platform: MetaPlatform = complete('instagram') ? 'instagram' : complete('threads') ? 'threads' : present('instagram') || !present('threads') ? 'instagram' : 'threads';
   const { seen, parts } = groups[platform];
   let { followers, following } = groups[platform];
 
@@ -134,9 +196,8 @@ export async function parseJsonFiles(files: { name: string; content: string }[])
     const sorted = [...new Set(values)].sort((a, b) => a - b);
     if (sorted.some((value, i) => value !== i + 1)) throw new Error('missing-relationship-part');
   }
-  const unique = (accounts: InstagramAccount[]) => [...new Map(accounts.map(a => [a.username, a])).values()].sort((a, b) => a.username.localeCompare(b.username));
-  followers = unique(followers);
-  following = unique(following);
+  followers = uniqueSorted(followers);
+  following = uniqueSorted(following);
   return { followers, following, schemaVersion: 2, ...(platform === 'threads' ? { platform } : {}) };
 }
 
@@ -152,7 +213,7 @@ export async function parseZip(file: File): Promise<ParsedData> {
   zip.forEach((relativePath, zipEntry) => {
     const name = relativePath.toLowerCase();
     if (!zipEntry.dir && RELATIONSHIP_HTML_PATTERN.test(name.split('/').pop() ?? '')) hasRelationshipHtml = true;
-    if (!zipEntry.dir && name.endsWith('.json') && (name.includes('followers') || name.includes('following'))) {
+    if (!zipEntry.dir && name.endsWith('.json') && (name.includes('followers') || name.includes('following') || TIKTOK_EXPORT_PATTERN.test(name.split('/').pop() ?? ''))) {
       promises.push(
         zipEntry.async('string').then(content => {
           relevantFiles.push({ name: relativePath, content });

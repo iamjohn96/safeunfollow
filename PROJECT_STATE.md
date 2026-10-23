@@ -158,6 +158,33 @@ Verification: 133/133 automation tests, lint, tsc, and production build passed. 
 
 Known limitation: the whole ZIP is read into memory, and Threads exports include media. A very large export could be slow or fail on phones. If that shows up, add selective ZIP reading; that would be a new dependency and needs approval.
 
+### 2026-10-23 TikTok export support
+
+Owner approved TikTok as the next platform. Facts were verified from the owner's own TikTok JSON export (not committed; only counts and shapes were inspected):
+- The export is one `user_data_tiktok.json` (3.3 MB here) holding all account data, including direct messages and purchase history.
+- The relationship lists are at `Profile And Settings` → `Follower` → `FansList` and `Following` → `Following`.
+- Each entry is `{ Date: 'YYYY-MM-DD HH:MM:SS', UserName }`. These are real follow dates, unlike Instagram observation dates.
+- Deleted or unavailable accounts appear as `UserName: "N/A"` (9 of 106 followers here).
+- `Profile Info.ProfileMap.followerCount` equalled the raw list length, so it can detect TikTok's follower cap. External guides report that only about the 10,000 most recent followers are included.
+
+Shipped:
+- `Platform` now includes `tiktok`.
+- The parser detects any `*user_data*.json`, whether uploaded directly (including browser-renamed copies) or inside the ZIP, and reads only the two lists.
+- `N/A` entries are skipped, and a list or entry with an unexpected shape is rejected as invalid.
+- `incompleteFollowers` is set when `followerCount` exceeds the listed followers by more than 10. In that case the dashboard warns that older followers can appear under "You follow, they don't".
+- Links open tiktok.com/@user, and the heading, profile label, and snapshot label name TikTok.
+- The upload note now mentions Threads and TikTok, and the guide has a TikTok section (JSON, download before the link expires, follower cap). Both are in all locales.
+- Tests: `scripts/tiktok.test.ts`.
+
+Verification:
+- 138/138 automation tests passed, plus lint, tsc, and the production build.
+- Playwright on the production build used the owner's real TikTok JSON and a ZIP of it, uploaded at en/es mobile viewports. Both gave platform `tiktok`, 97 valid followers and 11 following (6 mutual), tiktok.com links, and no page errors.
+- The synthetic capped export showed the incomplete warning.
+- Instagram and the real Threads ZIP still parse to their own platforms.
+- The guide's TikTok section shows in en/pt.
+
+Not supported: the TikTok TXT export format.
+
 ## 5. Architecture and data boundaries
 
 ### Browser-only data

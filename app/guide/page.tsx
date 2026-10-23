@@ -78,6 +78,12 @@ function GuideContent({ initialLang }: { initialLang: Lang }) {
         <p className="text-zinc-500"><SentenceLines text={t('guide.threads.desc', lang)} /></p>
       </div>
 
+      {/* TikTok */}
+      <div className="bg-white border border-zinc-100 rounded-xl p-4 mb-8 text-sm leading-relaxed">
+        <h2 className="font-semibold text-zinc-900 mb-1">{t('guide.tiktok.title', lang)}</h2>
+        <p className="text-zinc-500"><SentenceLines text={t('guide.tiktok.desc', lang)} /></p>
+      </div>
+
       {/* CTA */}
       <div className="text-center">
         <Link

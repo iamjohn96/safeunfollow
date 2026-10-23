@@ -10,9 +10,9 @@ Read `PROJECT_STATE.md` before making changes. It contains the current milestone
 
 ## Product and architecture invariants
 
-- SafeUnfollow is a privacy-first analyzer for official Meta data-export ZIPs (Instagram, and Threads since 2026-10). It must not require a login, OAuth, a platform API, or an account connection.
+- SafeUnfollow is a privacy-first analyzer for official platform data exports: Instagram, plus Threads and TikTok since 2026-10. It must not require a login, OAuth, a platform API, or an account connection.
 - Instagram export files, account lists, parsed results, snapshots, comparisons, and CSV output stay in the browser. Do not upload them to SafeUnfollow servers or third parties.
-- The supported analysis boundary is the follower/following relationship JSON that `utils/parser.ts` can validate reliably, for Instagram (`relationships_*`) and Threads (`text_post_app_text_post_app_*`). Each parsed result carries its platform (absent = Instagram), and snapshots are never compared across platforms. Expanding that boundary (another platform or the HTML format) requires representative export fixtures, explicit product approval, and parser tests.
+- The supported analysis boundary is the follower/following relationship JSON that `utils/parser.ts` can validate reliably, for Instagram (`relationships_*`), Threads (`text_post_app_text_post_app_*`), and TikTok (`user_data_tiktok.json` → `Profile And Settings` → `Follower.FansList` / `Following.Following`; other sections such as messages are never read). Each parsed result carries its platform (absent = Instagram), and snapshots are never compared across platforms. Expanding that boundary (another platform or the HTML format) requires representative export fixtures, explicit product approval, and parser tests.
 - Product metrics and cleanup categories are deterministic. Do not add AI-generated analysis, scores, or recommendations.
 - SafeUnfollow never performs Instagram actions. Do not implement auto-follow, auto-unfollow, scheduling, auto-DM, engagement automation, or credential-based account access.
 - Premium identity and billing state are server-side. Dodo Payments is the source of truth for actual purchases; analytics events are not proof of payment.

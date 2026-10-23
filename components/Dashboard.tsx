@@ -246,7 +246,7 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
     const newSnap: Snapshot = {
       id: savedAt.toString(),
       timestamp: savedAt,
-      label: `${platformOf(data) === 'threads' ? 'Threads · ' : ''}${data.profileId} · ${date}`,
+      label: `${platformOf(data) === 'instagram' ? '' : `${platformName(platformOf(data))} · `}${data.profileId} · ${date}`,
       data,
     };
 
@@ -298,6 +298,9 @@ export function Dashboard({ data: inputData, lang, onReset, purchaseReturn = fal
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-zinc-900 mb-2">{relationshipCopy.heading.replace('Instagram', platformName(platformOf(data)))}</h1>
           <p className="text-sm text-zinc-500 leading-relaxed"><SentenceLines text={relationshipCopy.description} /></p>
+          {data.incompleteFollowers && (
+            <p className="mt-3 rounded-lg border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700"><SentenceLines text={t('dashboard.incomplete_followers', lang)} /></p>
+          )}
         </div>
         {/* Stats bar */}
         <div className="mb-6 rounded-xl border p-4 space-y-3">
