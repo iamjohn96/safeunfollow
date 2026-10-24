@@ -3,15 +3,16 @@ import { localizedPath, type Lang } from '@/utils/i18n';
 import { JsonLd } from '@/components/JsonLd';
 import { SentenceLines } from '@/components/SentenceLines';
 import { faqStructuredData } from '@/lib/structured-data';
-import { landingCopy, type LandingPlatform } from '@/lib/platform-landing-copy';
+import { landingCopy, landingHowTo, type LandingPlatform } from '@/lib/platform-landing-copy';
 
-// Static landing page per supported platform. The FAQPage schema mirrors only the FAQs rendered here.
+// Static landing page per supported platform. The FAQPage and HowTo schemas mirror only the FAQs and steps rendered here.
 export function PlatformLanding({ platform, lang }: { platform: LandingPlatform; lang: Lang }) {
   const copy = landingCopy(platform, lang);
   const uploadHref = localizedPath('/upload', lang);
   return (
     <>
       <JsonLd data={faqStructuredData(copy.faq)} />
+      <JsonLd data={landingHowTo(platform, lang)} />
       <section className="py-16 px-4 max-w-2xl mx-auto" aria-labelledby="landing-heading">
         <div className="text-center mb-10">
           <h1 id="landing-heading" className="text-3xl font-bold text-zinc-900 mb-4">{copy.h1}</h1>

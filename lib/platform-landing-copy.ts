@@ -1,4 +1,5 @@
-import type { Lang } from '@/utils/i18n';
+import { localizedPath, type Lang } from '@/utils/i18n';
+import { howToStructuredData } from '@/lib/structured-data';
 
 // Copy for the per-platform landing pages. Claims must stay factual: no login,
 // browser-only analysis, and only the follower/following lists are read.
@@ -230,4 +231,23 @@ const specific: Record<LandingPlatform, Record<Lang, Omit<LandingCopy, keyof typ
 
 export function landingCopy(platform: LandingPlatform, lang: Lang): LandingCopy {
   return { ...shared[lang], ...specific[platform][lang] };
+}
+
+const platformLabel: Record<LandingPlatform, string> = { threads: 'Threads', tiktok: 'TikTok' };
+
+const howToNameTemplate: Record<Lang, (platform: string) => string> = {
+  en: platform => `How to see who doesn't follow you back on ${platform}`,
+  pt: platform => `Como ver quem não segue você de volta no ${platform}`,
+  ru: platform => `Как узнать, кто не подписан на вас в ответ в ${platform}`,
+  es: platform => `Cómo ver quién no te sigue de vuelta en ${platform}`,
+};
+
+// HowTo schema for a landing page. The steps are exactly the steps rendered on the page.
+export function landingHowTo(platform: LandingPlatform, lang: Lang) {
+  return howToStructuredData({
+    name: howToNameTemplate[lang](platformLabel[platform]),
+    description: landingSeo[platform].description[lang],
+    url: `https://safeunfollow.com${localizedPath(landingRoutes[platform], lang)}`,
+    steps: landingCopy(platform, lang).steps,
+  });
 }

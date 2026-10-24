@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import sitemap from '../app/sitemap';
 import { localizedMetadata } from '../lib/locale-metadata';
-import { landingCopy, landingRoutes, landingSeo, type LandingPlatform } from '../lib/platform-landing-copy';
+import { landingCopy, landingHowTo, landingRoutes, landingSeo, type LandingPlatform } from '../lib/platform-landing-copy';
 
 const platforms: LandingPlatform[] = ['threads', 'tiktok'];
 const langs = ['en', 'pt', 'ru', 'es'] as const;
@@ -79,4 +79,21 @@ test('guide and upload pages have their own descriptions, not the homepage one',
     }
   }
   assert.ok(home);
+});
+
+test('landing HowTo schema mirrors the rendered steps with a localized canonical URL', () => {
+  for (const platform of platforms) {
+    for (const lang of langs) {
+      const howTo = landingHowTo(platform, lang);
+      const steps = landingCopy(platform, lang).steps;
+      assert.equal(howTo['@type'], 'HowTo');
+      assert.match(howTo.name, platform === 'threads' ? /Threads/ : /TikTok/);
+      assert.equal(howTo.description, landingSeo[platform].description[lang]);
+      const route = landingRoutes[platform];
+      assert.equal(howTo.url, lang === 'en' ? `https://safeunfollow.com${route}` : `https://safeunfollow.com/${lang}${route}`);
+      assert.deepEqual(howTo.step.map(step => step.name), steps.map(step => step.title));
+      assert.deepEqual(howTo.step.map(step => step.text), steps.map(step => step.desc));
+      assert.deepEqual(howTo.step.map(step => step.position), steps.map((_, i) => i + 1));
+    }
+  }
 });
