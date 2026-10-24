@@ -239,13 +239,13 @@ function UploadContent({ initialLang }: { initialLang: Lang }) {
         {/* Trust badges */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-zinc-400">
           <span className="flex items-center gap-1.5">
-            <span className="text-green-500">✓</span> No login
+            <span className="text-green-500">✓</span> {t('upload.badge.login', lang)}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="text-green-500">✓</span> No server upload
+            <span className="text-green-500">✓</span> {t('upload.badge.server', lang)}
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="text-green-500">✓</span> Analyzed in your browser
+            <span className="text-green-500">✓</span> {t('upload.badge.browser', lang)}
           </span>
         </div>
       </div>

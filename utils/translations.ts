@@ -57,6 +57,9 @@ export type TranslationKey =
   | 'upload.error.html'
   | 'upload.error.partial'
   | 'upload.threads'
+  | 'upload.badge.login'
+  | 'upload.badge.server'
+  | 'upload.badge.browser'
   | 'dashboard.incomplete_followers'
   | 'dashboard.tab.nonfollowers'
   | 'dashboard.tab.changes'
@@ -270,6 +273,9 @@ const en: Translations = {
   'upload.error.html': 'This export is in HTML format. SafeUnfollow needs JSON. Request a new export and choose JSON as the format.',
   'upload.error.partial': 'Only one of the two lists was found. Upload the full ZIP, or select followers_1.json and following.json together.',
   'upload.threads': 'Threads and TikTok exports work too.',
+  'upload.badge.login': 'No login',
+  'upload.badge.server': 'No server upload',
+  'upload.badge.browser': 'Analyzed in your browser',
   'dashboard.incomplete_followers': 'TikTok only includes your most recent followers in the export, so this follower list is incomplete. Older followers can appear under "You follow, they don\'t".',
   'dashboard.tab.nonfollowers': 'Don\'t Follow Back',
   'dashboard.tab.changes': 'Changes',
@@ -451,6 +457,9 @@ const ja: Translations = {
   'upload.error.html': 'このエクスポートはHTML形式です。SafeUnfollowにはJSONが必要です。新しいエクスポートをリクエストし、JSON形式を選択してください。',
   'upload.error.partial': '2つのリストのうち1つしか見つかりませんでした。ZIP全体をアップロードするか、followers_1.jsonとfollowing.jsonを一緒に選択してください。',
   'upload.threads': 'ThreadsとTikTokのエクスポートも分析できます。',
+  'upload.badge.login': 'ログイン不要',
+  'upload.badge.server': 'サーバーへのアップロードなし',
+  'upload.badge.browser': 'ブラウザ内で分析',
   'dashboard.incomplete_followers': 'TikTokのエクスポートには最近のフォロワーしか含まれないため、フォロワー一覧は不完全です。古いフォロワーが「フォローバックなし」に表示されることがあります。',
   'dashboard.tab.nonfollowers': 'フォローバックなし',
   'dashboard.tab.changes': '変更',
@@ -632,6 +641,9 @@ const es: Translations = {
   'upload.error.html': 'Esta exportación está en HTML. SafeUnfollow necesita JSON. Solicita una nueva exportación y elige el formato JSON.',
   'upload.error.partial': 'Solo se encontró una de las dos listas. Sube el ZIP completo o selecciona juntos followers_1.json y following.json.',
   'upload.threads': 'También funciona con exportaciones de Threads y TikTok.',
+  'upload.badge.login': 'Sin inicio de sesión',
+  'upload.badge.server': 'Sin subir al servidor',
+  'upload.badge.browser': 'Analizado en tu navegador',
   'dashboard.incomplete_followers': 'TikTok solo incluye tus seguidores más recientes en la exportación, así que esta lista está incompleta. Seguidores antiguos pueden aparecer en "Solo tú sigues".',
   'dashboard.tab.nonfollowers': 'No te siguen',
   'dashboard.tab.changes': 'Cambios',
@@ -812,6 +824,9 @@ const pt: Translations = {
   'upload.error.html': 'Esta exportação está em HTML. O SafeUnfollow precisa de JSON. Solicite uma nova exportação e escolha o formato JSON.',
   'upload.error.partial': 'Só uma das duas listas foi encontrada. Envie o ZIP completo ou selecione followers_1.json e following.json juntos.',
   'upload.threads': 'Exportações do Threads e do TikTok também funcionam.',
+  'upload.badge.login': 'Sem login',
+  'upload.badge.server': 'Sem envio ao servidor',
+  'upload.badge.browser': 'Analisado no seu navegador',
   'dashboard.incomplete_followers': 'O TikTok inclui só seus seguidores mais recentes na exportação, então esta lista está incompleta. Seguidores antigos podem aparecer em "Só você segue".',
   'dashboard.tab.nonfollowers': 'Não seguem você',
   'dashboard.tab.changes': 'Mudanças',
@@ -971,6 +986,9 @@ const ru: Translations = {
   'upload.error.html': 'Этот экспорт в формате HTML. SafeUnfollow нужен JSON. Запросите новый экспорт и выберите формат JSON.',
   'upload.error.partial': 'Найден только один из двух списков. Загрузите полный ZIP или выберите вместе followers_1.json и following.json.',
   'upload.threads': 'Экспорт Threads и TikTok тоже поддерживается.',
+  'upload.badge.login': 'Без входа',
+  'upload.badge.server': 'Без загрузки на сервер',
+  'upload.badge.browser': 'Анализ в вашем браузере',
   'dashboard.incomplete_followers': 'TikTok включает в экспорт только последних подписчиков, поэтому список неполный. Давние подписчики могут попасть в «Подписаны только вы».',
   'dashboard.tab.nonfollowers': 'Не подписаны на вас',
   'dashboard.tab.changes': 'Изменения',
