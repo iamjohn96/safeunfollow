@@ -104,5 +104,7 @@ keywords:
 ## Похожие статьи
 
 - [Как анализировать экспорт данных Instagram без входа в аккаунт](/ru/blog/how-to-analyze-instagram-data-export)
+- [Как узнать, кто не подписан на вас в ответ в Threads, без входа в аккаунт](/ru/blog/see-who-doesnt-follow-you-back-on-threads)
+- [Как узнать, кто не подписан на вас в ответ в TikTok, без входа в аккаунт](/ru/blog/see-who-doesnt-follow-you-back-on-tiktok)
 
 [Загрузите свои данные Instagram в SafeUnfollow](https://safeunfollow.com/ru/upload)

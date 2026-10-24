@@ -26,5 +26,33 @@
     "avg_position": null,
     "last_seen_in_gsc": null,
     "cluster": "instagram-unfollow"
+  },
+  {
+    "keyword": "who doesn't follow you back on threads",
+    "slug": "see-who-doesnt-follow-you-back-on-threads",
+    "published": true,
+    "published_at": "2026-10-24T00:00:00.000Z",
+    "last_attempt": null,
+    "source": "platform_expansion",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "last_seen_in_gsc": null,
+    "cluster": "instagram-unfollow"
+  },
+  {
+    "keyword": "who doesn't follow you back on tiktok",
+    "slug": "see-who-doesnt-follow-you-back-on-tiktok",
+    "published": true,
+    "published_at": "2026-10-24T00:00:00.000Z",
+    "last_attempt": null,
+    "source": "platform_expansion",
+    "impressions": 0,
+    "clicks": 0,
+    "ctr": 0,
+    "avg_position": null,
+    "last_seen_in_gsc": null,
+    "cluster": "instagram-unfollow"
   }
 ]

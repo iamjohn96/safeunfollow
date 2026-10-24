@@ -196,7 +196,12 @@ function buildRelatedSection(
 ): { markdown: string; count: number } {
   const related = rankRelated(article, articles).slice(0, 5);
   const lines = related.map(item => `- [${item.title}](/blog/${item.slug})`);
-  const existingDestinations = new Set(parseInternalSlugs(article.content));
+  // Ignore the previously generated block, or a re-run would see its own pillar line and drop it.
+  const contentWithoutGeneratedRelated = article.content.replace(
+    /<!-- AUTO:RELATED_START -->[\s\S]*?<!-- AUTO:RELATED_END -->/g,
+    '',
+  );
+  const existingDestinations = new Set(parseInternalSlugs(contentWithoutGeneratedRelated));
   return {
     markdown: [
       ...(pillarSlug && pillarSlug !== article.slug && !existingDestinations.has(pillarSlug)

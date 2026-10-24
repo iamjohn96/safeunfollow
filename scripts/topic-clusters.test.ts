@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import {
+  RELATED_END,
   RELATED_START,
   assignKeywordCluster,
   buildRelatedSection,
@@ -148,4 +149,13 @@ test('cluster sync creates pillars, related sections, navigation, and roadmap fr
   assert.match(fs.readFileSync(path.join(blog, 'index.md'), 'utf8'), /Instagram Unfollow Guide/);
   assert(result.health.some(cluster => cluster.cluster === 'instagram-unfollow'));
   assert.equal(loadArticles(blog, pillars, entries, clusters()).filter(item => !item.isPillar).length, 2);
+});
+
+test('related section keeps the pillar line when re-run over its own generated block', () => {
+  const current = article('current', 'Instagram Data Download');
+  const first = buildRelatedSection(current, [current], 'instagram-unfollow-guide');
+  assert(first.markdown.includes('/pillars/instagram-unfollow-guide'));
+  current.content = `Body text.\n\n${RELATED_START}\n${first.markdown}\n${RELATED_END}\n`;
+  const second = buildRelatedSection(current, [current], 'instagram-unfollow-guide');
+  assert.equal(second.markdown, first.markdown);
 });

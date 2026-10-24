@@ -31,3 +31,5 @@ English (default, unprefixed URLs), Portuguese (/pt), Russian (/ru), Spanish (/e
 - Privacy Policy: https://safeunfollow.com/privacy
 - Terms of Service: https://safeunfollow.com/terms
 - Blog: https://safeunfollow.com/blog
+- Guide: How to see who doesn't follow you back on Threads: https://safeunfollow.com/blog/see-who-doesnt-follow-you-back-on-threads
+- Guide: How to see who doesn't follow you back on TikTok (including the TikTok export's recent-followers limit): https://safeunfollow.com/blog/see-who-doesnt-follow-you-back-on-tiktok

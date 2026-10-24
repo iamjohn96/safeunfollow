@@ -143,5 +143,7 @@ Comece pelo [guia completo de Instagram Unfollow](/pillars/instagram-unfollow-gu
 ## Artigos relacionados
 
 - [Como Rastrear Mudanças de Seguidores no Instagram ao Longo do Tempo](/pt/blog/track-instagram-follower-changes-over-time)
+- [Como Ver Quem Não Segue Você de Volta no Threads Sem Fazer Login](/pt/blog/see-who-doesnt-follow-you-back-on-threads)
+- [Como Ver Quem Não Segue Você de Volta no TikTok Sem Fazer Login](/pt/blog/see-who-doesnt-follow-you-back-on-tiktok)
 
 [Envie seus dados do Instagram para o SafeUnfollow](https://safeunfollow.com/pt/upload)

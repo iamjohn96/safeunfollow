@@ -143,5 +143,7 @@ SafeUnfollow работает без входа, без OAuth и без API, а 
 ## Похожие статьи
 
 - [Как отслеживать изменения подписчиков в Instagram со временем](/ru/blog/track-instagram-follower-changes-over-time)
+- [Как узнать, кто не подписан на вас в ответ в Threads, без входа в аккаунт](/ru/blog/see-who-doesnt-follow-you-back-on-threads)
+- [Как узнать, кто не подписан на вас в ответ в TikTok, без входа в аккаунт](/ru/blog/see-who-doesnt-follow-you-back-on-tiktok)
 
 [Загрузите свои данные Instagram в SafeUnfollow](https://safeunfollow.com/ru/upload)

@@ -21,6 +21,8 @@ test('the canonical Instagram data analyzer article passes every SEO rule', () =
     knownSlugs: new Set([
       slug,
       'instagram-unfollow-guide',
+      'see-who-doesnt-follow-you-back-on-threads',
+      'see-who-doesnt-follow-you-back-on-tiktok',
       'safe-instagram-unfollow-guide',
       'track-instagram-follower-changes-over-time',
     ]),
@@ -51,6 +53,8 @@ test('the snapshot tracking article passes every SEO rule', () => {
     knownSlugs: new Set([
       slug,
       'instagram-unfollow-guide',
+      'see-who-doesnt-follow-you-back-on-threads',
+      'see-who-doesnt-follow-you-back-on-tiktok',
       'safe-instagram-unfollow-guide',
       'how-to-analyze-instagram-data-export',
     ]),
