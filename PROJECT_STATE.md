@@ -367,3 +367,7 @@ Never copy values into this file, Git, logs, fixtures, or client code.
 ### 2026-10-24 first sale at the new price
 
 The first external sale after the US$14.99 change came on 2026-10-23 (Brazil, Pix, Lifetime). The checkout showed R$35.29, which is US$6.74 after the Brazil PPP discount (about 55% off US$14.99). Dodo fee: US$0.78. Net: US$5.96. Tax: US$0. Brazilian sales at the old US$3.99 price settled at about US$1.78 (R$9.36–9.40), so realized revenue per Brazil sale is about 3.3× higher. Brazil is about 43% of users, so the PPP-adjusted Brazil price drives most realized revenue. Use net per sale, not list price, in the 2026-11-20 price review.
+
+### 2026-10-24 Brazil distribution test (pt video)
+
+Owner chose to post a Portuguese promo video from his existing accounts as a small, measurable distribution test aimed at Brazil (about 43% of users). The video is 1080×1920, 27 s, and silent. It was recorded from the live `/pt` pages with synthetic `_demo` accounts and GA requests blocked during capture. It is not committed to the repo. Every link uses `utm_medium=social&utm_campaign=br_pt_video`, with `utm_source` set to `threads`, `instagram`, `tiktok`, or `x`. Read the result in GA4 Traffic acquisition filtered to that campaign: sessions, `upload_started`, `analysis_completed`, and purchases. Judge it at the 2026-11-16 checkpoint. While recording, a bug turned up: the upload page trust badges were hardcoded English on `/pt`, `/ru`, and `/es`. Fixed in b8b00bb.
